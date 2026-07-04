@@ -604,6 +604,9 @@ const FOOD_DB = [
  { keys:["belgian chocolate","belgian dark chocolate","belgian milk chocolate"], name:"Belgian Chocolate (1oz)", cal:165, pro:2, carb:15, fat:11, fib:2, se:2, io:8, zn:0.8, ir:1.2, mg:45, vd:0 },
  { keys:["toblerone"], name:"Toblerone (1 triangle/10g)", cal:55, pro:0.6, carb:6, fat:3, fib:0.2, se:0.5, io:3, zn:0.2, ir:0.2, mg:8, vd:0 },
  { keys:["soup","chicken soup","vegetable soup"], name:"Soup (1 bowl)", cal:140, pro:8, carb:18, fat:4, fib:3, se:5, io:5, zn:0.5, ir:1.0, mg:20, vd:0 },
+  { keys:["homemade avocado salad","avocado salad"], name:"Homemade Avocado Salad", cal:500, pro:7, carb:31, fat:43, fib:17, se:1, io:0, zn:1.3, ir:1.5, mg:90, vd:0 },
+{ keys:["nature valley bar","nature valley bars","nature valley granola bar"], name:"Nature Valley Bars (1 pouch/2 bars)", cal:190, pro:3, carb:29, fat:7, fib:2, se:2, io:0, zn:0.3, ir:1.0, mg:24, vd:0 },
+{ keys:["avocado toast"], name:"Avocado Toast", cal:230, pro:6, carb:24, fat:15, fib:8, se:5, io:0, zn:0.7, ir:1.3, mg:45, vd:0 },
  { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
 ];
