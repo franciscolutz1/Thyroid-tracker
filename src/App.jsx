@@ -610,7 +610,6 @@ const FOOD_DB = [
 { keys:["nature valley bar","nature valley bars","nature valley granola bar"], name:"Nature Valley Bars (1 pouch/2 bars)", cal:190, pro:3, carb:29, fat:7, fib:2, se:2, io:0, zn:0.3, ir:1.0, mg:24, vd:0 },
 { keys:["ham and toast","toast with ham","ham toast"], name:"Ham and Toast", cal:200, pro:15, carb:27, fat:4, fib:1, se:20, io:4, zn:1.5, ir:2.0, mg:23, vd:0 },
 { keys:["avocado toast"], name:"Avocado Toast", cal:230, pro:6, carb:24, fat:15, fib:8, se:5, io:0, zn:0.7, ir:1.3, mg:45, vd:0 },
-
   keys:["avocado toast"], name:"Avocado Toast", cal:230, pro:6, carb:24, fat:15, fib:8, se:5, io:0, zn:0.7, ir:1.3, mg:45, vd:0 },
  { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
