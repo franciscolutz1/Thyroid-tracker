@@ -612,7 +612,7 @@ const FOOD_DB = [
   { keys:["ham and toast","toast with ham","ham toast"], name:"Ham and Toast", cal:200, pro:15, carb:27, fat:4, fib:1, se:20, io:4, zn:1.5, ir:2.0, mg:23, vd:0 },
 { keys:["avocado toast"], name:"Avocado Toast", cal:230, pro:6, carb:24, fat:15, fib:8, se:5, io:0, zn:0.7, ir:1.3, mg:45, vd:0 },
   { keys:["spinach ravioli"], name:"Spinach Ravioli", cal:260, pro:11, carb:40, fat:7, fib:3, se:1, io:5, zn:1.1, ir:2.0, mg:30, vd:2 },
- { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
+{ keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
   { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
@@ -2532,6 +2532,585 @@ function WeeklyWellness({ logs, wellnessLog }) {
   );
 }
 
+// ── INSIGHTS ──────────────────────────────────────────────────────────────────
+function LineChart({ data, color = COLORS.tealMid, goal, height = 90 }) {
+  const w = 300;
+  const max = Math.max(goal || 0, ...data.map(d => d.value), 1);
+  const stepX = data.length > 1 ? w / (data.length - 1) : w;
+  const pts = data.map((d, i) => `${i * stepX},${height - (d.value / max) * height}`).join(" ");
+  const goalY = goal ? height - (goal / max) * height : null;
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} width="100%" height={height} preserveAspectRatio="none">
+      {goalY != null && <line x1="0" y1={goalY} x2={w} y2={goalY} stroke={COLORS.divider} strokeDasharray="4,3" strokeWidth="1" />}
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {data.map((d, i) => {
+        const x = i * stepX, y = height - (d.value / max) * height;
+        return <circle key={i} cx={x} cy={y} r="2.5" fill={color} />;
+      })}
+    </svg>
+  );
+}
+
+function pearson(xs, ys, minN = 5) {
+  const n = xs.length;
+  if (n < minN) return null;
+  const mx = xs.reduce((a, b) => a + b, 0) / n;
+  const my = ys.reduce((a, b) => a + b, 0) / n;
+  let num = 0, dx2 = 0, dy2 = 0;
+  for (let i = 0; i < n; i++) { const dx = xs[i] - mx, dy = ys[i] - my; num += dx * dy; dx2 += dx * dx; dy2 += dy * dy; }
+  const denom = Math.sqrt(dx2 * dy2);
+  return denom === 0 ? null : num / denom;
+}
+function describeCorr(r) {
+  const abs = Math.abs(r);
+  const strength = abs >= 0.6 ? "strong" : abs >= 0.35 ? "moderate" : "weak";
+  const dir = r > 0 ? "positive" : "negative";
+  return { strength, dir };
+}
+
+function Insights({ logs, labLog = [], weightLog = [], goals }) {
+  const GOALS = goals || DEFAULT_GOALS;
+  const [section, setSection] = useState("overview");
+  const [range, setRange] = useState(14);
+  const [nutrient, setNutrient] = useState("selenium");
+  const [corrWindow, setCorrWindow] = useState("week");
+  const [labKey, setLabKey] = useState("tsh");
+
+  const fmtDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const windowDates = (endDaysAgo, count) => {
+    const arr = [];
+    for (let i = count - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - endDaysAgo - i); arr.push(fmtDate(d)); }
+    return arr;
+  };
+
+  const days = windowDates(0, range).map(dateStr => {
+    const d = new Date(dateStr + "T12:00:00");
+    return { dateStr, label: d.toLocaleDateString("en-US", { weekday: "short" }), dayNum: d.getDate() };
+  });
+
+  const getDayTotals = (dateStr) => {
+    const dayLogs = logs.filter(l => l.date === dateStr);
+    const totals = Object.fromEntries(NUTRIENT_KEYS.map(k => [k, 0]));
+    dayLogs.filter(l => l.type === "meal").forEach(l => { NUTRIENT_KEYS.forEach(k => { totals[k] += l.nutrients?.[k] || 0; }); });
+    dayLogs.filter(l => l.type === "vit").forEach(l => { const n = suppNutrients(l.name, l.dose); Object.entries(n).forEach(([k, v]) => { if (totals[k] !== undefined) totals[k] += v; }); });
+    return totals;
+  };
+
+  const NUTRIENT_OPTIONS = [
+    { key: "selenium", label: "Selenium", unit: "mcg" }, { key: "iodine", label: "Iodine", unit: "mcg" },
+    { key: "zinc", label: "Zinc", unit: "mg" }, { key: "iron", label: "Iron", unit: "mg" },
+    { key: "magnesium", label: "Magnesium", unit: "mg" }, { key: "protein", label: "Protein", unit: "g" },
+    { key: "calories", label: "Calories", unit: "" },
+  ];
+  const WIN_KEYS = [
+    { key: "selenium", label: "Selenium" }, { key: "iodine", label: "Iodine" },
+    { key: "zinc", label: "Zinc" }, { key: "iron", label: "Iron" },
+    { key: "magnesium", label: "Magnesium" }, { key: "protein", label: "Protein" },
+  ];
+  const nutOpt = NUTRIENT_OPTIONS.find(n => n.key === nutrient);
+  const nutrientData = days.map(d => ({ label: d.label, value: getDayTotals(d.dateStr)[nutrient] || 0 }));
+  const avgVal = Math.round((nutrientData.reduce((s, d) => s + d.value, 0) / days.length) * 10) / 10;
+
+  const medDays = days.map(d => ({ ...d, taken: logs.some(l => l.type === "med" && l.date === d.dateStr) }));
+  const adherencePct = Math.round((medDays.filter(d => d.taken).length / days.length) * 100);
+  let streak = 0;
+  for (let i = medDays.length - 1; i >= 0; i--) { if (medDays[i].taken) streak++; else break; }
+
+  const symptomLogs = logs.filter(l => l.type === "symptom" && days.some(d => d.dateStr === l.date));
+  const freq = {};
+  symptomLogs.forEach(l => (l.symptoms || []).forEach(sym => { freq[sym] = (freq[sym] || 0) + 1; }));
+  const topSymptoms = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([key, count]) => ({ label: SYMPTOMS_LIST.find(s => s.key === key)?.label || key, value: count }));
+  const energyData = days.map(d => {
+    const l = symptomLogs.find(l => l.date === d.dateStr);
+    return { label: d.label, value: l?.energy || 0 };
+  });
+  const energyVals = energyData.filter(d => d.value > 0).map(d => d.value);
+  const avgEnergy = energyVals.length ? Math.round((energyVals.reduce((a, b) => a + b, 0) / energyVals.length) * 10) / 10 : null;
+
+  // ── Shared all-time lookups ──
+  const mealDateSet = new Set(logs.filter(l => l.type === "meal").map(l => l.date));
+  const medDateSet = new Set(logs.filter(l => l.type === "med").map(l => l.date));
+  const symptomMap = {};
+  logs.filter(l => l.type === "symptom").forEach(l => { symptomMap[l.date] = l; });
+
+  const computeCorrForDates = (dates) => {
+    const paired = dates.filter(dt => mealDateSet.has(dt) && symptomMap[dt]?.energy);
+    return WIN_KEYS.map(k => {
+      const xs = paired.map(dt => getDayTotals(dt)[k.key] || 0);
+      const ys = paired.map(dt => symptomMap[dt].energy);
+      const r = pearson(xs, ys, dates.length <= 7 ? 4 : 5);
+      return r == null ? null : { ...k, r };
+    }).filter(Boolean).sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+  };
+
+  // ── Correlations (This Week / 90 Days toggle) ──
+  const corrDates = windowDates(0, corrWindow === "week" ? 7 : 90);
+  const corrResults = computeCorrForDates(corrDates).slice(0, 3);
+  const corrResultsLong = computeCorrForDates(windowDates(0, 90)); // fixed 90-day, used by Recommendations & Predictions
+
+  const symDates = corrDates.filter(dt => symptomMap[dt]);
+  const takenSym = symDates.filter(dt => medDateSet.has(dt));
+  const missedSym = symDates.filter(dt => !medDateSet.has(dt));
+  const avgSympCount = arr => arr.length ? arr.reduce((s, dt) => s + (symptomMap[dt].symptoms?.length || 0), 0) / arr.length : null;
+  const avgEnergyFor = arr => { const vs = arr.map(dt => symptomMap[dt].energy).filter(Boolean); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
+  const minGroupSize = corrWindow === "week" ? 2 : 3;
+  const medComparison = (takenSym.length >= minGroupSize && missedSym.length >= minGroupSize) ? {
+    symptomsTaken: Math.round(avgSympCount(takenSym) * 10) / 10,
+    symptomsMissed: Math.round(avgSympCount(missedSym) * 10) / 10,
+    energyTaken: avgEnergyFor(takenSym) != null ? Math.round(avgEnergyFor(takenSym) * 10) / 10 : null,
+    energyMissed: avgEnergyFor(missedSym) != null ? Math.round(avgEnergyFor(missedSym) * 10) / 10 : null,
+  } : null;
+
+  const pairCounts = {};
+  corrDates.forEach(dt => {
+    const entry = symptomMap[dt];
+    if (!entry) return;
+    const syms = (entry.symptoms || []).filter(sm => sm !== "good day");
+    for (let i = 0; i < syms.length; i++) for (let j = i + 1; j < syms.length; j++) {
+      const key = [syms[i], syms[j]].sort().join("|");
+      pairCounts[key] = (pairCounts[key] || 0) + 1;
+    }
+  });
+  const topPairEntry = Object.entries(pairCounts).sort((a, b) => b[1] - a[1])[0];
+  const pairMinCount = corrWindow === "week" ? 2 : 3;
+  const topPair = (topPairEntry && topPairEntry[1] >= pairMinCount) ? {
+    a: SYMPTOMS_LIST.find(s => s.key === topPairEntry[0].split("|")[0])?.label || topPairEntry[0].split("|")[0],
+    b: SYMPTOMS_LIST.find(s => s.key === topPairEntry[0].split("|")[1])?.label || topPairEntry[0].split("|")[1],
+    count: topPairEntry[1],
+  } : null;
+
+  // ── Weekly Wins & Areas to Improve (this week vs last week) ──
+  const thisWeekDates = windowDates(0, 7);
+  const lastWeekDates = windowDates(7, 7);
+  const weekAvg = (dates, key) => dates.reduce((s, dt) => s + (getDayTotals(dt)[key] || 0), 0) / dates.length;
+  const weekCompare = WIN_KEYS.map(k => {
+    const thisAvg = weekAvg(thisWeekDates, k.key), lastAvg = weekAvg(lastWeekDates, k.key);
+    const goal = GOALS[k.key] || 1;
+    const thisPct = thisAvg / goal, lastPct = lastAvg / goal;
+    return { ...k, thisAvg, lastAvg, thisPct, lastPct, delta: thisPct - lastPct };
+  });
+  const wins = weekCompare.filter(w => w.delta >= 0.1 || (w.thisPct >= 0.9 && w.lastPct < 0.9));
+  const improveAreas = weekCompare.filter(w => w.thisPct < 0.5 || w.delta <= -0.1);
+  const medPctFor = dates => dates.filter(dt => medDateSet.has(dt)).length / dates.length;
+  const medThisWk = medPctFor(thisWeekDates), medLastWk = medPctFor(lastWeekDates);
+  const energyAvgFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.energy).filter(Boolean); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
+  const sympCountFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.symptoms?.length).filter(v => v != null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
+  const energyThisWk = energyAvgFor(thisWeekDates), energyLastWk = energyAvgFor(lastWeekDates);
+  const sympThisWk = sympCountFor(thisWeekDates), sympLastWk = sympCountFor(lastWeekDates);
+
+  // ── Daily Personalized Recommendations ──
+  const todayStr = fmtDate(new Date());
+  const todayTotals = getDayTotals(todayStr);
+  const lowToday = WIN_KEYS.filter(k => (todayTotals[k.key] || 0) / (GOALS[k.key] || 1) < 0.5);
+  const medTakenToday = medDateSet.has(todayStr);
+  const topCorrLong = corrResultsLong[0];
+  const recTips = [];
+  if (!medTakenToday) recTips.push({ icon: "💊", text: "You haven't logged your medication yet today — a good first step." });
+  if (lowToday.length) recTips.push({ icon: "🍽️", text: `${lowToday.map(k => k.label).join(", ")} ${lowToday.length > 1 ? "are" : "is"} under half your goal today — worth topping up.` });
+  if (topCorrLong && Math.abs(topCorrLong.r) >= 0.35) {
+    const { dir } = describeCorr(topCorrLong.r);
+    recTips.push({ icon: "🔗", text: dir === "positive"
+      ? `${topCorrLong.label} has tracked closely with your energy — a good one to prioritize today.`
+      : `Your energy has tended to dip on higher-${topCorrLong.label.toLowerCase()} days — worth keeping an eye on.` });
+  }
+  if (streak >= 3) recTips.push({ icon: "🔥", text: `You're on a ${streak}-day medication streak — keep it going!` });
+  if (recTips.length === 0) recTips.push({ icon: "✨", text: "Nothing stands out today — you're on track. Keep logging to unlock more personalized tips." });
+
+  // ── Lab Trends with Medication Changes ──
+  const ALL_LABS = [...THYROID_LABS, ...METABOLIC_LABS];
+  const labDef = ALL_LABS.find(l => l.key === labKey);
+  const sortedLabs = [...labLog].filter(l => l.values?.[labKey] != null && l.values[labKey] !== "").sort((a, b) => a.date > b.date ? 1 : -1);
+  const labChartData = sortedLabs.map(l => ({ label: l.date.slice(5), value: parseFloat(l.values[labKey]) }));
+  const medLogsAll = logs.filter(l => l.type === "med").sort((a, b) => a.date > b.date ? 1 : -1);
+  const doseChanges = [];
+  const lastDoseByName = {};
+  medLogsAll.forEach(l => {
+    const prevDose = lastDoseByName[l.name];
+    if (prevDose !== undefined && prevDose !== l.dose) doseChanges.push({ date: l.date, name: l.name, from: prevDose, to: l.dose });
+    lastDoseByName[l.name] = l.dose;
+  });
+
+  // ── Doctor Visit Summary (90-day) ──
+  const days90 = windowDates(0, 90);
+  const nutrientAvg90 = key => Math.round((days90.reduce((s, dt) => s + (getDayTotals(dt)[key] || 0), 0) / 90) * 10) / 10;
+  const symptomLogs90 = days90.map(dt => symptomMap[dt]).filter(Boolean);
+  const freq90 = {};
+  symptomLogs90.forEach(l => (l.symptoms || []).filter(sm => sm !== "good day").forEach(sym => { freq90[sym] = (freq90[sym] || 0) + 1; }));
+  const topSymptoms90 = Object.entries(freq90).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([key, count]) => `${SYMPTOMS_LIST.find(s => s.key === key)?.label || key} (${count}x)`);
+  const energy90Vals = symptomLogs90.map(l => l.energy).filter(Boolean);
+  const avgEnergy90 = energy90Vals.length ? Math.round((energy90Vals.reduce((a, b) => a + b, 0) / energy90Vals.length) * 10) / 10 : null;
+  const adherence90 = Math.round((days90.filter(dt => medDateSet.has(dt)).length / 90) * 100);
+  const weightsInRange = [...weightLog].filter(w => days90.includes(w.date)).sort((a, b) => a.date > b.date ? 1 : -1);
+  const weightChange = weightsInRange.length >= 2 ? Math.round((weightsInRange[weightsInRange.length - 1].weight - weightsInRange[0].weight) * 10) / 10 : null;
+  const labsInRange = [...labLog].filter(l => days90.includes(l.date)).sort((a, b) => a.date > b.date ? 1 : -1);
+  const latestThyroidLab = [...labsInRange].reverse().find(l => l.labType === "thyroid");
+
+  const buildSummaryText = () => {
+    const lines = [];
+    lines.push(`Thyroid Tracker — 90-Day Summary (${days90[0]} to ${days90[89]})`);
+    lines.push("");
+    lines.push("Nutrient averages (daily):");
+    WIN_KEYS.forEach(k => { lines.push(`  ${k.label}: ${nutrientAvg90(k.key)} (goal ${GOALS[k.key] || "—"})`); });
+    lines.push("");
+    lines.push(`Medication adherence: ${adherence90}%`);
+    lines.push(`Average energy: ${avgEnergy90 != null ? avgEnergy90 + "/10" : "not enough data"}`);
+    lines.push(`Most frequent symptoms: ${topSymptoms90.length ? topSymptoms90.join(", ") : "none logged"}`);
+    if (weightChange != null) lines.push(`Weight change: ${weightChange > 0 ? "+" : ""}${weightChange} lbs`);
+    if (latestThyroidLab) {
+      lines.push("");
+      lines.push(`Latest thyroid panel (${latestThyroidLab.date}):`);
+      THYROID_LABS.forEach(l => { if (latestThyroidLab.values[l.key]) lines.push(`  ${l.label}: ${latestThyroidLab.values[l.key]} ${l.unit}`); });
+    }
+    if (doseChanges.length) {
+      lines.push("");
+      lines.push("Medication dose changes:");
+      doseChanges.forEach(c => lines.push(`  ${c.date}: ${c.name} ${c.from} → ${c.to}`));
+    }
+    return lines.join("\n");
+  };
+  const copySummary = () => {
+    const text = buildSummaryText();
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => alert("Summary copied — paste it anywhere to share with your doctor."));
+    else alert(text);
+  };
+
+  // ── Monthly Progress Report (calendar month vs previous calendar month) ──
+  const now = new Date();
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+  const datesInMonth = (start, end) => { const arr = []; const d = new Date(start); while (d <= end) { arr.push(fmtDate(d)); d.setDate(d.getDate() + 1); } return arr; };
+  const thisMonthDates = datesInMonth(thisMonthStart, now);
+  const lastMonthDates = datesInMonth(lastMonthStart, lastMonthEnd);
+  const monthNutrientCompare = WIN_KEYS.map(k => {
+    const thisAvg = weekAvg(thisMonthDates, k.key), lastAvg = weekAvg(lastMonthDates, k.key);
+    return { ...k, thisAvg: Math.round(thisAvg * 10) / 10, lastAvg: Math.round(lastAvg * 10) / 10, delta: Math.round((thisAvg - lastAvg) * 10) / 10 };
+  });
+  const monthAdherence = { thisM: Math.round(medPctFor(thisMonthDates) * 100), lastM: Math.round(medPctFor(lastMonthDates) * 100) };
+  const monthEnergy = { thisM: energyAvgFor(thisMonthDates), lastM: energyAvgFor(lastMonthDates) };
+  const monthSymptoms = { thisM: sympCountFor(thisMonthDates), lastM: sympCountFor(lastMonthDates) };
+  const monthLabel = thisMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const lastMonthLabel = lastMonthStart.toLocaleDateString("en-US", { month: "long" });
+
+  // ── Predictive Insights (personal pattern flags, not medical predictions) ──
+  const predictions = [];
+  WIN_KEYS.forEach(k => {
+    const lowDaysNextEnergy = [];
+    const normalDaysNextEnergy = [];
+    for (let i = 1; i < days90.length; i++) {
+      const prevDt = days90[i - 1], curDt = days90[i];
+      const curEnergy = symptomMap[curDt]?.energy;
+      if (!curEnergy || !mealDateSet.has(prevDt)) continue;
+      const pct = (getDayTotals(prevDt)[k.key] || 0) / (GOALS[k.key] || 1);
+      if (pct < 0.5) lowDaysNextEnergy.push(curEnergy); else normalDaysNextEnergy.push(curEnergy);
+    }
+    if (lowDaysNextEnergy.length >= 3 && normalDaysNextEnergy.length >= 3) {
+      const lowAvg = lowDaysNextEnergy.reduce((a, b) => a + b, 0) / lowDaysNextEnergy.length;
+      const normAvg = normalDaysNextEnergy.reduce((a, b) => a + b, 0) / normalDaysNextEnergy.length;
+      if (normAvg - lowAvg >= 1) predictions.push({
+        icon: "🔮", text: `Days after low ${k.label.toLowerCase()} intake, your energy has averaged ${lowAvg.toFixed(1)}/10 vs ${normAvg.toFixed(1)}/10 otherwise — a pattern worth watching.`
+      });
+    }
+  });
+  if (topSymptoms.length) {
+    const top = topSymptoms[0];
+    const rate90 = Math.round(((freq90[SYMPTOMS_LIST.find(s => s.label === top.label)?.key] || 0) / 90) * 100);
+    if (rate90 >= 20) predictions.push({ icon: "📈", text: `You've logged ${top.label} on about ${rate90}% of the last 90 days — likely to show up again this week based on that pattern.` });
+  }
+  if (streak >= 5) predictions.push({ icon: "🔥", text: `At your current pace, you're on track to hit a ${streak + 7}-day medication streak by next week.` });
+
+  const SECTIONS = [
+    { key: "overview", label: "Overview" },
+    { key: "correlations", label: "Correlations" },
+    { key: "weekly", label: "Weekly Review" },
+    { key: "reports", label: "Reports" },
+    { key: "predictions", label: "Predictions" },
+  ];
+
+  const fmt2 = v => v == null ? "—" : (Number.isInteger(v) ? v : v.toFixed(1));
+  const pctFmt = v => `${Math.round(v * 100)}%`;
+
+  return (
+    <div>
+      <p style={s.sectionTitle}>Insights</p>
+
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 2 }}>
+        {SECTIONS.map(sec => (
+          <button key={sec.key} onClick={() => setSection(sec.key)}
+            style={{ flexShrink: 0, padding: "7px 12px", borderRadius: 16, border: `1px solid ${section === sec.key ? COLORS.tealMid : COLORS.divider}`,
+              background: section === sec.key ? COLORS.tealDeep : COLORS.white, color: section === sec.key ? COLORS.white : COLORS.textSec,
+              fontSize: "0.74rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+            {sec.label}
+          </button>
+        ))}
+      </div>
+
+      {section === "overview" && (
+        <div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            {[7, 14, 30].map(r => (
+              <button key={r} onClick={() => setRange(r)}
+                style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${r === range ? COLORS.tealMid : COLORS.divider}`,
+                  background: r === range ? COLORS.tealPale : COLORS.white, color: r === range ? COLORS.tealDeep : COLORS.textSec,
+                  fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
+                {r} days
+              </button>
+            ))}
+          </div>
+
+          <div style={s.card}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🦋 Nutrient Trend</span>
+              <select value={nutrient} onChange={e => setNutrient(e.target.value)}
+                style={{ fontSize: "0.75rem", padding: "4px 8px", borderRadius: 6, border: `1px solid ${COLORS.divider}` }}>
+                {NUTRIENT_OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </div>
+            <LineChart data={nutrientData} goal={GOALS[nutrient]} color={COLORS.tealMid} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: COLORS.textSec, marginTop: 6 }}>
+              <span>{days[0].label} {days[0].dayNum}</span>
+              <span>Avg: {avgVal}{nutOpt.unit} {GOALS[nutrient] ? `(goal ${GOALS[nutrient]}${nutOpt.unit})` : ""}</span>
+              <span>{days[days.length - 1].label} {days[days.length - 1].dayNum}</span>
+            </div>
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>💊 Medication Adherence</span>
+            <div style={{ display: "flex", gap: 4, marginTop: 10, marginBottom: 8 }}>
+              {medDays.map((d, i) => (
+                <div key={i} title={d.dateStr} style={{ flex: 1, height: 28, borderRadius: 5, background: d.taken ? COLORS.sage : COLORS.coralPale }} />
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.76rem", color: COLORS.textSec }}>
+              <span>{adherencePct}% of days logged</span>
+              <span>🔥 {streak} day streak</span>
+            </div>
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🩺 Symptom Patterns</span>
+            {topSymptoms.length === 0 ? (
+              <p style={{ fontSize: "0.78rem", color: COLORS.textSec, marginTop: 8 }}>No symptoms logged in this period.</p>
+            ) : (
+              <div style={{ marginTop: 10 }}>
+                {topSymptoms.map(sm => (
+                  <div key={sm.label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: "0.74rem", color: COLORS.textSec, minWidth: 90 }}>{sm.label}</span>
+                    <div style={{ flex: 1, height: 10, background: COLORS.mist, borderRadius: 5, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(sm.value / topSymptoms[0].value) * 100}%`, background: COLORS.coral, borderRadius: 5 }} />
+                    </div>
+                    <span style={{ fontSize: "0.72rem", color: COLORS.textSec }}>{sm.value}x</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>⚡ Energy Trend</span>
+            <div style={{ marginTop: 8 }}>
+              <LineChart data={energyData} goal={null} color={COLORS.amber} />
+            </div>
+            <div style={{ fontSize: "0.76rem", color: COLORS.textSec, marginTop: 6 }}>
+              {avgEnergy != null ? `Average energy: ${avgEnergy}/10` : "Log symptoms to see your energy trend."}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "correlations" && (
+        <div style={s.card}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🔗 Correlations</span>
+            <div style={{ display: "flex", gap: 4 }}>
+              {[{ key: "week", label: "This Week" }, { key: "90d", label: "90 Days" }].map(o => (
+                <button key={o.key} onClick={() => setCorrWindow(o.key)}
+                  style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${corrWindow === o.key ? COLORS.tealMid : COLORS.divider}`,
+                    background: corrWindow === o.key ? COLORS.tealPale : COLORS.white, color: corrWindow === o.key ? COLORS.tealDeep : COLORS.textSec,
+                    fontSize: "0.68rem", fontWeight: 600, cursor: "pointer" }}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 10 }}>
+            {corrWindow === "week" ? "Based on the last 7 days" : "Based on your last 90 days of logs"}
+          </p>
+
+          {corrResults.length === 0 ? (
+            <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>
+              {corrWindow === "week" ? "Not enough overlapping meal + symptom logs this week yet." : "Log more meals alongside symptoms to see nutrient ↔ energy correlations."}
+            </p>
+          ) : (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Nutrients ↔ Energy</p>
+              {corrResults.map(c => {
+                const { strength, dir } = describeCorr(c.r);
+                return (
+                  <div key={c.key} style={{ fontSize: "0.76rem", color: COLORS.textSec, marginBottom: 5, lineHeight: 1.4 }}>
+                    <b style={{ color: COLORS.tealDeep }}>{c.label}</b>: {strength} {dir} correlation with energy (r={c.r.toFixed(2)})
+                    {dir === "positive" ? " — higher intake tends to line up with better energy days." : " — higher intake tends to line up with lower energy days."}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {medComparison && (
+            <div style={{ marginBottom: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Meds ↔ Symptoms</p>
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.4 }}>
+                On days you logged meds, you averaged <b style={{ color: COLORS.tealDeep }}>{medComparison.symptomsTaken} symptoms</b>{medComparison.energyTaken != null ? ` and energy ${medComparison.energyTaken}/10` : ""}.
+                On days you missed them, that was <b style={{ color: COLORS.coral }}>{medComparison.symptomsMissed} symptoms</b>{medComparison.energyMissed != null ? ` and energy ${medComparison.energyMissed}/10` : ""}.
+              </p>
+            </div>
+          )}
+
+          {topPair && (
+            <div style={{ paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Symptoms That Cluster</p>
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.4 }}>
+                <b style={{ color: COLORS.tealDeep }}>{topPair.a}</b> and <b style={{ color: COLORS.tealDeep }}>{topPair.b}</b> showed up together on {topPair.count} days.
+              </p>
+            </div>
+          )}
+
+          {!medComparison && !topPair && corrResults.length === 0 && (
+            <p style={{ fontSize: "0.72rem", color: COLORS.textSec }}>Keep logging daily — correlations get more reliable with more data.</p>
+          )}
+        </div>
+      )}
+
+      {section === "weekly" && (
+        <div>
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>📊 Weekly Wins & Areas to Improve</span>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 10 }}>This week vs last week</p>
+
+            <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.sage, marginBottom: 6 }}>✅ Wins</p>
+            {wins.length === 0 ? (
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, marginBottom: 10 }}>No clear wins yet this week — keep logging to track progress.</p>
+            ) : wins.map(w => (
+              <div key={w.key} style={{ fontSize: "0.76rem", color: COLORS.textSec, marginBottom: 5, lineHeight: 1.4 }}>
+                <b style={{ color: COLORS.tealDeep }}>{w.label}</b>: {pctFmt(w.thisPct)} of goal (was {pctFmt(w.lastPct)})
+              </div>
+            ))}
+
+            <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.coral, marginTop: 12, marginBottom: 6 }}>🎯 Areas to Improve</p>
+            {improveAreas.length === 0 ? (
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec }}>Nothing significantly behind this week — nice work.</p>
+            ) : improveAreas.map(w => (
+              <div key={w.key} style={{ fontSize: "0.76rem", color: COLORS.textSec, marginBottom: 5, lineHeight: 1.4 }}>
+                <b style={{ color: COLORS.coral }}>{w.label}</b>: {pctFmt(w.thisPct)} of goal (was {pctFmt(w.lastPct)})
+              </div>
+            ))}
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}`, fontSize: "0.74rem", color: COLORS.textSec }}>
+              <span>💊 {Math.round(medThisWk * 100)}% adherence <span style={{ opacity: 0.7 }}>(was {Math.round(medLastWk * 100)}%)</span></span>
+              <span>⚡ {fmt2(energyThisWk)} energy <span style={{ opacity: 0.7 }}>(was {fmt2(energyLastWk)})</span></span>
+            </div>
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>✨ Today's Recommendations</span>
+            <div style={{ marginTop: 10 }}>
+              {recTips.map((t, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "0.9rem" }}>{t.icon}</span>
+                  <span style={{ fontSize: "0.78rem", color: COLORS.textSec, lineHeight: 1.4 }}>{t.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "reports" && (
+        <div>
+          <div style={s.card}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>📈 Lab Trends</span>
+              <select value={labKey} onChange={e => setLabKey(e.target.value)}
+                style={{ fontSize: "0.75rem", padding: "4px 8px", borderRadius: 6, border: `1px solid ${COLORS.divider}` }}>
+                {ALL_LABS.map(l => <option key={l.key} value={l.key}>{l.label}</option>)}
+              </select>
+            </div>
+            {labChartData.length < 2 ? (
+              <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>Log at least two {labDef?.label} results to see a trend.</p>
+            ) : (
+              <>
+                <LineChart data={labChartData} goal={null} color={COLORS.tealMid} />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: COLORS.textSec, marginTop: 6 }}>
+                  <span>{labChartData[0].label}: {labChartData[0].value} {labDef?.unit}</span>
+                  <span>{labChartData[labChartData.length - 1].label}: {labChartData[labChartData.length - 1].value} {labDef?.unit}</span>
+                </div>
+              </>
+            )}
+            {doseChanges.length > 0 && (
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
+                <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Medication Dose Changes</p>
+                {doseChanges.map((c, i) => (
+                  <div key={i} style={{ fontSize: "0.74rem", color: COLORS.textSec, marginBottom: 4 }}>
+                    {dateLabel(c.date)}: <b style={{ color: COLORS.tealDeep }}>{c.name}</b> {c.from} → {c.to}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🩺 Doctor Visit Summary</span>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 10 }}>Last 90 days — ready to bring to an appointment</p>
+            <div style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.6 }}>
+              <div>💊 Medication adherence: <b style={{ color: COLORS.tealDeep }}>{adherence90}%</b></div>
+              <div>⚡ Average energy: <b style={{ color: COLORS.tealDeep }}>{avgEnergy90 != null ? avgEnergy90 + "/10" : "—"}</b></div>
+              <div>🩺 Top symptoms: <b style={{ color: COLORS.tealDeep }}>{topSymptoms90.length ? topSymptoms90.join(", ") : "none logged"}</b></div>
+              {weightChange != null && <div>⚖️ Weight change: <b style={{ color: COLORS.tealDeep }}>{weightChange > 0 ? "+" : ""}{weightChange} lbs</b></div>}
+              {latestThyroidLab && <div>🦋 Latest TSH: <b style={{ color: COLORS.tealDeep }}>{latestThyroidLab.values.tsh || "—"} mIU/L</b> ({dateLabel(latestThyroidLab.date)})</div>}
+            </div>
+            <button onClick={copySummary} style={{ ...s.btnOutline, marginTop: 12, width: "100%" }}>📋 Copy Full Summary</button>
+          </div>
+
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🗓️ Monthly Progress Report</span>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 10 }}>{monthLabel} vs {lastMonthLabel}</p>
+            {monthNutrientCompare.map(m => (
+              <div key={m.key} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.76rem", color: COLORS.textSec, marginBottom: 5 }}>
+                <span>{m.label}</span>
+                <span>{fmt2(m.thisAvg)} <span style={{ opacity: 0.6 }}>(was {fmt2(m.lastAvg)})</span> {m.delta > 0 ? "↑" : m.delta < 0 ? "↓" : "—"}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}`, fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.6 }}>
+              <div>💊 Adherence: {monthAdherence.thisM}% <span style={{ opacity: 0.6 }}>(was {monthAdherence.lastM}%)</span></div>
+              <div>⚡ Energy: {fmt2(monthEnergy.thisM)} <span style={{ opacity: 0.6 }}>(was {fmt2(monthEnergy.lastM)})</span></div>
+              <div>🩺 Avg symptoms/day: {fmt2(monthSymptoms.thisM)} <span style={{ opacity: 0.6 }}>(was {fmt2(monthSymptoms.lastM)})</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "predictions" && (
+        <div style={s.card}>
+          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🔮 Predictive Insights</span>
+          <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 10 }}>Personal patterns from your own data — not medical predictions</p>
+          {predictions.length === 0 ? (
+            <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>Not enough history yet to spot reliable patterns. Keep logging daily and check back.</p>
+          ) : (
+            predictions.map((p, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
+                <span style={{ fontSize: "0.9rem" }}>{p.icon}</span>
+                <span style={{ fontSize: "0.78rem", color: COLORS.textSec, lineHeight: 1.4 }}>{p.text}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [data, setData] = useState(EMPTY_STATE);
@@ -2573,8 +3152,8 @@ export default function App() {
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
   const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
 
-  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","wellness","labs","weekly","wellweek","calendar","weight","history","settings"];
-  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Wellness","Labs","Weekly","Well. Week","Calendar","Weight","History","My Profile"];
+  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
+  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
 
   if (!loaded) return (
     <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:COLORS.mist, flexDirection:"column", gap:12 }}>
@@ -2610,6 +3189,7 @@ export default function App() {
         {tab==="labs"       && <LabResults labLog={data.labLog||[]} onSave={addLab} onDelete={deleteLab}/>}
         {tab==="weekly"     && <WeeklyDashboard logs={data.logs}/>}
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
+        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
         {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
