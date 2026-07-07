@@ -2429,8 +2429,8 @@ function WeeklyWellness({ logs, wellnessLog }) {
               {metric.icon} {metric.label}
             </div>
             <div style={{ display:"flex", gap:4, alignItems:"flex-end", height:50 }}>
-              {days.map((d,i) => {
-                const w = wellnessDays[i];
+                           {days.map((d,i) => {
+                const w = metric.key === "energy" ? symptomDays[i] : wellnessDays[i];
                 const rawVal = metric.key === "heartRate" || metric.key === "sleepHours"
                   ? parseFloat(w?.[metric.key]) || 0
                   : w?.[metric.key] || 0;
