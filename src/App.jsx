@@ -2313,7 +2313,7 @@ function WeeklyWellness({ logs, wellnessLog }) {
   const wellnessDays = days.map(d => getWellness(d.dateStr));
   const symptomDays  = days.map(d => getSymptoms(d.dateStr));
 
-  const avgEnergy  = (() => { const v = wellnessDays.filter(w=>w?.energy).map(w=>w.energy); return v.length ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1) : null; })();
+ const avgEnergy  = (() => { const v = symptomDays.filter(s=>s?.energy).map(s=>s.energy); return v.length ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1) : null; })();
   const avgMood    = (() => { const v = wellnessDays.filter(w=>w?.mood).map(w=>w.mood);     return v.length ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1) : null; })();
   const avgAnxiety = (() => { const v = wellnessDays.filter(w=>w?.anxiety).map(w=>w.anxiety); return v.length ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1) : null; })();
   const avgStress  = (() => { const v = wellnessDays.filter(w=>w?.stress).map(w=>w.stress);   return v.length ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1) : null; })();
