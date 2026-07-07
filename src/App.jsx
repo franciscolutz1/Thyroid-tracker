@@ -3135,7 +3135,7 @@ export default function App() {
   const addLog = useCallback(entry => {
     setData(d => {
       let logs = [...d.logs];
-      if (entry.type==="symptom") logs = logs.filter(l=>!(l.type==="symptom"&&l.date===today()));
+    if (entry.type==="symptom") logs = logs.filter(l=>!(l.type==="symptom"&&l.date===entry.date));
       return {...d, logs:[...logs, entry]};
     });
     setTab("dashboard");
