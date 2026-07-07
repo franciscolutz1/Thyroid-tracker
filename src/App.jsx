@@ -11,6 +11,10 @@ const COLORS = {
 const today = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};const dedupeSymptoms = (logs) => {
+  const seen = {};
+  logs.forEach(l => { if (l.type === "symptom") seen[l.date] = l; });
+  return logs.filter(l => l.type !== "symptom" || seen[l.date] === l);
 };
 const nowTime = () => new Date().toTimeString().slice(0, 5);
 const dateLabel = d => {
@@ -3119,9 +3123,10 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
 
   // Load from persistent storage on mount
-  useEffect(() => {
+    useEffect(() => {
     loadFromStorage().then(saved => {
-      setData(saved);
+      const cleaned = { ...saved, logs: dedupeSymptoms(saved.logs || []) };
+      setData(cleaned);
       setLoaded(true);
     });
   }, []);
