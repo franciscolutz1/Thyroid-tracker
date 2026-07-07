@@ -998,14 +998,22 @@ function LogMed({ presets, onSave, onUpdatePresets }) {
   );
 }
 
-function Symptoms({ onSave }) {
+function Symptoms({ onSave, logs }) {
   const [sympDate, setSympDate] = useState(today());
   const [energy, setEnergy] = useState(null);
   const [selected, setSelected] = useState([]);
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    const existing = logs.find(l => l.type === "symptom" && l.date === sympDate);
+    setEnergy(existing?.energy ?? null);
+    setSelected(existing?.symptoms ? [...existing.symptoms] : []);
+    setNotes(existing?.notes || "");
+  }, [sympDate, logs]);
+
   const toggle = sym => setSelected(s => s.includes(sym) ? s.filter(x=>x!==sym) : [...s,sym]);
-  const save = () => {
-    onSave({ id:Date.now(), date:sympDate, type:"symptom", time:nowTime(), energy, symptoms:[...selected], notes });
+
+onSave({ id:Date.now(), date:sympDate, type:"symptom", time:nowTime(), energy, symptoms:[...selected], notes });
     alert("Check-in saved!");
   };
   return (
@@ -3188,7 +3196,7 @@ export default function App() {
         {tab==="dashboard"  && <Dashboard logs={data.logs} goals={data.goals} onDelete={deleteLog} onEdit={setEditingLog}/>}
         {tab==="log-meal"   && <LogMeal onSave={addLog}/>}
         {tab==="log-med"    && <LogMed presets={data.presets} onSave={addLog} onUpdatePresets={updatePresets}/>}
-        {tab==="symptoms"   && <Symptoms onSave={addLog}/>}
+     {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
