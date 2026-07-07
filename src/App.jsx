@@ -1012,8 +1012,8 @@ function Symptoms({ onSave, logs }) {
   }, [sympDate, logs]);
 
   const toggle = sym => setSelected(s => s.includes(sym) ? s.filter(x=>x!==sym) : [...s,sym]);
-
-onSave({ id:Date.now(), date:sympDate, type:"symptom", time:nowTime(), energy, symptoms:[...selected], notes });
+  const save = () => {
+    onSave({ id:Date.now(), date:sympDate, type:"symptom", time:nowTime(), energy, symptoms:[...selected], notes });
     alert("Check-in saved!");
   };
   return (
