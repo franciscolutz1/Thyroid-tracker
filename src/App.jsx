@@ -617,6 +617,8 @@ const FOOD_DB = [
 { keys:["avocado toast"], name:"Avocado Toast", cal:230, pro:6, carb:24, fat:15, fib:8, se:5, io:0, zn:0.7, ir:1.3, mg:45, vd:0 },
   { keys:["spinach ravioli"], name:"Spinach Ravioli", cal:260, pro:11, carb:40, fat:7, fib:3, se:1, io:5, zn:1.1, ir:2.0, mg:30, vd:2 },
 { keys:["ham and cheese sandwich", "ham cheese sandwich", "jambon fromage"], name:"Ham and Cheese Sandwich", cal:300, pro:15, carb:32, fat:12, fib:1.5, se:20, io:15, zn:1.5, ir:1.3, mg:15, vd:0.1 },
+ { keys:["beef milanesa","milanesa de carne"], name:"Beef Milanesa", cal:350, pro:25, carb:20, fat:18, fib:1, se:20, io:3, zn:4.5, ir:2.8, mg:25, vd:0 },
+{ keys:["chicken milanesa","milanesa de pollo"], name:"Chicken Milanesa", cal:350, pro:30, carb:20, fat:15, fib:1, se:24, io:2, zn:1.3, ir:1.2, mg:28, vd:0 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
   { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
