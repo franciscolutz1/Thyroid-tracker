@@ -625,6 +625,7 @@ const FOOD_DB = [
   { keys:["sandwich de miga", "sandwich de miga jamon y queso", "miga sandwich"], name:"Sandwich de Miga - Ham & Cheese (1 piece)", cal:130, pro:6, carb:14, fat:5, fib:0.5, se:8, io:6, zn:0.6, ir:0.7, mg:8, vd:0.1 },
 { keys:["croissant", "mini croissant", "butter croissant"], name:"Croissant (Mini, Plain Butter)", cal:120, pro:2.5, carb:13, fat:6.5, fib:0.7, se:5, io:3, zn:0.3, ir:0.8, mg:5, vd:0.1 },
 { keys:["french fries", "fries"], name:"French Fries (Small, Deep-Fried)", cal:230, pro:2.5, carb:29, fat:11, fib:2.5, se:1, io:1, zn:0.4, ir:0.6, mg:22, vd:0 },
+ { keys:["red salami", "salami"], name:"Red Salami (4-5 slices)", cal:180, pro:9, carb:1, fat:15, fib:0, se:8, io:2, zn:1.2, ir:0.6, mg:8, vd:0.2 },
   { keys:["chicken milanesa","milanesa de pollo"], name:"Chicken Milanesa", cal:350, pro:30, carb:20, fat:15, fib:1, se:24, io:2, zn:1.3, ir:1.2, mg:28, vd:0 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
