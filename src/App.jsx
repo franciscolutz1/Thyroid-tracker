@@ -628,6 +628,7 @@ const FOOD_DB = [
 { keys:["strawberry liquid yogurt", "liquid yogurt strawberry", "drinkable yogurt strawberry"], name:"Strawberry Liquid Yogurt (Small Bottle)", cal:110, pro:3, carb:20, fat:2, fib:0, se:5, io:20, zn:0.5, ir:0.1, mg:12, vd:0 },
   { keys:["red salami", "salami"], name:"Red Salami (4-5 slices)", cal:180, pro:9, carb:1, fat:15, fib:0, se:8, io:2, zn:1.2, ir:0.6, mg:8, vd:0.2 },
   { keys:["chicken milanesa","milanesa de pollo"], name:"Chicken Milanesa", cal:350, pro:30, carb:20, fat:15, fib:1, se:24, io:2, zn:1.3, ir:1.2, mg:28, vd:0 },
+ { keys:["pineapple peach oat chia smoothie", "smoothie pineapple peach banana"], name:"Pineapple Peach Banana Smoothie (w/ Oats, Chia, Greek Yogurt & Milk)", cal:475, pro:18, carb:76, fat:14, fib:11, se:8, io:45, zn:2, ir:1.5, mg:100, vd:2.5 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
   { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
