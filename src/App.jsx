@@ -448,7 +448,7 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
       {/* Nutrients grid */}
       <p style={s.sectionTitle}>Today's Nutrients</p>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9, marginBottom:14 }}>
-               <RangeBar label="Protein" badge="Macro" current={totals.protein} unit="g" ranges={PROTEIN_RANGES} scaleMax={300} />
+                <RangeBar label="Protein" badge="Macro" current={totals.protein} unit="g" ranges={PROTEIN_RANGES} scaleMax={300} />
         <NutrientBar label="Carbs" badge="Macro" current={totals.carbs} goal={goals.carbs} unit="g" />
         <NutrientBar label="Fat" badge="Macro" current={totals.fat} goal={goals.fat} unit="g" />
         <NutrientBar label="Fiber" badge="Macro" current={totals.fiber} goal={goals.fiber} unit="g" thyroid />
@@ -456,7 +456,7 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
         <RangeBar label="Iodine" badge="Thyroid ★" current={totals.iodine} unit="mcg" ranges={IODINE_RANGES} scaleMax={1300} note="Optimal range: 150–300mcg" />
         <NutrientBar label="Zinc" badge="Thyroid ★" current={totals.zinc} goal={goals.zinc} unit="mg" thyroid />
         <NutrientBar label="Iron" badge="Thyroid ★" current={totals.iron} goal={goals.iron} unit="mg" thyroid />
-        <RangeBar label="Vitamin D" badge="Thyroid ★" current={totals.vitd} unit="IU" ranges={VITD_RANGES} scaleMax={11000} note="Optimal range: 600–4000IU" />
+        <RangeBar label="Vitamin D" badge="Thyroid ★" current={totals.vitd} unit="IU" ranges={VITD_RANGES} scaleMax={11000} note="Optimal range: 600–4000IU" />       
         <NutrientBar label="Magnesium" current={totals.magnesium} goal={goals.magnesium} unit="mg" />
         <NutrientBar label="Calories" current={totals.calories} goal={goals.calories} unit="" />
         <NutrientBar label="Water" current={totals.water} goal={goals.water} unit=" cups" />
