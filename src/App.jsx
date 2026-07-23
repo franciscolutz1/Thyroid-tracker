@@ -1531,8 +1531,9 @@ const SCHEDULE = [
     { name:"Vitamin K",  dose:"6090mcg", type:"vit", note:"Take with lunch" },
     { name:"Vitamin D3", dose:"2000IU",  type:"vit", note:"Take with lunch" },
     { name:"Vitamin B12",dose:"1mg",     type:"vit", note:"Take with lunch" },
-    { name:"Selenium",   dose:"200mcg",  type:"vit", note:"Take with lunch" },
-        { name:"Omega-3 with CoQ10 (Thorne)", dose:"1 softgel", type:"vit", note:"Take with lunch" },
+       { name:"Selenium",   dose:"200mcg",  type:"vit", note:"Take with lunch" },
+    { name:"Omega-3 with CoQ10 (Thorne)", dose:"1 softgel", type:"vit", note:"Take with lunch" },
+  ]},
   ]},
   { time:"9:00 PM",  items:[
     { name:"Lamotrigine",        dose:"25mg",  type:"med", note:"Take at night for mood" },
