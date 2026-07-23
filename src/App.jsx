@@ -379,14 +379,19 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
   else if (totals.selenium <= 400) insights.push({type:"warn", icon:"⚠️", title:"Selenium caution zone",     text:"You're in the 300–400mcg caution range. Consider easing back on supplements or high-selenium foods."});
   else                              insights.push({type:"warn", icon:"🚫", title:"Selenium above safe limit", text:"You're over 400mcg, above the tolerable upper intake level. Consider reducing intake."});
 
-  // Iodine
-  if (pct("iodine") < 0.5)    insights.push({type:"warn", icon:"⚠️", title:"Low Iodine",        text:"Iodine is needed to make thyroid hormones. Try seafood, dairy, or iodized salt."});
-  else if (pct("iodine")>=1)   insights.push({type:"good", icon:"✅", title:"Iodine goal met",    text:"Good iodine levels support thyroid hormone production."});
+    // Iodine
+  if (totals.iodine < 150)        insights.push({type:"warn", icon:"⚠️", title:"Low Iodine",             text:"Iodine is needed to make thyroid hormones. Try seafood, dairy, or iodized salt."});
+  else if (totals.iodine <= 300)  insights.push({type:"good", icon:"✅", title:"Iodine optimal",           text:"Good iodine levels support thyroid hormone production."});
+  else if (totals.iodine <= 600)  insights.push({type:"info", icon:"ℹ️", title:"Iodine a bit high",        text:"You're in the high-but-acceptable range (300–600mcg)."});
+  else if (totals.iodine <= 1100) insights.push({type:"warn", icon:"⚠️", title:"Iodine caution zone",      text:"You're in the 600–1100mcg caution range. Too much iodine can worsen thyroid autoimmunity."});
+  else                             insights.push({type:"warn", icon:"🚫", title:"Iodine above safe limit",  text:"You're over 1100mcg, above the tolerable upper intake level. Consider reducing intake."});
 
   // Vitamin D
-  if (pct("vitd") < 0.5)      insights.push({type:"warn", icon:"☀️", title:"Low Vitamin D",      text:"Vitamin D supports thyroid receptor function. Consider your D3 supplement or sunlight."});
-  else if (pct("vitd")>=1)     insights.push({type:"good", icon:"✅", title:"Vitamin D goal met", text:"Great! Vitamin D supports thyroid receptor sensitivity."});
-
+  if (totals.vitd < 600)          insights.push({type:"warn", icon:"☀️", title:"Low Vitamin D",           text:"Vitamin D supports thyroid receptor function. Consider your D3 supplement or sunlight."});
+  else if (totals.vitd <= 4000)   insights.push({type:"good", icon:"✅", title:"Vitamin D optimal",        text:"Great! Vitamin D supports thyroid receptor sensitivity."});
+  else if (totals.vitd <= 5000)   insights.push({type:"info", icon:"ℹ️", title:"Vitamin D a bit high",     text:"You're in the high-but-acceptable range (4000–5000IU)."});
+  else if (totals.vitd <= 10000)  insights.push({type:"warn", icon:"⚠️", title:"Vitamin D caution zone",   text:"You're in the 5000–10000IU caution range. Sustained high intake can lead to toxicity."});
+  else                             insights.push({type:"warn", icon:"🚫", title:"Vitamin D above safe limit", text:"You're over 10000IU, above the safe daily limit. Consider reducing intake."});
   // Zinc
   if (pct("zinc") < 0.5)      insights.push({type:"warn", icon:"⚠️", title:"Low Zinc",           text:"Zinc is needed for thyroid hormone production. Try meat, shellfish, or your zinc supplement."});
   else if (pct("zinc")>=1)     insights.push({type:"good", icon:"✅", title:"Zinc goal met",       text:"Good zinc levels support thyroid hormone synthesis."});
