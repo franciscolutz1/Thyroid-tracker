@@ -2816,9 +2816,10 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   if (streak >= 3) recTips.push({ icon: "🔥", text: `You're on a ${streak}-day medication streak — keep it going!` });
   if (recTips.length === 0) recTips.push({ icon: "✨", text: "Nothing stands out today — you're on track. Keep logging to unlock more personalized tips." });
 
-    // ── What Would Raise Your Score ──
+       // ── What Would Raise Your Score ──
   const SCORE_KEYS = ["selenium", "iodine", "zinc", "iron", "vitd"];
-  const FIELD_FOR = { selenium: "se", iodine: "io", zinc: "zn", iron: "ir", vitd: "vd", magnesium: "mg", protein: "pro", fiber: "fib" };
+  const NUTRIENT_FOR_FIELD = { se: "selenium", io: "iodine", zn: "zinc", ir: "iron", mg: "magnesium", vd: "vitd", pro: "protein", fib: "fiber" };
+  const NUTRIENT_LABEL = { selenium: "Selenium", iodine: "Iodine", zinc: "Zinc", iron: "Iron", vitd: "Vitamin D", protein: "Protein", fiber: "Fiber", magnesium: "Magnesium" };
   const CEILING_FOR = {
     selenium: SELENIUM_RANGES[1].max, iodine: IODINE_RANGES[1].max,
     vitd: VITD_RANGES[1].max, protein: PROTEIN_RANGES[1].max,
@@ -2835,36 +2836,47 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   const medTakenTodayBool = medDateSet.has(todayStr);
   const baselineScore = computeScore(todayTotals, todayEnergyVal, medTakenTodayBool) ?? 0;
 
-  const scoreBoosts = [];
+  const habitBoosts = [];
   if (!medTakenTodayBool) {
     const pts = computeScore(todayTotals, todayEnergyVal, true) - baselineScore;
-    if (pts > 0) scoreBoosts.push({ icon: "💊", action: "Log your medication", points: pts });
+    if (pts > 0) habitBoosts.push({ icon: "💊", action: "Log your medication", points: pts });
   }
   if ((todayTotals.water || 0) < GOALS.water) {
     const simulated = { ...todayTotals, water: GOALS.water };
     const pts = computeScore(simulated, todayEnergyVal, medTakenTodayBool) - baselineScore;
     const cupsNeeded = Math.max(1, Math.ceil(GOALS.water - (todayTotals.water || 0)));
-    if (pts > 0) scoreBoosts.push({ icon: "💧", action: `Drink ${cupsNeeded} more cup${cupsNeeded > 1 ? "s" : ""} of water`, points: pts });
+    if (pts > 0) habitBoosts.push({ icon: "💧", action: `Drink ${cupsNeeded} more cup${cupsNeeded > 1 ? "s" : ""} of water`, points: pts });
   }
-  ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].forEach(k => {
-    const gap = (GOALS[k] || 0) - (todayTotals[k] || 0);
-    if (gap <= 0) return;
-    const field = FIELD_FOR[k];
-    const ceiling = CEILING_FOR[k] ?? Infinity;
-    let best = null, bestPts = 0;
-    FOOD_DB.forEach(food => {
+  habitBoosts.sort((a, b) => b.points - a.points);
+  const habitTips = [
+    { icon: "🚶", action: "Take a 20-minute walk", note: "Supports metabolism and energy (not yet part of your score)" },
+    { icon: "😴", action: "Go to bed before 11pm", note: "Consistent sleep supports thyroid hormone regulation (not yet part of your score)" },
+  ];
+
+  const gapKeys = ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].filter(k => (GOALS[k] || 0) - (todayTotals[k] || 0) > 0);
+  const foodBoosts = [];
+  FOOD_DB.forEach(food => {
+    const simulated = { ...todayTotals };
+    const helps = [];
+    let overCeiling = false;
+    Object.entries(NUTRIENT_FOR_FIELD).forEach(([field, k]) => {
       const contribution = food[field];
       if (!contribution || contribution <= 0) return;
-      const newVal = (todayTotals[k] || 0) + contribution;
-      if (newVal > ceiling) return;
-      const simulated = { ...todayTotals, [k]: newVal };
-      const pts = computeScore(simulated, todayEnergyVal, medTakenTodayBool) - baselineScore;
-      if (pts > bestPts) { bestPts = pts; best = food; }
+      const newVal = (simulated[k] || 0) + contribution;
+      const ceiling = CEILING_FOR[k] ?? Infinity;
+      if (newVal > ceiling) overCeiling = true;
+      simulated[k] = newVal;
+      if (gapKeys.includes(k)) helps.push(NUTRIENT_LABEL[k]);
     });
-    if (best && bestPts > 0) scoreBoosts.push({ icon: "🍽️", action: `Eat ${best.name}`, points: bestPts });
+    if (overCeiling || helps.length === 0) return;
+    const pts = computeScore(simulated, todayEnergyVal, medTakenTodayBool) - baselineScore;
+    if (pts > 0) foodBoosts.push({ name: food.name, points: pts, helps });
   });
-  scoreBoosts.sort((a, b) => b.points - a.points);
-  const topScoreBoosts = scoreBoosts.slice(0, 6);
+  foodBoosts.sort((a, b) => b.points - a.points);
+  const topFoodBoosts = foodBoosts.slice(0, 5);
+
+  // ── Lab Trends with Medication Changes ──
+
 
 
   // ── Lab Trends with Medication Changes ──
