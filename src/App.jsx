@@ -341,9 +341,12 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
   const insights = [];
   const pct = k => totals[k] / (goals[k]||1);
 
-  // Selenium
-  if (pct("selenium") < 0.5)  insights.push({type:"warn", icon:"⚠️", title:"Low Selenium",     text:"Selenium converts T4 to active T3. Try eggs, Brazil nuts, or your Thorne supplement."});
-  else if (pct("selenium")>=1) insights.push({type:"good", icon:"✅", title:"Selenium goal met", text:"Great! Selenium supports healthy thyroid hormone conversion."});
+   // Selenium
+  if (totals.selenium < 55)       insights.push({type:"warn", icon:"⚠️", title:"Low Selenium",             text:"Selenium converts T4 to active T3. Try eggs, Brazil nuts, or your Thorne supplement."});
+  else if (totals.selenium <= 200) insights.push({type:"good", icon:"✅", title:"Selenium optimal",          text:"Great! You're in the optimal 55–200mcg range for thyroid hormone conversion."});
+  else if (totals.selenium <= 300) insights.push({type:"info", icon:"ℹ️", title:"Selenium a bit high",       text:"You're in the high-but-acceptable range (200–300mcg). Not concerning, but no need to go higher."});
+  else if (totals.selenium <= 400) insights.push({type:"warn", icon:"⚠️", title:"Selenium caution zone",     text:"You're in the 300–400mcg caution range. Consider easing back on supplements or high-selenium foods."});
+  else                              insights.push({type:"warn", icon:"🚫", title:"Selenium above safe limit", text:"You're over 400mcg, above the tolerable upper intake level. Consider reducing intake."});
 
   // Iodine
   if (pct("iodine") < 0.5)    insights.push({type:"warn", icon:"⚠️", title:"Low Iodine",        text:"Iodine is needed to make thyroid hormones. Try seafood, dairy, or iodized salt."});
