@@ -560,7 +560,8 @@ const FOOD_DB = [
  { keys:["pea","peas","green peas"], name:"Green Peas (½ cup)", cal:62, pro:4, carb:11, fat:0, fib:4, se:1.8, io:0, zn:0.6, ir:1.2, mg:26, vd:0 },
 { keys:["snap pea","snap peas","sugar snap peas"], name:"Snap Peas, raw (1 cup)", cal:41, pro:3, carb:7, fat:0, fib:3, se:0.3, io:0, zn:0.3, ir:1.1, mg:12, vd:0 },
   { keys:["green bean","string bean","french bean"], name:"Green Beans (1 cup)", cal:31, pro:2, carb:7, fat:0, fib:3, se:0.6, io:0, zn:0.2, ir:1.0, mg:25, vd:0 },
- { keys:["asparagus"], name:"Asparagus (6)", cal:22, pro:2, carb:4, fat:0, fib:2, se:2.3, io:0, zn:0.4, ir:1.0, mg:13, vd:0 },
+{ keys:["snap pea","snap peas","sugar snap peas"], name:"Snap Peas, raw (1 cup)", cal:41, pro:3, carb:7, fat:0, fib:3, se:0.3, io:0, zn:0.3, ir:1.1, mg:12, vd:0 },
+  { keys:["asparagus"], name:"Asparagus (6)", cal:22, pro:2, carb:4, fat:0, fib:2, se:2.3, io:0, zn:0.4, ir:1.0, mg:13, vd:0 },
  { keys:["bok choy","pak choi"], name:"Bok Choy (1 cup)", cal:20, pro:3, carb:3, fat:0, fib:2, se:0.5, io:0, zn:0.2, ir:1.8, mg:19, vd:0 },
  { keys:["edamame"], name:"Edamame (½ cup)", cal:90, pro:8, carb:7, fat:4, fib:4, se:1, io:0, zn:1.0, ir:1.8, mg:48, vd:0 },
  { keys:["tofu"], name:"Tofu (½ cup)", cal:90, pro:9, carb:2, fat:5, fib:0.5, se:10, io:0, zn:1.0, ir:3.4, mg:37, vd:0 },
@@ -1532,11 +1533,10 @@ const SCHEDULE = [
     { name:"Vitamin K",  dose:"6090mcg", type:"vit", note:"Take with lunch" },
     { name:"Vitamin D3", dose:"2000IU",  type:"vit", note:"Take with lunch" },
     { name:"Vitamin B12",dose:"1mg",     type:"vit", note:"Take with lunch" },
-       { name:"Selenium",   dose:"200mcg",  type:"vit", note:"Take with lunch" },
-    { name:"Omega-3 with CoQ10 (Thorne)", dose:"1 softgel", type:"vit", note:"Take with lunch" },
-  ]},
+        { name:"Omega-3 with CoQ10 (Thorne)", dose:"1 softgel", type:"vit", note:"Take with lunch" },
   ]},
   { time:"9:00 PM",  items:[
+
     { name:"Lamotrigine",        dose:"25mg",  type:"med", note:"Take at night for mood" },
     { name:"Magnesium Glycinate",dose:"200mg", type:"vit", note:"Take at night, well clear of Synthroid" },
   ]},
