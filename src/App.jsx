@@ -418,7 +418,7 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
         <NutrientBar label="Carbs" badge="Macro" current={totals.carbs} goal={goals.carbs} unit="g" />
         <NutrientBar label="Fat" badge="Macro" current={totals.fat} goal={goals.fat} unit="g" />
         <NutrientBar label="Fiber" badge="Macro" current={totals.fiber} goal={goals.fiber} unit="g" thyroid />
-        <NutrientBar label="Selenium" badge="Thyroid ★" current={totals.selenium} goal={goals.selenium} unit="mcg" thyroid />
+        <SeleniumBar current={totals.selenium} />
         <NutrientBar label="Iodine" badge="Thyroid ★" current={totals.iodine} goal={goals.iodine} unit="mcg" thyroid />
         <NutrientBar label="Zinc" badge="Thyroid ★" current={totals.zinc} goal={goals.zinc} unit="mg" thyroid />
         <NutrientBar label="Iron" badge="Thyroid ★" current={totals.iron} goal={goals.iron} unit="mg" thyroid />
