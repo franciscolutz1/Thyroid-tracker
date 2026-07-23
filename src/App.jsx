@@ -3271,22 +3271,50 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
       )}
       
       {section === "score" && (
-        <div style={s.card}>
-          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>⭐ What Would Raise Your Score</span>
-          <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 12 }}>Today's score: {baselineScore}/100 — here's what would move it, ranked by impact</p>
-          {topScoreBoosts.length === 0 ? (
-            <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on everything trackable today — nice work!</p>
-          ) : (
-            topScoreBoosts.map((b, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
-                <span style={{ fontSize: "1.1rem" }}>{b.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{b.action}</div>
+             {section === "score" && (
+        <div>
+          <div style={s.card}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 12 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
+            {topFoodBoosts.length === 0 ? (
+              <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on trackable nutrients today — nice work!</p>
+            ) : (
+              topFoodBoosts.map((f, i) => (
+                <div key={i} style={{ padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</div>
+                      <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 2 }}>Boosts {f.helps.join(", ")}</div>
+                    </div>
+                    <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{f.points} pt{f.points !== 1 ? "s" : ""}</span>
+                  </div>
                 </div>
-                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{b.points} pt{b.points !== 1 ? "s" : ""}</span>
+              ))
+            )}
+          </div>
+
+          <div style={{ ...s.card, marginTop: 12 }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🎯 Habits</span>
+            {habitBoosts.map((h, i) => (
+              <div key={`hb${i}`} style={{ display: "flex", gap: 10, alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                <span style={{ fontSize: "1.1rem" }}>{h.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{h.action}</div>
+                </div>
+                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{h.points} pt{h.points !== 1 ? "s" : ""}</span>
               </div>
-            ))
-          )}
+            ))}
+            {habitTips.map((t, i) => (
+              <div key={`ht${i}`} style={{ display: "flex", gap: 10, alignItems: "center", padding: "9px 0", borderTop: (habitBoosts.length > 0 || i > 0) ? `1px solid ${COLORS.divider}` : "none" }}>
+                <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{t.action}</div>
+                  <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 2 }}>{t.note}</div>
+                </div>
+                <span style={{ background: COLORS.sagePale, color: COLORS.sage, borderRadius: 3, padding: "2px 6px", fontSize: "0.62rem", fontWeight: 700, whiteSpace: "nowrap" }}>TIP</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
