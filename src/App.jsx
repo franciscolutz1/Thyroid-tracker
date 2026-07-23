@@ -26,7 +26,7 @@ const dateLabel = d => {
   return new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 };
 
-const DEFAULT_GOALS = { calories:1800, protein:100, carbs:200, fat:65, fiber:25, water:8, selenium:55, iodine:150, zinc:8, iron:18, magnesium:320, vitd:2000, vitk:6090, b12:1000 };
+const DEFAULT_GOALS = { calories:1600, protein:130, carbs:145, fat:55, fiber:28, water:8, selenium:55, iodine:150, zinc:11, iron:8, magnesium:420, vitd:2000, vitk:6090, b12:1000 };
 const DEFAULT_PRESETS = {
   meds: [{name:"Synthroid (Levothyroxine)",dose:"125mcg"},{name:"Lamotrigine",dose:"25mg"},{name:"Sertraline",dose:"100mg"}],
   vits: [{name:"Vitamin K",dose:"6090mcg"},{name:"Vitamin D3",dose:"2000IU"},{name:"Vitamin B12",dose:"1mg"},{name:"Selenium",dose:"200mcg"},{name:"Magnesium Glycinate",dose:"200mg"},{name:"Valerian Root",dose:"320mg"},{name:"GABA",dose:"250mg"}]
