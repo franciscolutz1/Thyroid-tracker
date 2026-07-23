@@ -3258,6 +3258,27 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
           )}
         </div>
       )}
+      
+      {section === "score" && (
+        <div style={s.card}>
+          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>⭐ What Would Raise Your Score</span>
+          <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 12 }}>Today's score: {baselineScore}/100 — here's what would move it, ranked by impact</p>
+          {topScoreBoosts.length === 0 ? (
+            <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on everything trackable today — nice work!</p>
+          ) : (
+            topScoreBoosts.map((b, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                <span style={{ fontSize: "1.1rem" }}>{b.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{b.action}</div>
+                </div>
+                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{b.points} pt{b.points !== 1 ? "s" : ""}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
