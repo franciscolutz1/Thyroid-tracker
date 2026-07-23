@@ -2875,8 +2875,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   foodBoosts.sort((a, b) => b.points - a.points);
   const topFoodBoosts = foodBoosts.slice(0, 5);
 
-  // ── Lab Trends with Medication Changes ──
-
+  
 
 
   // ── Lab Trends with Medication Changes ──
