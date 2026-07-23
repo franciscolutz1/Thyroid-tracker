@@ -128,34 +128,65 @@ function NutrientBar({ label, badge, current, goal, unit, thyroid }) {
   );
 }
 
-function seleniumTier(v) {
-  if (v < 55)  return { label:"Below optimal",          color:"#94a3b8" };
-  if (v <= 200) return { label:"Optimal",                color:"#2fbf8f" };
-  if (v <= 300) return { label:"High but acceptable",    color:"#f0c14b" };
-  if (v <= 400) return { label:"Caution",                color:"#f2994a" };
-  return               { label:"Above tolerable limit",  color:"#e0554f" };
+function rangeTier(v, ranges) {
+  for (const r of ranges) { if (v <= r.max) return r; }
+  return ranges[ranges.length-1];
 }
 
-function SeleniumBar({ current }) {
-  const scaleMax = 450;
-  const tier = seleniumTier(current);
+const PROTEIN_RANGES = [
+  { max:65,        color:"#94a3b8", label:"Below optimal" },
+  { max:160,       color:"#2fbf8f", label:"Optimal" },
+  { max:200,       color:"#f0c14b", label:"High but fine" },
+  { max:250,       color:"#f2994a", label:"Very high" },
+  { max:Infinity,  color:"#e0554f", label:"Excessive" },
+];
+const SELENIUM_RANGES = [
+  { max:55,        color:"#94a3b8", label:"Below optimal" },
+  { max:200,       color:"#2fbf8f", label:"Optimal" },
+  { max:300,       color:"#f0c14b", label:"High but acceptable" },
+  { max:400,       color:"#f2994a", label:"Caution" },
+  { max:Infinity,  color:"#e0554f", label:"Above tolerable limit" },
+];
+const IODINE_RANGES = [
+  { max:150,       color:"#94a3b8", label:"Below optimal" },
+  { max:300,       color:"#2fbf8f", label:"Optimal" },
+  { max:600,       color:"#f0c14b", label:"High but acceptable" },
+  { max:1100,      color:"#f2994a", label:"Caution" },
+  { max:Infinity,  color:"#e0554f", label:"Above tolerable limit" },
+];
+const VITD_RANGES = [
+  { max:600,       color:"#94a3b8", label:"Below optimal" },
+  { max:4000,      color:"#2fbf8f", label:"Optimal" },
+  { max:5000,      color:"#f0c14b", label:"High but acceptable" },
+  { max:10000,     color:"#f2994a", label:"Caution" },
+  { max:Infinity,  color:"#e0554f", label:"Above safe limit" },
+];
+
+function RangeBar({ label, badge, current, unit, ranges, scaleMax, note }) {
+  const tier = rangeTier(current, ranges);
   const p = v => Math.min(100, (v/scaleMax)*100);
-  const grad = `linear-gradient(to right, #94a3b8 0%, #94a3b8 ${p(55)}%, #2fbf8f ${p(55)}%, #2fbf8f ${p(200)}%, #f0c14b ${p(200)}%, #f0c14b ${p(300)}%, #f2994a ${p(300)}%, #f2994a ${p(400)}%, #e0554f ${p(400)}%, #e0554f 100%)`;
+  let stops = [], prevPct = 0;
+  ranges.forEach((r,i) => {
+    const pctAt = i===ranges.length-1 ? 100 : p(r.max);
+    stops.push(`${r.color} ${prevPct}%`, `${r.color} ${pctAt}%`);
+    prevPct = pctAt;
+  });
+  const grad = `linear-gradient(to right, ${stops.join(", ")})`;
   const markerPct = p(current);
   return (
     <div style={{ ...s.card, padding:"11px 13px", marginBottom:0, borderLeft:`3px solid ${COLORS.tealLight}` }}>
       <div style={{ fontSize:"0.69rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:5, display:"flex", gap:5, alignItems:"center" }}>
-        Selenium
-        <span style={{ background:COLORS.tealPale, color:COLORS.tealMid, borderRadius:3, padding:"1px 4px", fontSize:"0.58rem", fontWeight:700 }}>Thyroid ★</span>
+        {label}
+        {badge && <span style={{ background:COLORS.tealPale, color:COLORS.tealMid, borderRadius:3, padding:"1px 4px", fontSize:"0.58rem", fontWeight:700 }}>{badge}</span>}
       </div>
       <div style={{ display:"flex", alignItems:"baseline", gap:4, marginBottom:5 }}>
         <span style={{ fontFamily:"monospace", fontSize:"1rem", fontWeight:500, color:tier.color }}>{Number.isInteger(current)?current:current.toFixed(1)}</span>
-        <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>mcg · {tier.label}</span>
+        <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{unit} · {tier.label}</span>
       </div>
       <div style={{ position:"relative", height:6, borderRadius:3, background:grad }}>
         <div style={{ position:"absolute", left:`calc(${markerPct}% - 1px)`, top:-2, width:2, height:10, background:"#1f2937", borderRadius:1 }} />
       </div>
-      <div style={{ fontSize:"0.58rem", color:COLORS.textSec, marginTop:4 }}>Optimal range: 55–200mcg</div>
+      {note && <div style={{ fontSize:"0.58rem", color:COLORS.textSec, marginTop:4 }}>{note}</div>}
     </div>
   );
 }
