@@ -3271,8 +3271,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
       )}
       
       {section === "score" && (
-                      {section === "score" && (
-        <div>
+              <div>
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
             <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 12 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
