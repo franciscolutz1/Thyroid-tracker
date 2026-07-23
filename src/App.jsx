@@ -2816,7 +2816,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   if (streak >= 3) recTips.push({ icon: "🔥", text: `You're on a ${streak}-day medication streak — keep it going!` });
   if (recTips.length === 0) recTips.push({ icon: "✨", text: "Nothing stands out today — you're on track. Keep logging to unlock more personalized tips." });
 
-       // ── What Would Raise Your Score ──
+             // ── What Would Raise Your Score ──
   const SCORE_KEYS = ["selenium", "iodine", "zinc", "iron", "vitd"];
   const NUTRIENT_FOR_FIELD = { se: "selenium", io: "iodine", zn: "zinc", ir: "iron", mg: "magnesium", vd: "vitd", pro: "protein", fib: "fiber" };
   const NUTRIENT_LABEL = { selenium: "Selenium", iodine: "Iodine", zinc: "Zinc", iron: "Iron", vitd: "Vitamin D", protein: "Protein", fiber: "Fiber", magnesium: "Magnesium" };
@@ -2824,30 +2824,33 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
     selenium: SELENIUM_RANGES[1].max, iodine: IODINE_RANGES[1].max,
     vitd: VITD_RANGES[1].max, protein: PROTEIN_RANGES[1].max,
   };
-  const computeScore = (totalsObj, symptomEnergy, medTaken) => {
+  // Returns the raw, unrounded score so small differences between foods aren't lost to rounding ties
+  const computeScoreRaw = (totalsObj, symptomEnergy, medTaken) => {
     let ss = 0, sc = 0;
     SCORE_KEYS.forEach(k => { ss += Math.min(1, (totalsObj[k] || 0) / (GOALS[k] || 1)); sc++; });
     ["protein", "fiber", "water"].forEach(k => { ss += Math.min(1, (totalsObj[k] || 0) / (GOALS[k] || 1)) * 0.5; sc += 0.5; });
     if (symptomEnergy) { ss += symptomEnergy / 10; sc++; }
     if (medTaken) { ss += 1; sc++; }
-    return sc > 0 ? Math.round((ss / sc) * 100) : null;
+    return sc > 0 ? (ss / sc) * 100 : 0;
   };
+  const computeScore = (totalsObj, symptomEnergy, medTaken) => Math.round(computeScoreRaw(totalsObj, symptomEnergy, medTaken));
   const todayEnergyVal = symptomMap[todayStr]?.energy;
   const medTakenTodayBool = medDateSet.has(todayStr);
-  const baselineScore = computeScore(todayTotals, todayEnergyVal, medTakenTodayBool) ?? 0;
+  const baselineRaw = computeScoreRaw(todayTotals, todayEnergyVal, medTakenTodayBool);
+  const baselineScore = Math.round(baselineRaw);
 
   const habitBoosts = [];
   if (!medTakenTodayBool) {
-    const pts = computeScore(todayTotals, todayEnergyVal, true) - baselineScore;
-    if (pts > 0) habitBoosts.push({ icon: "💊", action: "Log your medication", points: pts });
+    const ptsRaw = computeScoreRaw(todayTotals, todayEnergyVal, true) - baselineRaw;
+    if (ptsRaw > 0.05) habitBoosts.push({ icon: "💊", action: "Log your medication", points: Math.round(ptsRaw), ptsRaw });
   }
   if ((todayTotals.water || 0) < GOALS.water) {
     const simulated = { ...todayTotals, water: GOALS.water };
-    const pts = computeScore(simulated, todayEnergyVal, medTakenTodayBool) - baselineScore;
+    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
     const cupsNeeded = Math.max(1, Math.ceil(GOALS.water - (todayTotals.water || 0)));
-    if (pts > 0) habitBoosts.push({ icon: "💧", action: `Drink ${cupsNeeded} more cup${cupsNeeded > 1 ? "s" : ""} of water`, points: pts });
+    if (ptsRaw > 0.05) habitBoosts.push({ icon: "💧", action: `Drink ${cupsNeeded} more cup${cupsNeeded > 1 ? "s" : ""} of water`, points: Math.round(ptsRaw), ptsRaw });
   }
-  habitBoosts.sort((a, b) => b.points - a.points);
+  habitBoosts.sort((a, b) => b.ptsRaw - a.ptsRaw);
   const habitTips = [
     { icon: "🚶", action: "Take a 20-minute walk", note: "Supports metabolism and energy (not yet part of your score)" },
     { icon: "😴", action: "Go to bed before 11pm", note: "Consistent sleep supports thyroid hormone regulation (not yet part of your score)" },
@@ -2869,11 +2872,13 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
       if (gapKeys.includes(k)) helps.push(NUTRIENT_LABEL[k]);
     });
     if (overCeiling || helps.length === 0) return;
-    const pts = computeScore(simulated, todayEnergyVal, medTakenTodayBool) - baselineScore;
-    if (pts > 0) foodBoosts.push({ name: food.name, points: pts, helps });
+    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
+    if (ptsRaw > 0.5) foodBoosts.push({ name: food.name, points: Math.round(ptsRaw), helps, ptsRaw });
   });
-  foodBoosts.sort((a, b) => b.points - a.points);
+  foodBoosts.sort((a, b) => b.ptsRaw - a.ptsRaw);
   const topFoodBoosts = foodBoosts.slice(0, 5);
+
+
 
   
 
