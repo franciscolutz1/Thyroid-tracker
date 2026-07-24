@@ -2821,8 +2821,8 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   const NUTRIENT_FOR_FIELD = { se: "selenium", io: "iodine", zn: "zinc", ir: "iron", mg: "magnesium", vd: "vitd", pro: "protein", fib: "fiber" };
   const NUTRIENT_LABEL = { selenium: "Selenium", iodine: "Iodine", zinc: "Zinc", iron: "Iron", vitd: "Vitamin D", protein: "Protein", fiber: "Fiber", magnesium: "Magnesium" };
   const CEILING_FOR = {
-    selenium: SELENIUM_RANGES[1].max, iodine: IODINE_RANGES[1].max,
-    vitd: VITD_RANGES[1].max, protein: PROTEIN_RANGES[1].max,
+    selenium: SELENIUM_RANGES[2].max, iodine: IODINE_RANGES[2].max,
+    vitd: VITD_RANGES[2].max, protein: PROTEIN_RANGES[2].max,
   };
   // Returns the raw, unrounded score so small differences between foods aren't lost to rounding ties
   const computeScoreRaw = (totalsObj, symptomEnergy, medTaken) => {
