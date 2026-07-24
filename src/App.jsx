@@ -2706,6 +2706,58 @@ function describeCorr(r) {
   return { strength, dir };
 }
 
+function FoodLibrary({ recipes = [], onLog, embedded = false }) {
+  const [search, setSearch] = useState("");
+  const [flash, setFlash] = useState(null);
+  const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
+  const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
+  const items = [
+    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
+    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), nutrients: foodNut(f) })),
+  ];
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? items.filter(it => it.name.toLowerCase().includes(q) || it.keys.some(k => k.includes(q)))
+    : (embedded ? [] : items.slice().sort((a,b)=> (b.isRecipe?1:0)-(a.isRecipe?1:0) || a.name.localeCompare(b.name)));
+  const log = (it) => {
+    onLog({ id: Date.now(), date: today(), type:"meal", mealType: mealGuess(), time: nowTime(), name: it.name, nutrients: it.nutrients, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
+    setFlash(it.name); setTimeout(()=>setFlash(null), 2200);
+  };
+
+  return (
+    <div>
+      {!embedded && <p style={s.sectionTitle}>Foods</p>}
+      {!embedded && <p style={{fontSize:"0.76rem",color:COLORS.textSec,marginTop:-6,marginBottom:12}}>Everything in your food database plus your recipes. Tap Log to add it to today.</p>}
+      {embedded && <div style={{fontSize:"0.85rem",fontWeight:600,color:COLORS.tealDeep,marginBottom:8}}>🔎 Quick-log from your foods</div>}
+      <input style={{...s.input, borderColor:COLORS.tealLight, marginBottom:10}} value={search} onChange={e=>setSearch(e.target.value)} placeholder={embedded ? "Search a food or recipe to log…" : "Search your foods & recipes…"} />
+      {flash && <div style={{background:COLORS.sagePale,color:COLORS.tealDeep,borderRadius:8,padding:"7px 11px",marginBottom:10,fontSize:"0.76rem",fontWeight:600}}>✓ Logged {flash} to today</div>}
+      {embedded && !q ? (
+        <p style={{fontSize:"0.74rem",color:COLORS.textSec}}>Start typing to find a food or recipe and log it in one tap.</p>
+      ) : filtered.length === 0 ? (
+        <div style={s.emptyState}>No matches for "{search}".</div>
+      ) : (
+        <div style={embedded ? {maxHeight:340, overflowY:"auto"} : undefined}>
+          {filtered.map((it,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
+              <div style={{flex:1, minWidth:0}}>
+                <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
+                  {it.isRecipe && <span style={{fontSize:"0.58rem",fontWeight:700,background:COLORS.amberPale,color:COLORS.amber,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🍳</span>}
+                </div>
+                <div style={{fontSize:"0.66rem",color:COLORS.textSec,marginTop:2}}>
+                  {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
+                </div>
+              </div>
+              <button style={{...s.btnOutline,...s.btnSm}} onClick={()=>log(it)}>Log</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {!embedded && !q && <div style={{fontSize:"0.7rem",color:COLORS.textSec,marginTop:10}}>{items.length} items total</div>}
+    </div>
+  );
+}
+
 function Pantry({ pantry = [], onAdd, onDelete }) {
   const FIELDS = [
     { f:"cal", label:"Calories", unit:"" }, { f:"pro", label:"Protein", unit:"g" }, { f:"carb", label:"Carbs", unit:"g" },
@@ -2938,6 +2990,10 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
       <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:12 }}>
         Build a dish from your food database and pantry. Nutrients auto-scale per serving, and saved recipes become loggable foods that also feed your Score Boost recommendations.
       </p>
+
+      <div style={s.card}>
+        <FoodLibrary recipes={recipes} onLog={onLog} embedded={true} />
+      </div>
 
       {/* Free-text quick add */}
       <div style={s.aiBox}>
@@ -3836,8 +3892,8 @@ export default function App() {
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
   const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
 
-  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
-  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
+  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","foods","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
+  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Foods","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
 
   if (!loaded) return (
     <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:COLORS.mist, flexDirection:"column", gap:12 }}>
@@ -3869,6 +3925,7 @@ export default function App() {
      {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
+        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog}/>}
         {tab==="recipes"    && <Recipes recipes={data.recipes||[]} pantry={data.pantry||[]} onSave={addRecipe} onDelete={deleteRecipe} onLog={addLog}/>}
         {tab==="pantry"     && <Pantry pantry={data.pantry||[]} onAdd={addPantry} onDelete={deletePantry}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
