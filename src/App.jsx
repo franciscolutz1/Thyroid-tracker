@@ -43,7 +43,7 @@ const SYMPTOMS_LIST = [
   {key:"good day",emoji:"✨",label:"Good Day!"}
 ];
 
-const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [] });
+const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})) });
 
 async function loadFromStorage() {
   // Always try Firebase first — this is the cross-device sync source
@@ -713,8 +713,42 @@ const FOOD_DB = [
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
 ];
 
+const DEFAULT_PANTRY = [
+  { id:"seed-bouillon", name:"Vegetable Bouillon Cube", unit:"1 cube", keys:["bouillon","broth cube","vegetable cube","veg cube","stock cube","broth"], cal:10, pro:0.3, carb:1, fat:0.3, fib:0, se:0, io:0, zn:0, ir:0, mg:2, vd:0 },
+  { id:"seed-salt", name:"Iodized Salt", unit:"¼ tsp", keys:["iodized salt","iodised salt","salt"], cal:0, pro:0, carb:0, fat:0, fib:0, se:0, io:71, zn:0, ir:0, mg:0, vd:0 },
+  { id:"seed-paprika", name:"Paprika", unit:"1 tbsp", keys:["paprika"], cal:19, pro:1, carb:4, fat:1, fib:2.5, se:0.2, io:0, zn:0.3, ir:1.5, mg:14, vd:0 },
+  { id:"seed-blackpepper", name:"Ground Black Pepper", unit:"1 tbsp", keys:["black pepper","ground pepper","peppercorn","black peppercorn"], cal:16, pro:0.7, carb:4, fat:0.2, fib:1.7, se:0, io:0, zn:0.2, ir:0.6, mg:11, vd:0 },
+];
+
+const SEASONINGS_REF = [
+  { name:"Cumin (ground)", unit:"1 tbsp", keys:["cumin","ground cumin","jeera"], cal:22, pro:1.1, carb:2.6, fat:1.3, fib:0.6, se:0.3, io:0, zn:0.3, ir:4.0, mg:22, vd:0 },
+  { name:"Garlic Powder", unit:"1 tbsp", keys:["garlic powder","garlic"], cal:33, pro:1.6, carb:7.3, fat:0.1, fib:0.9, se:2.4, io:0, zn:0.3, ir:0.6, mg:10, vd:0 },
+  { name:"Onion Powder", unit:"1 tbsp", keys:["onion powder"], cal:24, pro:0.7, carb:5.6, fat:0.1, fib:0.5, se:0.3, io:0, zn:0.2, ir:0.3, mg:7, vd:0 },
+  { name:"Oregano (dried)", unit:"1 tbsp", keys:["oregano"], cal:8, pro:0.3, carb:2.1, fat:0.1, fib:1.3, se:0.1, io:0, zn:0.1, ir:1.1, mg:8, vd:0 },
+  { name:"Cinnamon (ground)", unit:"1 tbsp", keys:["cinnamon"], cal:19, pro:0.3, carb:6.3, fat:0.1, fib:4.1, se:0.2, io:0, zn:0.1, ir:0.6, mg:4, vd:0 },
+  { name:"Turmeric (ground)", unit:"1 tbsp", keys:["turmeric"], cal:29, pro:0.9, carb:6.3, fat:0.3, fib:2.1, se:0.5, io:0, zn:0.4, ir:5.0, mg:18, vd:0 },
+  { name:"Chili Powder", unit:"1 tbsp", keys:["chili powder","chilli powder"], cal:24, pro:0.9, carb:4.1, fat:1.2, fib:2.6, se:0.3, io:0, zn:0.2, ir:1.1, mg:12, vd:0 },
+  { name:"Cayenne Pepper", unit:"1 tbsp", keys:["cayenne"], cal:17, pro:0.6, carb:3.1, fat:0.9, fib:1.5, se:0.1, io:0, zn:0.1, ir:0.4, mg:8, vd:0 },
+  { name:"Curry Powder", unit:"1 tbsp", keys:["curry powder","curry"], cal:20, pro:0.8, carb:3.7, fat:0.9, fib:2.1, se:0.1, io:0, zn:0.3, ir:1.9, mg:16, vd:0 },
+  { name:"Coriander (ground)", unit:"1 tbsp", keys:["coriander","ground coriander"], cal:15, pro:0.6, carb:2.8, fat:0.9, fib:2.1, se:0.1, io:0, zn:0.2, ir:0.8, mg:16, vd:0 },
+  { name:"Ginger (ground)", unit:"1 tbsp", keys:["ground ginger","ginger powder"], cal:18, pro:0.5, carb:3.9, fat:0.2, fib:0.8, se:3.0, io:0, zn:0.2, ir:1.1, mg:11, vd:0 },
+  { name:"Basil (dried)", unit:"1 tbsp", keys:["dried basil","basil"], cal:10, pro:1.0, carb:2.4, fat:0.2, fib:1.6, se:0, io:0, zn:0.3, ir:2.5, mg:30, vd:0 },
+  { name:"Thyme (dried)", unit:"1 tbsp", keys:["thyme"], cal:8, pro:0.3, carb:1.9, fat:0.2, fib:1.0, se:0.1, io:0, zn:0.2, ir:3.3, mg:6, vd:0 },
+  { name:"Rosemary (dried)", unit:"1 tbsp", keys:["rosemary"], cal:11, pro:0.2, carb:2.1, fat:0.5, fib:1.4, se:0, io:0, zn:0.1, ir:1.1, mg:7, vd:0 },
+  { name:"Parsley (dried)", unit:"1 tbsp", keys:["dried parsley","parsley"], cal:4, pro:0.3, carb:0.7, fat:0.1, fib:0.4, se:0.1, io:0, zn:0.1, ir:1.2, mg:5, vd:0 },
+  { name:"Nutmeg (ground)", unit:"1 tbsp", keys:["nutmeg"], cal:37, pro:0.4, carb:3.5, fat:2.5, fib:1.5, se:0, io:0, zn:0.1, ir:0.2, mg:13, vd:0 },
+  { name:"Garam Masala", unit:"1 tbsp", keys:["garam masala"], cal:22, pro:0.9, carb:3.4, fat:0.9, fib:1.8, se:0.2, io:0, zn:0.3, ir:1.5, mg:15, vd:0 },
+  { name:"Bay Leaf (crumbled)", unit:"1 tbsp", keys:["bay leaf","bay leaves"], cal:6, pro:0.1, carb:1.4, fat:0.1, fib:0.5, se:0, io:0, zn:0.1, ir:0.8, mg:2, vd:0 },
+  { name:"Olive Oil", unit:"1 tbsp", keys:["olive oil","evoo"], cal:119, pro:0, carb:0, fat:13.5, fib:0, se:0, io:0, zn:0, ir:0.1, mg:0, vd:0 },
+  { name:"Vegetable Oil", unit:"1 tbsp", keys:["vegetable oil","canola oil","cooking oil"], cal:120, pro:0, carb:0, fat:13.6, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
+  { name:"Butter", unit:"1 tbsp", keys:["butter"], cal:102, pro:0.1, carb:0, fat:11.5, fib:0, se:0.2, io:0, zn:0, ir:0, mg:0.3, vd:9 },
+  { name:"Soy Sauce", unit:"1 tbsp", keys:["soy sauce","soya sauce"], cal:8, pro:1.3, carb:0.8, fat:0.1, fib:0.1, se:0.1, io:0, zn:0.1, ir:0.4, mg:5, vd:0 },
+  { name:"Honey", unit:"1 tbsp", keys:["honey"], cal:64, pro:0.1, carb:17.3, fat:0, fib:0, se:0.2, io:0, zn:0.1, ir:0.1, mg:0.4, vd:0 },
+  { name:"Tomato Paste", unit:"1 tbsp", keys:["tomato paste"], cal:13, pro:0.7, carb:3.1, fat:0.1, fib:0.7, se:0.1, io:0, zn:0.1, ir:0.5, mg:6, vd:0 },
+  { name:"Lemon Juice", unit:"1 tbsp", keys:["lemon juice"], cal:3, pro:0.1, carb:1.0, fat:0, fib:0.1, se:0, io:0, zn:0, ir:0, mg:1, vd:0 },
+];
+
 function estimateNutrients(q) {
-  // Find best matching food
   let best = null, bestScore = 0;
   for (const food of FOOD_DB) {
     for (const key of food.keys) {
@@ -2672,7 +2706,359 @@ function describeCorr(r) {
   return { strength, dir };
 }
 
-function Insights({ logs, labLog = [], weightLog = [], goals }) {
+function Pantry({ pantry = [], onAdd, onDelete }) {
+  const FIELDS = [
+    { f:"cal", label:"Calories", unit:"" }, { f:"pro", label:"Protein", unit:"g" }, { f:"carb", label:"Carbs", unit:"g" },
+    { f:"fat", label:"Fat", unit:"g" }, { f:"fib", label:"Fiber", unit:"g" }, { f:"se", label:"Selenium", unit:"mcg" },
+    { f:"io", label:"Iodine", unit:"mcg" }, { f:"zn", label:"Zinc", unit:"mg" }, { f:"ir", label:"Iron", unit:"mg" },
+    { f:"mg", label:"Magnesium", unit:"mg" }, { f:"vd", label:"Vitamin D", unit:"IU" },
+  ];
+  const SUMMARY = [
+    { f:"cal", label:"cal", unit:"" }, { f:"pro", label:"protein", unit:"g" }, { f:"carb", label:"carbs", unit:"g" },
+    { f:"fat", label:"fat", unit:"g" }, { f:"fib", label:"fiber", unit:"g" }, { f:"se", label:"Se", unit:"mcg" },
+    { f:"io", label:"iodine", unit:"mcg" }, { f:"zn", label:"zinc", unit:"mg" }, { f:"ir", label:"iron", unit:"mg" },
+    { f:"mg", label:"Mg", unit:"mg" }, { f:"vd", label:"Vit D", unit:"IU" },
+  ];
+  const blank = () => Object.fromEntries(FIELDS.map(x => [x.f, ""]));
+  const [name, setName] = useState("");
+  const [unit, setUnit] = useState("");
+  const [alt, setAlt] = useState("");
+  const [vals, setVals] = useState(blank());
+  const [flash, setFlash] = useState(false);
+
+  const setV = (f, v) => setVals(o => ({ ...o, [f]: v }));
+  const [notFound, setNotFound] = useState(false);
+  const SHORT = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
+  const autoFill = () => {
+    const q = name.trim().toLowerCase();
+    if (!q) return;
+    const refPool = [
+      ...SEASONINGS_REF,
+      ...FOOD_DB.map(fd => ({ name: fd.name, unit: "serving", keys: fd.keys || [], ...fd })),
+    ];
+    let best = null, bestScore = 0;
+    for (const it of refPool) {
+      for (const key of [it.name.toLowerCase(), ...(it.keys||[]).map(k=>k.toLowerCase())]) {
+        if (key && (q === key || q.includes(key) || key.includes(q)) && key.length > bestScore) { bestScore = key.length; best = it; }
+      }
+    }
+    if (!best) { setNotFound(true); setTimeout(() => setNotFound(false), 3000); return; }
+    setNotFound(false);
+    setName(best.name);
+    if (best.unit) setUnit(best.unit);
+    setVals(Object.fromEntries(SHORT.map(f => [f, best[f] != null ? String(best[f]) : "0"])));
+    if (best.keys && best.keys.length) setAlt(best.keys.filter(k => k !== best.name.toLowerCase()).join(", "));
+  };
+  const canAdd = name.trim() && unit.trim();
+  const add = () => {
+    if (!canAdd) { alert("Give the item a name and a serving unit (e.g. 1 tbsp)."); return; }
+    const nums = Object.fromEntries(FIELDS.map(x => [x.f, parseFloat(vals[x.f]) || 0]));
+    const keys = [name.toLowerCase().trim(), ...alt.split(",").map(k => k.trim().toLowerCase()).filter(Boolean)];
+    onAdd({ id: Date.now(), name: name.trim(), unit: unit.trim(), keys, ...nums });
+    setName(""); setUnit(""); setAlt(""); setVals(blank());
+    setFlash(true); setTimeout(() => setFlash(false), 2500);
+  };
+
+  return (
+    <div>
+      <p style={s.sectionTitle}>Pantry</p>
+      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:12 }}>
+        Staples and seasonings with their per-serving nutrients. These are searchable in the Recipe builder and recognized by the recipe text parser.
+      </p>
+
+      <div style={s.card}>
+        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>➕ Add pantry item</div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Name</label><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Cumin"/></div>
+          <div style={s.formGroup}><label style={s.label}>Serving unit</label><input style={s.input} value={unit} onChange={e=>setUnit(e.target.value)} placeholder="e.g. 1 tbsp, ¼ tsp, 1 cube"/></div>
+        </div>
+        <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10, flexWrap:"wrap" }}>
+          <button style={{...s.btnOutline, ...s.btnSm}} onClick={autoFill}>✨ Auto-fill from name</button>
+          <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>Fills values for known spices, oils & staples (editable after).</span>
+        </div>
+        {notFound && (
+          <div style={{ background:COLORS.amberPale, borderRadius:8, padding:"7px 11px", marginBottom:10, fontSize:"0.72rem", color:COLORS.amber }}>
+            ⚠️ "{name}" isn't in the reference list — enter its values by hand below.
+          </div>
+        )}
+        <div style={s.formGroup}><label style={s.label}>Also matches (optional, comma-separated)</label><input style={s.input} value={alt} onChange={e=>setAlt(e.target.value)} placeholder="e.g. ground cumin, jeera"/></div>
+        <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", margin:"6px 0 8px" }}>Nutrients per serving</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
+          {FIELDS.map(({f,label,unit:u}) => (
+            <div key={f}>
+              <label style={{ ...s.label, marginBottom:2 }}>{label}{u?` (${u})`:""}</label>
+              <input type="number" step="0.1" style={{...s.input, padding:"6px 8px"}} value={vals[f]} onChange={e=>setV(f, e.target.value)} placeholder="0"/>
+            </div>
+          ))}
+        </div>
+        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
+          <button style={{...s.btnPrimary, opacity: canAdd?1:0.5}} onClick={add} disabled={!canAdd}>Add to pantry</button>
+          {flash && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Added</span>}
+        </div>
+      </div>
+
+      <p style={{ ...s.sectionTitle, fontSize:"0.92rem", marginTop:18 }}>Your Pantry ({pantry.length})</p>
+      {pantry.length === 0 ? (
+        <div style={s.emptyState}>No pantry items yet.</div>
+      ) : (
+        pantry.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p => (
+          <div key={p.id} style={{ ...s.card, padding:"12px 14px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:"0.86rem", fontWeight:600, color:COLORS.ink }}>{p.name} <span style={{ fontSize:"0.7rem", color:COLORS.textSec, fontWeight:400 }}>· {p.unit}</span></div>
+                <div style={{ marginTop:6, display:"flex", flexWrap:"wrap", gap:5 }}>
+                  {SUMMARY.map(({f,label,unit:u}) => ((p[f]||0) > 0 ?
+                    <span key={f} style={s.chip}>{p[f]}{u} {label}</span> : null))}
+                </div>
+              </div>
+              <button style={{...s.btnDanger}} onClick={()=>onDelete(p.id)}>Delete</button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
+  const ALL_FIELDS = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
+  const SUMMARY = [
+    { f:"cal", label:"cal", unit:"" }, { f:"pro", label:"protein", unit:"g" }, { f:"carb", label:"carbs", unit:"g" },
+    { f:"fat", label:"fat", unit:"g" }, { f:"fib", label:"fiber", unit:"g" }, { f:"se", label:"Se", unit:"mcg" },
+    { f:"io", label:"iodine", unit:"mcg" }, { f:"zn", label:"zinc", unit:"mg" }, { f:"ir", label:"iron", unit:"mg" },
+    { f:"mg", label:"Mg", unit:"mg" }, { f:"vd", label:"Vit D", unit:"IU" },
+  ];
+  const UNIT_WORDS = { tbsp:"tbsp", tbs:"tbsp", tablespoon:"tbsp", tablespoons:"tbsp", tsp:"tsp", teaspoon:"tsp", teaspoons:"tsp", cup:"cup", cups:"cup", cube:"cube", cubes:"cube" };
+  const pick = (x) => Object.fromEntries(ALL_FIELDS.map(f => [f, x[f] || 0]));
+  const rawPool = [
+    ...(pantry||[]).map(p => ({ name: p.name, unit: p.unit || "serving", keys: (p.keys||[]).map(k=>k.toLowerCase()), food: pick(p) })),
+    ...FOOD_DB.map(fd => ({ name: fd.name, unit: "serving", keys: (fd.keys||[]).map(k=>k.toLowerCase()), food: pick(fd) })),
+    ...SEASONINGS_REF.map(sr => ({ name: sr.name, unit: sr.unit || "serving", keys: (sr.keys||[]).map(k=>k.toLowerCase()), food: pick(sr) })),
+  ];
+  const seen = new Set();
+  const searchPool = rawPool.filter(it => { const n = it.name.toLowerCase(); if (seen.has(n)) return false; seen.add(n); return true; });
+
+  const [name, setName] = useState("");
+  const [prep, setPrep] = useState("");
+  const [servings, setServings] = useState(1);
+  const [ingredients, setIngredients] = useState([]);
+  const [search, setSearch] = useState("");
+  const [text, setText] = useState("");
+  const [missed, setMissed] = useState([]);
+  const [logServings, setLogServings] = useState({});
+  const [flash, setFlash] = useState(null);
+
+  const matches = search.trim().length >= 2
+    ? searchPool.filter(it => it.name.toLowerCase().includes(search.toLowerCase()) || it.keys.some(k => k.includes(search.toLowerCase()))).slice(0, 6)
+    : [];
+
+  const addIngredient = (it) => {
+    setIngredients(list => [...list, { name: it.name, qty: 1, unit: it.unit, food: it.food }]);
+    setSearch("");
+  };
+  const setQty = (i, qty) => setIngredients(list => list.map((it, j) => j === i ? { ...it, qty } : it));
+  const removeIngredient = (i) => setIngredients(list => list.filter((_, j) => j !== i));
+
+  const matchFood = (phrase) => {
+    const q = phrase.toLowerCase();
+    let best = null, bestScore = 0;
+    for (const it of searchPool) {
+      for (const key of [it.name.toLowerCase(), ...it.keys]) {
+        if (key && q.includes(key) && key.length > bestScore) { bestScore = key.length; best = it; }
+      }
+    }
+    return best;
+  };
+
+  const parseText = () => {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return;
+    let ingLines;
+    if (/^\d/.test(lines[0])) {
+      ingLines = lines; // every line is an ingredient; keep whatever name is typed
+    } else {
+      setName(lines[0].replace(/^["']|["']$/g, "").trim());
+      ingLines = lines.slice(1);
+    }
+    const parsed = [], miss = [];
+    ingLines.forEach(line => {
+      const numM = line.match(/^(\d+(?:[.,]\d+)?)/);
+      const num = numM ? parseFloat(numM[1].replace(",", ".")) : 1;
+      const lower = line.toLowerCase();
+      let unit = null;
+      for (const w of Object.keys(UNIT_WORDS)) { if (new RegExp(`\\b${w}\\b`).test(lower)) { unit = UNIT_WORDS[w]; break; } }
+      const item = matchFood(line);
+      if (!item) { miss.push(line); return; }
+      let qty = num;
+      const iu = (item.unit || "").toLowerCase();
+      if (iu.includes("¼ tsp") || iu.includes("1/4 tsp")) {
+        if (unit === "tbsp") qty = num * 12; else if (unit === "tsp") qty = num * 4; else qty = num;
+      } else if (iu.includes("tbsp")) {
+        if (unit === "tsp") qty = Math.round((num / 3) * 100) / 100; else qty = num;
+      }
+      qty = Math.round(qty * 100) / 100;
+      parsed.push({ name: item.name, qty, unit: item.unit, food: item.food });
+    });
+    if (parsed.length) setIngredients(list => [...list, ...parsed]);
+    setMissed(miss);
+    setText("");
+  };
+
+  const total = ALL_FIELDS.reduce((acc, f) => {
+    acc[f] = Math.round(ingredients.reduce((s, it) => s + (it.food[f] || 0) * (parseFloat(it.qty) || 0), 0) * 10) / 10;
+    return acc;
+  }, {});
+  const sv = Math.max(1, parseFloat(servings) || 1);
+  const per = ALL_FIELDS.reduce((acc, f) => { acc[f] = Math.round((total[f] / sv) * 10) / 10; return acc; }, {});
+
+  const canSave = name.trim() && ingredients.length > 0;
+  const save = () => {
+    if (!canSave) { alert("Give the recipe a name and at least one ingredient."); return; }
+    onSave({ id: Date.now(), name: name.trim(), prep: prep.trim(), servings: sv, ingredients, total, per });
+    setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setMissed([]);
+    setFlash("saved"); setTimeout(() => setFlash(null), 2500);
+  };
+
+  const logRecipe = (r) => {
+    const n = Math.max(0.5, parseFloat(logServings[r.id]) || 1);
+    const m = (v) => Math.round((v || 0) * n * 10) / 10;
+    const nutrients = {
+      calories: Math.round((r.per.cal || 0) * n), protein: m(r.per.pro), carbs: m(r.per.carb), fat: m(r.per.fat),
+      fiber: m(r.per.fib), water: 0, selenium: m(r.per.se), iodine: m(r.per.io), zinc: m(r.per.zn),
+      iron: m(r.per.ir), magnesium: m(r.per.mg), vitd: m(r.per.vd),
+    };
+    onLog({ id: Date.now(), date: today(), type: "meal", mealType: "Dinner", time: nowTime(),
+      name: n === 1 ? r.name : `${r.name} (×${n})`, nutrients, notes: r.prep ? `Recipe: ${r.prep}` : "Logged from recipe" });
+    setFlash("logged:" + r.id); setTimeout(() => setFlash(null), 2500);
+  };
+
+  return (
+    <div>
+      <p style={s.sectionTitle}>Recipes</p>
+      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:12 }}>
+        Build a dish from your food database and pantry. Nutrients auto-scale per serving, and saved recipes become loggable foods that also feed your Score Boost recommendations.
+      </p>
+
+      {/* Free-text quick add */}
+      <div style={s.aiBox}>
+        <div style={s.aiBadge}>✍️ Quick add from text</div>
+        <p style={{ fontSize:"0.72rem", color:COLORS.textSec, marginBottom:8 }}>
+          First line = recipe name, then one ingredient per line (e.g. <em>1 cup of lentils</em>). I'll match each to your food DB / pantry and fill in the builder below for you to review.
+        </p>
+        <textarea style={{ ...s.textarea, borderColor:COLORS.tealLight, minHeight:96 }} value={text} onChange={e=>setText(e.target.value)}
+          placeholder={"Lentil soup\n1 cup of lentils\n2 vegetable broth cubes\n1 tbsp of iodized salt\n1 tbsp of paprika\n1 tbsp of ground black pepper"}/>
+        <div style={{ display:"flex", gap:10, marginTop:8, alignItems:"center" }}>
+          <button style={s.btnPrimary} onClick={parseText}>Parse ingredients</button>
+          <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>Review & edit quantities below before saving.</span>
+        </div>
+        {missed.length > 0 && (
+          <div style={{ marginTop:10, background:COLORS.amberPale, borderRadius:8, padding:"8px 11px" }}>
+            <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.amber, marginBottom:3 }}>⚠️ Couldn't match {missed.length} line{missed.length!==1?"s":""}</div>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{missed.join("; ")}</div>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:3 }}>Add them in the Pantry tab (or search below), then parse again.</div>
+          </div>
+        )}
+      </div>
+
+      {/* Builder */}
+      <div style={s.card}>
+        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>🍳 Recipe builder</div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Recipe name</label><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Lentil soup"/></div>
+          <div style={s.formGroup}>
+            <label style={s.label}>Makes (servings)</label>
+            <input type="number" min="1" step="1" style={s.input} value={servings} onChange={e=>setServings(e.target.value)}/>
+          </div>
+        </div>
+        <div style={s.formGroup}>
+          <label style={s.label}>Prep-method notes (optional)</label>
+          <input style={s.input} value={prep} onChange={e=>setPrep(e.target.value)} placeholder="e.g. slow-cooked, no added salt"/>
+        </div>
+
+        {/* Ingredient search */}
+        <div style={s.formGroup}>
+          <label style={s.label}>Add ingredient (food database + pantry)</label>
+          <input style={{...s.input, borderColor:COLORS.tealLight}} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search foods… e.g. lentils, paprika"/>
+          {matches.length > 0 && (
+            <div style={{ border:`1px solid ${COLORS.divider}`, borderRadius:8, marginTop:6, overflow:"hidden" }}>
+              {matches.map((it, i) => (
+                <div key={i} onClick={()=>addIngredient(it)} style={{ padding:"8px 11px", fontSize:"0.8rem", color:COLORS.ink, cursor:"pointer", borderTop: i>0?`1px solid ${COLORS.divider}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center", background:COLORS.white }}>
+                  <span>{it.name} <span style={{ fontSize:"0.68rem", color:COLORS.textSec }}>· {it.unit}</span></span>
+                  <span style={{ fontSize:"0.7rem", color:COLORS.tealMid, fontWeight:600 }}>+ add</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Ingredient list */}
+        {ingredients.length > 0 && (
+          <div style={{ marginTop:4 }}>
+            {ingredients.map((it, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 0", borderTop: i>0?`1px solid ${COLORS.divider}`:"none" }}>
+                <span style={{ flex:1, fontSize:"0.8rem", color:COLORS.ink }}>{it.name}</span>
+                <input type="number" min="0.5" step="0.5" value={it.qty} onChange={e=>setQty(i, e.target.value)}
+                  style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
+                <span style={{ fontSize:"0.68rem", color:COLORS.textSec, width:58 }}>× {it.unit || "serving"}</span>
+                <button style={{...s.btnDanger, padding:"4px 9px"}} onClick={()=>removeIngredient(i)}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Live totals */}
+        {ingredients.length > 0 && (
+          <div style={{ marginTop:12, background:COLORS.tealPale, borderRadius:8, padding:"10px 12px" }}>
+            <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.tealDeep, marginBottom:6 }}>Per serving (of {sv})</div>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+              {SUMMARY.map(({f,label,unit}) => (per[f] > 0 ?
+                <span key={f} style={s.chip}>{per[f]}{unit} {label}</span> : null))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
+          <button style={{...s.btnPrimary, opacity: canSave?1:0.5}} onClick={save} disabled={!canSave}>Save recipe</button>
+          {flash === "saved" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe saved</span>}
+        </div>
+      </div>
+
+      {/* Saved recipes */}
+      <p style={{ ...s.sectionTitle, fontSize:"0.92rem", marginTop:18 }}>Your Recipes</p>
+      {recipes.length === 0 ? (
+        <div style={s.emptyState}>No recipes yet. Build one above to reuse it as a single loggable food.</div>
+      ) : (
+        recipes.slice().sort((a,b)=>b.id-a.id).map(r => (
+          <div key={r.id} style={s.card}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:"0.9rem", fontWeight:600, color:COLORS.ink }}>{r.name}</div>
+                <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:2 }}>Makes {r.servings} · {r.ingredients.length} ingredient{r.ingredients.length!==1?"s":""}{r.prep ? ` · ${r.prep}` : ""}</div>
+              </div>
+              <button style={{...s.btnDanger}} onClick={()=>onDelete(r.id)}>Delete</button>
+            </div>
+            <div style={{ fontSize:"0.68rem", color:COLORS.textSec, marginTop:6 }}>{r.ingredients.map(it => `${it.name}${it.qty!==1?` ×${it.qty}`:""}`).join(", ")}</div>
+            <div style={{ marginTop:8, display:"flex", flexWrap:"wrap", gap:5 }}>
+              {SUMMARY.map(({f,label,unit}) => (r.per[f] > 0 ?
+                <span key={f} style={s.chip}>{r.per[f]}{unit} {label}</span> : null))}
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, flexWrap:"wrap" }}>
+              <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>Log</span>
+              <input type="number" min="0.5" step="0.5" value={logServings[r.id] ?? 1}
+                onChange={e=>setLogServings(m=>({...m, [r.id]: e.target.value}))}
+                style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
+              <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>serving(s) today</span>
+              <button style={{...s.btnOutline, ...s.btnSm}} onClick={()=>logRecipe(r)}>Log meal</button>
+              {flash === "logged:"+r.id && <span style={{ fontSize:"0.74rem", color:COLORS.sage, fontWeight:600 }}>✓ Logged</span>}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
   const GOALS = goals || DEFAULT_GOALS;
   const [section, setSection] = useState("overview");
   const [range, setRange] = useState(14);
@@ -2864,12 +3250,23 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
 
    const gapKeys = ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].filter(k => (GOALS[k] || 0) - (todayTotals[k] || 0) > 0);
   const gapSummary = gapKeys.map(k => ({
+    key: k,
     label: NUTRIENT_LABEL[k],
     remaining: Math.round(((GOALS[k] || 0) - (todayTotals[k] || 0)) * 10) / 10,
+    goal: GOALS[k] || 0,
     unit: UNIT_FOR[k],
   }));
+  // Variety factor (#5): foods eaten in the last 3 days get a small ranking penalty
+  const varietyCutoff = new Date(); varietyCutoff.setDate(varietyCutoff.getDate() - 3);
+  const recentNames = logs
+    .filter(l => l.type === "meal" && l.name && new Date(l.date) >= varietyCutoff)
+    .map(l => l.name.toLowerCase());
+  const VARIETY_PENALTY = 1.5;
+  // Recipes act as loggable foods and feed the recommendation engine (#6)
+  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, ...(r.per || {}) }));
+  const CANDIDATE_FOODS = [...FOOD_DB, ...recipeFoods];
   const foodBoosts = [];
-  FOOD_DB.forEach(food => {
+  CANDIDATE_FOODS.forEach(food => {
     const simulated = { ...todayTotals };
     const helps = [];
     let overCeiling = false;
@@ -2880,14 +3277,28 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
       const ceiling = CEILING_FOR[k] ?? Infinity;
       if (newVal > ceiling) overCeiling = true;
       simulated[k] = newVal;
-      if (gapKeys.includes(k)) helps.push(NUTRIENT_LABEL[k]);
+      if (gapKeys.includes(k)) helps.push({ key: k, label: NUTRIENT_LABEL[k], amount: Math.round(contribution * 10) / 10, unit: UNIT_FOR[k], pct: Math.min(100, Math.round((contribution / (GOALS[k] || 1)) * 100)) });
     });
     if (overCeiling || helps.length === 0) return;
     const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
-    if (ptsRaw > 0.5) foodBoosts.push({ name: food.name, points: Math.round(ptsRaw), helps, ptsRaw });
+    if (ptsRaw <= 0.5) return;
+    const nm = food.name.toLowerCase();
+    const recent = recentNames.some(n => n.includes(nm) || nm.includes(n));
+    const adjRaw = ptsRaw - (recent ? VARIETY_PENALTY : 0);
+    foodBoosts.push({
+      name: food.name, points: Math.round(ptsRaw), helps, ptsRaw, adjRaw, recent,
+      isRecipe: !!food.isRecipe,
+      projected: Math.round(baselineRaw + ptsRaw),
+      coverage: gapKeys.length ? helps.length / gapKeys.length : 0,
+    });
   });
-  foodBoosts.sort((a, b) => b.ptsRaw - a.ptsRaw);
-  const topFoodBoosts = foodBoosts.slice(0, 5);
+  // Rank by variety-adjusted boost so recently eaten foods yield to fresh options with similar impact (#5)
+  foodBoosts.sort((a, b) => b.adjRaw - a.adjRaw);
+  const topFoodBoosts = foodBoosts.slice(0, 5).map((f, i) => ({
+    ...f,
+    bestMatch: i === 0,
+    confidence: f.coverage >= 0.6 ? "High" : f.coverage >= 0.35 ? "Medium" : "Fair",
+  }));
 
 
 
@@ -3291,26 +3702,58 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
             <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
-            {gapSummary.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-                {gapSummary.map((g, i) => (
-                  <span key={i} style={{ background: COLORS.tealPale, color: COLORS.tealDeep, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
-                    {g.label}: {g.remaining}{g.unit} left
-                  </span>
-                ))}
-              </div>
-            )}
+            {gapSummary.length > 0 && (() => {
+              const maxRem = Math.max(...gapSummary.map(g => g.remaining), 1);
+              const chipColor = (r) => {
+                const n = r / maxRem;
+                if (n >= 0.66) return { bg: COLORS.coralPale, fg: COLORS.coral };
+                if (n >= 0.33) return { bg: COLORS.amberPale, fg: COLORS.amber };
+                return { bg: COLORS.sagePale, fg: COLORS.tealDeep };
+              };
+              return (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                  {gapSummary.map((g, i) => {
+                    const c = chipColor(g.remaining);
+                    return (
+                      <span key={i} style={{ background: c.bg, color: c.fg, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
+                        {g.label}: {g.remaining}{g.unit} left
+                      </span>
+                    );
+                  })}
+                </div>
+              );
+            })()}
             {topFoodBoosts.length === 0 ? (
               <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on trackable nutrients today — nice work!</p>
             ) : (
               topFoodBoosts.map((f, i) => (
-                <div key={i} style={{ padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div key={i} style={{ padding: "10px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</div>
-                      <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 2 }}>Boosts {f.helps.join(", ")}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
+                        {f.bestMatch && <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", background: COLORS.tealMid, color: "white", borderRadius: 4, padding: "1px 6px" }}>Best match</span>}
+                        {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px" }}>🍳 Recipe</span>}
+                      </div>
+                      <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>
+                        {f.confidence} match · covers {f.helps.length} of {gapSummary.length} gap{gapSummary.length !== 1 ? "s" : ""}{f.recent ? " · eaten recently" : ""}
+                      </div>
                     </div>
-                    <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{f.points} pt{f.points !== 1 ? "s" : ""}</span>
+                    <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid }}>+{f.points} pt{f.points !== 1 ? "s" : ""}</div>
+                      <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 1 }}>{baselineScore} → {f.projected}</div>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {f.helps.map((h, j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: "0.64rem", color: COLORS.textSec, width: 92, flexShrink: 0 }}>{h.label} +{h.amount}{h.unit}</span>
+                        <div style={{ flex: 1, height: 6, background: COLORS.divider, borderRadius: 3, overflow: "hidden" }}>
+                          <div style={{ width: `${h.pct}%`, height: "100%", background: COLORS.tealMid, borderRadius: 3 }} />
+                        </div>
+                        <span style={{ fontSize: "0.62rem", color: COLORS.tealMid, fontWeight: 600, width: 34, textAlign: "right", flexShrink: 0 }}>{h.pct}%</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))
@@ -3356,6 +3799,7 @@ export default function App() {
     useEffect(() => {
     loadFromStorage().then(saved => {
       const cleaned = { ...saved, logs: dedupeSymptoms(saved.logs || []) };
+      if (!cleaned.pantry || cleaned.pantry.length === 0) cleaned.pantry = DEFAULT_PANTRY.map(p=>({...p}));
       setData(cleaned);
       setLoaded(true);
     });
@@ -3384,12 +3828,16 @@ export default function App() {
   const deleteWellness = useCallback(id => setData(d=>({...d, wellnessLog:(d.wellnessLog||[]).filter(e=>e.id!==id)})), []);
   const addLab        = useCallback(entry => setData(d=>({...d, labLog:[...(d.labLog||[]), entry]})), []);
   const deleteLab     = useCallback(id => setData(d=>({...d, labLog:(d.labLog||[]).filter(e=>e.id!==id)})), []);
+  const addRecipe     = useCallback(entry => setData(d=>({...d, recipes:[...(d.recipes||[]), entry]})), []);
+  const deleteRecipe  = useCallback(id => setData(d=>({...d, recipes:(d.recipes||[]).filter(r=>r.id!==id)})), []);
+  const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
+  const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
   const deleteWeight = useCallback(id => setData(d=>({...d, weightLog:(d.weightLog||[]).filter(e=>e.id!==id)})), []);
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
   const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
 
-  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
-  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
+  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
+  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
 
   if (!loaded) return (
     <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:COLORS.mist, flexDirection:"column", gap:12 }}>
@@ -3421,11 +3869,13 @@ export default function App() {
      {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
+        {tab==="recipes"    && <Recipes recipes={data.recipes||[]} pantry={data.pantry||[]} onSave={addRecipe} onDelete={deleteRecipe} onLog={addLog}/>}
+        {tab==="pantry"     && <Pantry pantry={data.pantry||[]} onAdd={addPantry} onDelete={deletePantry}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
         {tab==="labs"       && <LabResults labLog={data.labLog||[]} onSave={addLab} onDelete={deleteLab}/>}
         {tab==="weekly"     && <WeeklyDashboard logs={data.logs}/>}
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
-        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals}/>}
+        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
         {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
