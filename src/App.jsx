@@ -2820,6 +2820,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
   const SCORE_KEYS = ["selenium", "iodine", "zinc", "iron", "vitd"];
   const NUTRIENT_FOR_FIELD = { se: "selenium", io: "iodine", zn: "zinc", ir: "iron", mg: "magnesium", vd: "vitd", pro: "protein", fib: "fiber" };
   const NUTRIENT_LABEL = { selenium: "Selenium", iodine: "Iodine", zinc: "Zinc", iron: "Iron", vitd: "Vitamin D", protein: "Protein", fiber: "Fiber", magnesium: "Magnesium" };
+   const UNIT_FOR = { selenium: "mcg", iodine: "mcg", zinc: "mg", iron: "mg", vitd: "IU", protein: "g", fiber: "g", magnesium: "mg" };
   const CEILING_FOR = {
     selenium: SELENIUM_RANGES[2].max, iodine: IODINE_RANGES[2].max,
     vitd: VITD_RANGES[2].max, protein: PROTEIN_RANGES[2].max,
@@ -2856,7 +2857,12 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
     { icon: "😴", action: "Go to bed before 11pm", note: "Consistent sleep supports thyroid hormone regulation (not yet part of your score)" },
   ];
 
-  const gapKeys = ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].filter(k => (GOALS[k] || 0) - (todayTotals[k] || 0) > 0);
+   const gapKeys = ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].filter(k => (GOALS[k] || 0) - (todayTotals[k] || 0) > 0);
+  const gapSummary = gapKeys.map(k => ({
+    label: NUTRIENT_LABEL[k],
+    remaining: Math.round(((GOALS[k] || 0) - (todayTotals[k] || 0)) * 10) / 10,
+    unit: UNIT_FOR[k],
+  }));
   const foodBoosts = [];
   FOOD_DB.forEach(food => {
     const simulated = { ...todayTotals };
@@ -3275,11 +3281,20 @@ function Insights({ logs, labLog = [], weightLog = [], goals }) {
         </div>
       )}
       
-      {section === "score" && (
+           {section === "score" && (
               <div>
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
-            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 12 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
+            {gapSummary.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                {gapSummary.map((g, i) => (
+                  <span key={i} style={{ background: COLORS.tealPale, color: COLORS.tealDeep, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
+                    {g.label}: {g.remaining}{g.unit} left
+                  </span>
+                ))}
+              </div>
+            )}
             {topFoodBoosts.length === 0 ? (
               <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on trackable nutrients today — nice work!</p>
             ) : (
