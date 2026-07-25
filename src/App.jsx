@@ -3191,6 +3191,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
   // ── Shared all-time lookups ──
   const mealDateSet = new Set(logs.filter(l => l.type === "meal").map(l => l.date));
   const medDateSet = new Set(logs.filter(l => l.type === "med").map(l => l.date));
+  const vitDateSet = new Set(logs.filter(l => l.type === "vit").map(l => l.date));
   const symptomMap = {};
   logs.filter(l => l.type === "symptom").forEach(l => { symptomMap[l.date] = l; });
 
@@ -3254,6 +3255,8 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
   const improveAreas = weekCompare.filter(w => w.thisPct < 0.5 || w.delta <= -0.1);
   const medPctFor = dates => dates.filter(dt => medDateSet.has(dt)).length / dates.length;
   const medThisWk = medPctFor(thisWeekDates), medLastWk = medPctFor(lastWeekDates);
+  const vitPctFor = dates => dates.filter(dt => vitDateSet.has(dt)).length / dates.length;
+  const vitThisWk = vitPctFor(thisWeekDates), vitLastWk = vitPctFor(lastWeekDates);
   const energyAvgFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.energy).filter(Boolean); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const sympCountFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.symptoms?.length).filter(v => v != null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const energyThisWk = energyAvgFor(thisWeekDates), energyLastWk = energyAvgFor(lastWeekDates);
@@ -3672,7 +3675,10 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
             ))}
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}`, fontSize: "0.74rem", color: COLORS.textSec }}>
-              <span>💊 {Math.round(medThisWk * 100)}% adherence <span style={{ opacity: 0.7 }}>(was {Math.round(medLastWk * 100)}%)</span></span>
+              <span>💊 {Math.round(medThisWk * 100)}% meds <span style={{ opacity: 0.7 }}>(was {Math.round(medLastWk * 100)}%)</span></span>
+              <span>🌿 {Math.round(vitThisWk * 100)}% vitamins <span style={{ opacity: 0.7 }}>(was {Math.round(vitLastWk * 100)}%)</span></span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 6, fontSize: "0.74rem", color: COLORS.textSec }}>
               <span>⚡ {fmt2(energyThisWk)} energy <span style={{ opacity: 0.7 }}>(was {fmt2(energyLastWk)})</span></span>
             </div>
           </div>
