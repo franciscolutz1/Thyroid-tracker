@@ -3162,6 +3162,20 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
   let streak = 0;
   for (let i = medDays.length - 1; i >= 0; i--) { if (medDays[i].taken) streak++; else break; }
 
+  // True trailing 7-day adherence, tracked separately for meds vs vitamins (independent of the range slider)
+  const week7 = windowDates(0, 7).map(dateStr => {
+    const d = new Date(dateStr + "T12:00:00");
+    return { dateStr, label: d.toLocaleDateString("en-US", { weekday: "narrow" }) };
+  });
+  const adhFor = (t) => {
+    const rows = week7.map(d => ({ ...d, taken: logs.some(l => l.type === t && l.date === d.dateStr) }));
+    const pct = Math.round((rows.filter(r => r.taken).length / rows.length) * 100);
+    let stk = 0; for (let i = rows.length - 1; i >= 0; i--) { if (rows[i].taken) stk++; else break; }
+    return { rows, pct, streak: stk };
+  };
+  const medWeek = adhFor("med");
+  const vitWeek = adhFor("vit");
+
   const symptomLogs = logs.filter(l => l.type === "symptom" && days.some(d => d.dateStr === l.date));
   const freq = {};
   symptomLogs.forEach(l => (l.symptoms || []).forEach(sym => { freq[sym] = (freq[sym] || 0) + 1; }));
@@ -3522,16 +3536,21 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [] }) {
           </div>
 
           <div style={s.card}>
-            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>💊 Medication Adherence</span>
-            <div style={{ display: "flex", gap: 4, marginTop: 10, marginBottom: 8 }}>
-              {medDays.map((d, i) => (
-                <div key={i} title={d.dateStr} style={{ flex: 1, height: 28, borderRadius: 5, background: d.taken ? COLORS.sage : COLORS.coralPale }} />
-              ))}
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.76rem", color: COLORS.textSec }}>
-              <span>{adherencePct}% of days logged</span>
-              <span>🔥 {streak} day streak</span>
-            </div>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>Adherence · last 7 days</span>
+            {[{ label: "💊 Medications", w: medWeek }, { label: "🌿 Vitamins & supplements", w: vitWeek }].map((row, ri) => (
+              <div key={ri} style={{ marginTop: ri === 0 ? 12 : 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>
+                  <span>{row.label}</span>
+                  <span style={{ color: COLORS.tealMid }}>{row.w.pct}%</span>
+                </div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {row.w.rows.map((d, i) => (
+                    <div key={i} title={d.dateStr} style={{ flex: 1, height: 26, borderRadius: 5, background: d.taken ? COLORS.sage : COLORS.coralPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: d.taken ? "white" : COLORS.textSec, fontWeight: 700 }}>{d.label}</div>
+                  ))}
+                </div>
+                <div style={{ fontSize: "0.72rem", color: COLORS.textSec, marginTop: 5 }}>🔥 {row.w.streak} day streak</div>
+              </div>
+            ))}
           </div>
 
           <div style={s.card}>
