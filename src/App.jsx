@@ -1585,6 +1585,39 @@ function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) 
         </div>
       )}
 
+           {/* Height (for BMI) + rolling averages */}
+      <div style={{ display:"flex", gap:10, marginBottom:14, flexWrap:"wrap" }}>
+        <div style={{ ...s.card, flex:1, minWidth:150, marginBottom:0 }}>
+          <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:6 }}>Height (for BMI)</div>
+          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <input type="number" min="0" style={{...s.input, width:56, textAlign:"center", padding:"6px"}} value={ft} onChange={e=>{ setFt(e.target.value); persistHeight(e.target.value, inch); }} placeholder="ft"/>
+            <span style={{ fontSize:"0.8rem", color:COLORS.textSec }}>ft</span>
+            <input type="number" min="0" max="11" style={{...s.input, width:56, textAlign:"center", padding:"6px"}} value={inch} onChange={e=>{ setInch(e.target.value); persistHeight(ft, e.target.value); }} placeholder="in"/>
+            <span style={{ fontSize:"0.8rem", color:COLORS.textSec }}>in</span>
+          </div>
+        </div>
+      </div>
+
+      {(avg7 !== null || avg30 !== null || bmi !== null) && (
+        <div style={{ display:"flex", gap:10, marginBottom:14, flexWrap:"wrap" }}>
+          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
+            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>7-Day Avg</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:COLORS.tealDeep }}>{avg7 ?? "—"}</div>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{avg7 !== null ? unit : "no data"}</div>
+          </div>
+          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
+            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>30-Day Avg</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:COLORS.tealDeep }}>{avg30 ?? "—"}</div>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{avg30 !== null ? unit : "no data"}</div>
+          </div>
+          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
+            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>BMI</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:bmiColor }}>{bmi ?? "—"}</div>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{bmi !== null ? bmiCat : "add height"}</div>
+          </div>
+        </div>
+      )}
+
       {/* Chart */}
       {chartWeights.length > 1 && (
         <div style={s.card}>
