@@ -3985,8 +3985,9 @@ export default function App() {
   const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
   const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
   const deleteWeight = useCallback(id => setData(d=>({...d, weightLog:(d.weightLog||[]).filter(e=>e.id!==id)})), []);
+    const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
-  const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
+  const savePersonalGoals = useCallback(pg => setData(d=>({...d, personalGoals:pg})), []);
 
   const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","foods","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
   const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Foods","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
