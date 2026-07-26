@@ -2899,8 +2899,9 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   const [search, setSearch] = useState("");
   const [text, setText] = useState("");
   const [missed, setMissed] = useState([]);
-  const [logServings, setLogServings] = useState({});
+    const [logServings, setLogServings] = useState({});
   const [flash, setFlash] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   const matches = search.trim().length >= 2
     ? searchPool.filter(it => it.name.toLowerCase().includes(search.toLowerCase()) || it.keys.some(k => k.includes(search.toLowerCase()))).slice(0, 6)
@@ -3911,7 +3912,7 @@ export default function App() {
   const deleteWellness = useCallback(id => setData(d=>({...d, wellnessLog:(d.wellnessLog||[]).filter(e=>e.id!==id)})), []);
   const addLab        = useCallback(entry => setData(d=>({...d, labLog:[...(d.labLog||[]), entry]})), []);
   const deleteLab     = useCallback(id => setData(d=>({...d, labLog:(d.labLog||[]).filter(e=>e.id!==id)})), []);
-  const addRecipe     = useCallback(entry => setData(d=>({...d, recipes:[...(d.recipes||[]), entry]})), []);
+  const addRecipe     = useCallback(entry => setData(d=>{ const list=(d.recipes||[]); return {...d, recipes: list.some(r=>r.id===entry.id) ? list.map(r=>r.id===entry.id?entry:r) : [...list, entry]}; }), []);
   const deleteRecipe  = useCallback(id => setData(d=>({...d, recipes:(d.recipes||[]).filter(r=>r.id!==id)})), []);
   const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
   const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
