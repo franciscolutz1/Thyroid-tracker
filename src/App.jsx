@@ -1230,7 +1230,8 @@ function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals 
 
   return (
     <div>
-      <p style={s.sectionTitle}>My Nutrient Goals</p>
+          <p style={s.sectionTitle}>Evidence-Based Goals</p>
+      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:10 }}>Grounded in RDA and standard nutrition guidelines. Vitamin D reflects your prescribed target.</p>
       <div style={s.card}>
         {[["calories","Calories / day"],["protein","Protein (g)"],["carbs","Carbs (g)"],["fat","Fat (g)"],["fiber","Fiber (g)"],["water","Water (cups)"]].reduce((rows,item,i,arr)=>{
           if(i%2===0) rows.push([item, arr[i+1]]);
