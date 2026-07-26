@@ -1254,6 +1254,54 @@ function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals 
         <button style={s.btnPrimary} onClick={()=>onSaveGoals(Object.fromEntries(Object.entries(form).map(([k,v])=>[k,parseFloat(v)||DEFAULT_GOALS[k]])))}>Save Goals</button>
       </div>
 
+      <p style={s.sectionTitle}>Personal Goals</p>
+      <div style={s.card}>
+        <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginBottom:10 }}>Your own goals — check-off items or targets with a progress bar.</p>
+        <div style={s.formGroup}><label style={s.label}>Goal</label>
+          <input style={s.input} value={pgText} onChange={e=>setPgText(e.target.value)} placeholder="e.g. Walk 20 minutes / Lose 5 lbs / 100 oz water"/>
+        </div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Type</label>
+            <select style={s.select} value={pgType} onChange={e=>setPgType(e.target.value)}>
+              <option value="check">Check off when done</option>
+              <option value="target">Target with progress</option>
+            </select>
+          </div>
+          {pgType==="target" && <div style={s.formGroup}><label style={s.label}>Target</label><input type="number" style={s.input} value={pgTarget} onChange={e=>setPgTarget(e.target.value)} placeholder="e.g. 100"/></div>}
+          {pgType==="target" && <div style={s.formGroup}><label style={s.label}>Unit</label><input style={s.input} value={pgUnit} onChange={e=>setPgUnit(e.target.value)} placeholder="oz, lbs, hrs…"/></div>}
+        </div>
+        <button style={{...s.btnPrimary,...s.btnSm}} onClick={addPersonalGoal}>Add Goal</button>
+        <div style={{ marginTop:14 }}>
+          {(personalGoals||[]).length === 0 ? (
+            <div style={{ fontSize:"0.78rem", color:COLORS.textSec }}>No personal goals yet.</div>
+          ) : (personalGoals||[]).map(g => (
+            <div key={g.id} style={{ padding:"10px 0", borderBottom:`1px solid ${COLORS.divider}` }}>
+              {g.type==="target" ? (
+                <div>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, marginBottom:6 }}>
+                    <span style={{ fontSize:"0.84rem", fontWeight:500 }}>{g.text}</span>
+                    <button style={s.btnDanger} onClick={()=>removePersonalGoal(g.id)}>Remove</button>
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                    <input type="number" style={{...s.input, width:76, padding:"5px 8px"}} value={g.current} onChange={e=>updatePersonalGoal(g.id,{current:parseFloat(e.target.value)||0})}/>
+                    <span style={{ fontSize:"0.76rem", color:COLORS.textSec }}>/ {g.target} {g.unit}</span>
+                  </div>
+                  <div style={{ height:6, background:COLORS.mist, borderRadius:3, overflow:"hidden" }}>
+                    <div style={{ height:"100%", width:`${Math.min(100, g.target>0 ? (g.current/g.target)*100 : 0)}%`, background:COLORS.tealMid, borderRadius:3, transition:"width 0.4s" }} />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <input type="checkbox" checked={!!g.done} onChange={e=>updatePersonalGoal(g.id,{done:e.target.checked})} style={{ width:18, height:18, flexShrink:0 }}/>
+                  <span style={{ flex:1, fontSize:"0.84rem", textDecoration: g.done?"line-through":"none", color: g.done?COLORS.textSec:COLORS.ink }}>{g.text}</span>
+                  <button style={s.btnDanger} onClick={()=>removePersonalGoal(g.id)}>Remove</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <p style={s.sectionTitle}>My Medications & Vitamins</p>
       <div style={s.card}>
         <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginBottom:10 }}>Add your regular meds/vitamins as quick-add chips.</p>
