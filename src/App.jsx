@@ -3085,8 +3085,10 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
         )}
 
         <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
-          <button style={{...s.btnPrimary, opacity: canSave?1:0.5}} onClick={save} disabled={!canSave}>Save recipe</button>
+                    <button style={{...s.btnPrimary, opacity: canSave?1:0.5}} onClick={save} disabled={!canSave}>{editingId ? "Update recipe" : "Save recipe"}</button>
+          {editingId && <button style={{...s.btnOutline}} onClick={cancelEdit}>Cancel edit</button>}
           {flash === "saved" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe saved</span>}
+          {flash === "updated" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe updated</span>}
         </div>
       </div>
 
