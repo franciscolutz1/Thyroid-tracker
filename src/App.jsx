@@ -3976,7 +3976,7 @@ export default function App() {
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
         {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
-        {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight}/>}
+              {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight} heightIn={data.heightIn||""} onSaveHeight={saveHeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
         {tab==="settings"   && <Settings goals={data.goals} presets={data.presets} onSaveGoals={saveGoals} onUpdatePresets={updatePresets}/>}
       </main>
