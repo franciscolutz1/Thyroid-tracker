@@ -3104,7 +3104,10 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
                 <div style={{ fontSize:"0.9rem", fontWeight:600, color:COLORS.ink }}>{r.name}</div>
                 <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:2 }}>Makes {r.servings} · {r.ingredients.length} ingredient{r.ingredients.length!==1?"s":""}{r.prep ? ` · ${r.prep}` : ""}</div>
               </div>
-              <button style={{...s.btnDanger}} onClick={()=>onDelete(r.id)}>Delete</button>
+              <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                <button style={{...s.btnOutline, ...s.btnSm}} onClick={()=>startEdit(r)}>Edit</button>
+                <button style={{...s.btnDanger}} onClick={()=>onDelete(r.id)}>Delete</button>
+              </div>
             </div>
             <div style={{ fontSize:"0.68rem", color:COLORS.textSec, marginTop:6 }}>{r.ingredients.map(it => `${it.name}${it.qty!==1?` ×${it.qty}`:""}`).join(", ")}</div>
             <div style={{ marginTop:8, display:"flex", flexWrap:"wrap", gap:5 }}>
