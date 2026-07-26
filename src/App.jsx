@@ -1505,7 +1505,25 @@ function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) 
 
   const latest = sorted[0];
   const prev   = sorted[1];
-  const diff   = latest && prev ? (toDisplay(latest.weight, latest.unit) - toDisplay(prev.weight, prev.unit)) : null;
+    const diff   = latest && prev ? (toDisplay(latest.weight, latest.unit) - toDisplay(prev.weight, prev.unit)) : null;
+
+  // Rolling averages (in the current display unit)
+  const daysAgoStr = (n) => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); };
+  const avgSince = (n) => {
+    const cutoff = daysAgoStr(n);
+    const vals = weightLog.filter(e => e.date >= cutoff).map(e => toDisplay(e.weight, e.unit));
+    return vals.length ? Math.round((vals.reduce((s,v)=>s+v,0)/vals.length)*10)/10 : null;
+  };
+  const avg7  = avgSince(7);
+  const avg30 = avgSince(30);
+
+  // BMI from latest weight + entered height
+  const heightInches = (parseFloat(ft)||0)*12 + (parseFloat(inch)||0);
+  const latestKg = latest ? (latest.unit === "kg" ? latest.weight : latest.weight*0.453592) : null;
+  const heightM = heightInches*0.0254;
+  const bmi = (latestKg && heightM) ? Math.round((latestKg/(heightM*heightM))*10)/10 : null;
+  const bmiCat = bmi === null ? "" : bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese";
+  const bmiColor = bmi === null ? COLORS.ink : (bmi < 18.5 || bmi >= 30) ? COLORS.coral : (bmi >= 25 ? COLORS.amber : COLORS.sage);
 
   return (
     <div>
