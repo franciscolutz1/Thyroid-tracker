@@ -2967,11 +2967,19 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   const per = ALL_FIELDS.reduce((acc, f) => { acc[f] = Math.round((total[f] / sv) * 10) / 10; return acc; }, {});
 
   const canSave = name.trim() && ingredients.length > 0;
+    const startEdit = (r) => {
+    setEditingId(r.id); setName(r.name); setPrep(r.prep || ""); setServings(r.servings || 1);
+    setIngredients((r.ingredients || []).map(it => ({ ...it }))); setSearch(""); setText(""); setMissed([]);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const cancelEdit = () => {
+    setEditingId(null); setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setText(""); setMissed([]);
+  };
   const save = () => {
     if (!canSave) { alert("Give the recipe a name and at least one ingredient."); return; }
-    onSave({ id: Date.now(), name: name.trim(), prep: prep.trim(), servings: sv, ingredients, total, per });
+    onSave({ id: editingId || Date.now(), name: name.trim(), prep: prep.trim(), servings: sv, ingredients, total, per });
     setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setMissed([]);
-    setFlash("saved"); setTimeout(() => setFlash(null), 2500);
+    setFlash(editingId ? "updated" : "saved"); setEditingId(null); setTimeout(() => setFlash(null), 2500);
   };
 
   const logRecipe = (r) => {
