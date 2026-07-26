@@ -1200,10 +1200,21 @@ function History({ logs, onDelete }) {
   );
 }
 
-function Settings({ goals, presets, onSaveGoals, onUpdatePresets }) {
+function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals = [], onSavePersonalGoals }) {
   const [form, setForm] = useState({...goals});
   const [pName, setPName] = useState(""); const [pDose, setPDose] = useState(""); const [pType, setPType] = useState("med");
+  const [pgText, setPgText] = useState(""); const [pgType, setPgType] = useState("check"); const [pgTarget, setPgTarget] = useState(""); const [pgUnit, setPgUnit] = useState("");
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const addPersonalGoal = () => {
+    if (!pgText.trim()) return;
+    const g = pgType === "target"
+      ? { id:Date.now(), text:pgText.trim(), type:"target", current:0, target:parseFloat(pgTarget)||0, unit:pgUnit.trim() }
+      : { id:Date.now(), text:pgText.trim(), type:"check", done:false };
+    onSavePersonalGoals([...(personalGoals||[]), g]);
+    setPgText(""); setPgTarget(""); setPgUnit(""); setPgType("check");
+  };
+  const updatePersonalGoal = (id, patch) => onSavePersonalGoals((personalGoals||[]).map(g => g.id===id ? {...g, ...patch} : g));
+  const removePersonalGoal = (id) => onSavePersonalGoals((personalGoals||[]).filter(g => g.id!==id));
 
   const addPreset = () => {
     if (!pName.trim()) return;
