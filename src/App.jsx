@@ -1458,11 +1458,14 @@ function Calendar({ logs, onDelete }) {
 
 
 // ── WEIGHT TRACKER ────────────────────────────────────────────────────────────
-function WeightTracker({ weightLog, onSave, onDelete }) {
+function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) {
   const [weightDate, setWeightDate] = useState(today());
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("lbs");
   const [note, setNote] = useState("");
+  const [ft, setFt] = useState(heightIn ? Math.floor(heightIn/12) : "");
+  const [inch, setInch] = useState(heightIn ? Math.round(heightIn%12) : "");
+  const persistHeight = (f, i) => { const tot = (parseFloat(f)||0)*12 + (parseFloat(i)||0); onSaveHeight(tot > 0 ? tot : ""); };
 
   const save = () => {
     if (!weight || isNaN(parseFloat(weight))) { alert("Please enter a weight."); return; }
