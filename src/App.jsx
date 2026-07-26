@@ -3646,7 +3646,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     };
   });
 
-  const pearson = (pairs) => {
+    const pearsonPairs = (pairs) => {
     const pts = pairs.filter(p => p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1]));
     const n = pts.length;
     if (n < 5) return { r: null, n };
@@ -3659,7 +3659,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   const corr = (inFn, outFn, lag = 0) => {
     const pairs = [];
     patternDays.forEach((d, i) => { const t = patternDays[i + lag]; if (t) pairs.push([inFn(d), outFn(t)]); });
-    return pearson(pairs);
+    return pearsonPairs(pairs);
   };
   const groupDiff = (condFn, outFn, lag = 0) => {
     const w = [], wo = [];
