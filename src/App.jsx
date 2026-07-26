@@ -3920,7 +3920,8 @@ export default function App() {
   const deleteLog = useCallback(id => setData(d=>({...d, logs:d.logs.filter(l=>l.id!==id)})), []);
   const editLog   = useCallback(updated => setData(d=>({...d, logs:d.logs.map(l=>l.id===updated.id?updated:l)})), []);
   const [editingLog, setEditingLog] = useState(null);
-  const addWeight     = useCallback(entry => setData(d=>({...d, weightLog:[...(d.weightLog||[]), entry]})), []);
+    const addWeight     = useCallback(entry => setData(d=>({...d, weightLog:[...(d.weightLog||[]), entry]})), []);
+  const saveHeight    = useCallback(h => setData(d=>({...d, heightIn:h})), []);
   const addWellness   = useCallback(entry => setData(d=>({...d, wellnessLog:[...(d.wellnessLog||[]).filter(e=>e.date!==entry.date), entry]})), []);
   const deleteWellness = useCallback(id => setData(d=>({...d, wellnessLog:(d.wellnessLog||[]).filter(e=>e.id!==id)})), []);
   const addLab        = useCallback(entry => setData(d=>({...d, labLog:[...(d.labLog||[]), entry]})), []);
