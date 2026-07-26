@@ -4033,7 +4033,7 @@ export default function App() {
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
               {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight} heightIn={data.heightIn||""} onSaveHeight={saveHeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
-        {tab==="settings"   && <Settings goals={data.goals} presets={data.presets} onSaveGoals={saveGoals} onUpdatePresets={updatePresets}/>}
+             {tab==="settings"   && <Settings goals={data.goals} presets={data.presets} onSaveGoals={saveGoals} onUpdatePresets={updatePresets} personalGoals={data.personalGoals||[]} onSavePersonalGoals={savePersonalGoals}/>}
       </main>
       {editingLog && editingLog.type==="meal" && <EditMealModal log={editingLog} onSave={updated=>{ editLog(updated); setEditingLog(null); }} onClose={()=>setEditingLog(null)}/>}
       {editingLog && (editingLog.type==="med"||editingLog.type==="vit") && <EditMedModal log={editingLog} onSave={updated=>{ editLog(updated); setEditingLog(null); }} onClose={()=>setEditingLog(null)}/>}
