@@ -43,7 +43,7 @@ const SYMPTOMS_LIST = [
   {key:"good day",emoji:"✨",label:"Good Day!"}
 ];
 
-const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})) });
+const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [] });
 
 async function loadFromStorage() {
   // Always try Firebase first — this is the cross-device sync source
@@ -592,7 +592,11 @@ const FOOD_DB = [
  { keys:["apple"], name:"Apple", cal:95, pro:0, carb:25, fat:0, fib:4, se:0, io:0, zn:0.1, ir:0.2, mg:9, vd:0 },
  { keys:["banana"], name:"Banana", cal:105, pro:1, carb:27, fat:0, fib:3, se:1, io:3, zn:0.2, ir:0.3, mg:32, vd:0 },
  { keys:["orange"], name:"Orange", cal:62, pro:1, carb:15, fat:0, fib:3, se:0.7, io:0, zn:0.1, ir:0.1, mg:13, vd:0 },
- { keys:["blueberr","strawberr","raspberr","blackberr","berries"], name:"Berries (1 cup)", cal:70, pro:1, carb:17, fat:0, fib:4, se:0.4, io:0, zn:0.2, ir:0.9, mg:15, vd:0 },
+ { keys:["blueberr"], name:"Blueberries (1 cup)", cal:84, pro:1, carb:21, fat:0.5, fib:3.6, se:0.1, io:0, zn:0.2, ir:0.4, mg:9, vd:0 },
+ { keys:["strawberr"], name:"Strawberries (1 cup)", cal:49, pro:1, carb:12, fat:0.5, fib:3, se:0.6, io:0, zn:0.2, ir:0.6, mg:13, vd:0 },
+ { keys:["raspberr"], name:"Raspberries (1 cup)", cal:64, pro:1.5, carb:15, fat:0.8, fib:8, se:0.2, io:0, zn:0.5, ir:0.8, mg:22, vd:0 },
+ { keys:["blackberr"], name:"Blackberries (1 cup)", cal:62, pro:2, carb:14, fat:0.7, fib:7.6, se:0.6, io:0, zn:0.5, ir:0.8, mg:29, vd:0 },
+ { keys:["berries","mixed berries"], name:"Mixed Berries (1 cup)", cal:65, pro:1.3, carb:16, fat:0.6, fib:5.5, se:0.4, io:0, zn:0.4, ir:0.7, mg:18, vd:0 },
  { keys:["avocado"], name:"Avocado (½)", cal:120, pro:2, carb:6, fat:11, fib:5, se:0.6, io:0, zn:0.4, ir:0.4, mg:29, vd:0 },
  { keys:["mango"], name:"Mango (1 cup)", cal:100, pro:1, carb:25, fat:1, fib:3, se:1, io:0, zn:0.1, ir:0.2, mg:15, vd:0 },
  { keys:["pineapple"], name:"Pineapple (1 cup)", cal:82, pro:1, carb:22, fat:0, fib:2, se:0.2, io:0, zn:0.2, ir:0.3, mg:20, vd:0 },
@@ -618,8 +622,7 @@ const FOOD_DB = [
  { keys:["cauliflower"], name:"Cauliflower (1 cup)", cal:27, pro:2, carb:5, fat:0, fib:3, se:0.6, io:0, zn:0.3, ir:0.4, mg:16, vd:0 },
  { keys:["sweet potato","yam"], name:"Sweet Potato", cal:103, pro:2, carb:24, fat:0, fib:4, se:0.2, io:0, zn:0.3, ir:0.7, mg:27, vd:0 },
  { keys:["potato","baked potato"], name:"Potato (medium)", cal:161, pro:4, carb:37, fat:0, fib:4, se:0.4, io:0, zn:0.4, ir:1.9, mg:48, vd:0 },
- { keys:["pictsweet","roasted veggies","roasted vegetables","vegetables for roasting","broccoli potato carrot roast","roasted veggie blend"], name:"Roasted Veggies (Pictsweet, 1 cup)", cal:70, pro:2, carb:12, fat:1, fib:2, se:1, io:3, zn:0.4, ir:0.7, mg:25, vd:0 },
-  { keys:["carrot","carrots"], name:"Carrots (1 cup)", cal:52, pro:1, carb:12, fat:0, fib:3.6, se:0.1, io:0, zn:0.3, ir:0.4, mg:15, vd:0 },
+ { keys:["carrot","carrots"], name:"Carrots (1 cup)", cal:52, pro:1, carb:12, fat:0, fib:3.6, se:0.1, io:0, zn:0.3, ir:0.4, mg:15, vd:0 },
  { keys:["tomato","tomatoes"], name:"Tomato (medium)", cal:22, pro:1, carb:5, fat:0, fib:1.5, se:0, io:0, zn:0.2, ir:0.3, mg:11, vd:0 },
  { keys:["cucumber"], name:"Cucumber (1 cup)", cal:16, pro:0.7,carb:4, fat:0, fib:0.5, se:0.3, io:0, zn:0.2, ir:0.3, mg:13, vd:0 },
  { keys:["celery"], name:"Celery (2 stalks)", cal:12, pro:0.5,carb:3, fat:0, fib:1.5, se:0.4, io:0, zn:0.1, ir:0.2, mg:9, vd:0 },
@@ -679,19 +682,14 @@ const FOOD_DB = [
  { keys:["smoothie","fruit smoothie"], name:"Fruit Smoothie", cal:200, pro:4, carb:45, fat:1, fib:4, se:2, io:10, zn:0.3, ir:0.5, mg:35, vd:0 },
  { keys:["hummus"], name:"Hummus (¼ cup)", cal:100, pro:5, carb:12, fat:4, fib:4, se:2, io:0, zn:1.0, ir:1.5, mg:20, vd:0 },
  { keys:["belgian chocolate","belgian dark chocolate","belgian milk chocolate"], name:"Belgian Chocolate (1oz)", cal:165, pro:2, carb:15, fat:11, fib:2, se:2, io:8, zn:0.8, ir:1.2, mg:45, vd:0 },
-{ keys:["whey protein scoop","whey powder","protein powder scoop"], name:"Whey Protein Powder (1 scoop)", cal:120, pro:24, carb:3, fat:1.5, fib:0, se:9, io:0, zn:0.2, ir:0.2, mg:5, vd:0 },
-{ keys:["creatine","creatine scoop"], name:"Creatine (1 scoop)", cal:0, pro:0, carb:0, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
-{ keys:["oats tbsp","tbsp oats","raw oats"], name:"Oats (1 tbsp)", cal:20, pro:1, carb:3, fat:0.4, fib:0.5, se:0.4, io:0, zn:0.1, ir:0.2, mg:6, vd:0 },
-{ keys:["chia seeds","chia"], name:"Chia Seeds (1 tbsp)", cal:58, pro:2, carb:5, fat:3.7, fib:4, se:0.9, io:0, zn:0.5, ir:0.9, mg:33, vd:0 },
-{ keys:["wurze seasoning","maggi wurze","wurze"], name:"Maggi Würze Seasoning (1 tsp)", cal:3, pro:0.5, carb:0.3, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
-  { keys:["toblerone"], name:"Toblerone (1 triangle/10g)", cal:55, pro:0.6, carb:6, fat:3, fib:0.2, se:0.5, io:3, zn:0.2, ir:0.2, mg:8, vd:0 },
+ { keys:["toblerone"], name:"Toblerone (1 triangle/10g)", cal:55, pro:0.6, carb:6, fat:3, fib:0.2, se:0.5, io:3, zn:0.2, ir:0.2, mg:8, vd:0 },
  { keys:["soup","chicken soup","vegetable soup"], name:"Soup (1 bowl)", cal:140, pro:8, carb:18, fat:4, fib:3, se:5, io:5, zn:0.5, ir:1.0, mg:20, vd:0 },
-{ keys:["homemade scrambled eggs with ham","scrambled eggs with ham"], name:"Homemade Scrambled Eggs with Ham", cal:275, pro:29, carb:2, fat:16, fib:0, se:50, io:134, zn:1.7, ir:2.8, mg:18, vd:100 },
-  { keys:["homemade scrambled eggs","scrambled eggs"], name:"Homemade Scrambled Eggs", cal:160, pro:14, carb:4, fat:10, fib:1.5, se:33, io:24, zn:1.5, ir:2.7, mg:39, vd:90 },
+  { keys:["homemade scrambled eggs with ham","scrambled eggs with ham"], name:"Homemade Scrambled Eggs with Ham", cal:275, pro:29, carb:2, fat:16, fib:0, se:50, io:134, zn:1.7, ir:2.8, mg:18, vd:100 },
+{ keys:["homemade scrambled eggs","scrambled eggs"], name:"Homemade Scrambled Eggs", cal:160, pro:14, carb:4, fat:10, fib:1.5, se:33, io:24, zn:1.5, ir:2.7, mg:39, vd:90 },
   { keys:["homemade avocado salad","avocado salad"], name:"Homemade Avocado Salad", cal:500, pro:7, carb:31, fat:43, fib:17, se:1, io:0, zn:1.3, ir:1.5, mg:90, vd:0 },
 { keys:["nature valley bar","nature valley bars","nature valley granola bar"], name:"Nature Valley Bars (1 pouch/2 bars)", cal:190, pro:3, carb:29, fat:7, fib:2, se:2, io:0, zn:0.3, ir:1.0, mg:24, vd:0 },
 { keys:["publix japanese blend","japanese blend"], name:"Publix Japanese Blend (1 cup)", cal:30, pro:2, carb:5, fat:0, fib:2.5, se:2, io:0, zn:0.4, ir:0.8, mg:20, vd:0 },
-{ keys:["ham and toast","toast with ham","ham toast"], name:"Ham and Toast", cal:145, pro:13, carb:15, fat:4, fib:1, se:5, io:2, zn:1.0, ir:0.5, mg:10, vd:0 },
+  { keys:["ham and toast","toast with ham","ham toast"], name:"Ham and Toast", cal:145, pro:13, carb:15, fat:4, fib:1, se:5, io:2, zn:1.0, ir:0.5, mg:10, vd:0 },
 { keys:["avocado toast"], name:"Avocado Toast", cal:400, pro:6, carb:31, fat:30, fib:14, se:1, io:0, zn:1.3, ir:1.2, mg:60, vd:0 },
   { keys:["spinach ravioli"], name:"Spinach Ravioli", cal:260, pro:11, carb:40, fat:7, fib:3, se:1, io:5, zn:1.1, ir:2.0, mg:30, vd:2 },
 { keys:["spinach, mush, red pepper scrambled","egg scramble","veggie eggs","spinach mushroom eggs"], name:"Spinach, Mush, Red Pepper Scrambled", cal:241, pro:21, carb:6, fat:15, fib:2, se:52, io:143, zn:2.5, ir:4, mg:49, vd:120 },
@@ -708,11 +706,15 @@ const FOOD_DB = [
   { keys:["red salami", "salami"], name:"Red Salami (4-5 slices)", cal:180, pro:9, carb:1, fat:15, fib:0, se:8, io:2, zn:1.2, ir:0.6, mg:8, vd:0.2 },
  { keys:["baked chicken sweet potato broth", "chicken sweet potato onion broth"], name:"Baked Chicken Breast w/ Vegetable Broth, Sweet Potato & Onion", cal:420, pro:48, carb:35, fat:8, fib:5, se:38, io:8, zn:1.8, ir:2, mg:60, vd:0.2 },
   { keys:["chicken milanesa","milanesa de pollo"], name:"Chicken Milanesa", cal:350, pro:30, carb:20, fat:15, fib:1, se:24, io:2, zn:1.3, ir:1.2, mg:28, vd:0 },
+ { keys:["smoothie","bmp smoothie","recovery smoothie","protein smoothie"], name:"BMP Smoothie", cal:650, pro:50, carb:92, fat:14, fib:12, se:23, io:91, zn:3.2, ir:2.5, mg:146, vd:3 },
 { keys:["seasons 52 scallops","caramelized sea scallops","seasons 52 sea scallops"], name:"Seasons 52 Caramelized Sea Scallops", cal:440, pro:38, carb:28, fat:14, fib:4, se:30, io:130, zn:1.6, ir:1.2, mg:40, vd:0 },
 { keys:["seasons 52 smores","seasons 52 s'mores","chocolate smores","belgian chocolate smore"], name:"Seasons 52 Chocolate S'Mores (mini)", cal:300, pro:4, carb:36, fat:17, fib:4, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
 { keys:["lentil soup","homemade lentil soup"], name:"Homemade Lentil Soup", cal:175, pro:12, carb:30, fat:1, fib:16, se:2, io:33, zn:1.6, ir:3.9, mg:31, vd:0 },
-  { keys:["smoothie","bmp smoothie","recovery smoothie","protein smoothie"], name:"BMP Smoothie", cal:650, pro:50, carb:92, fat:14, fib:12, se:23, io:91, zn:3.2, ir:2.5, mg:146, vd:3 },
- { keys:["smoothie #2","smoothie 2","high protein smoothie","high-protein smoothie","whey creatine smoothie"], name:"Smoothie #2 (High-Protein)", cal:555, pro:35, carb:85, fat:11, fib:10, se:24, io:59, zn:2.7, ir:1.8, mg:113, vd:120 },
+{ keys:["whey protein scoop","whey powder","protein powder scoop"], name:"Whey Protein Powder (1 scoop)", cal:120, pro:24, carb:3, fat:1.5, fib:0, se:9, io:0, zn:0.2, ir:0.2, mg:5, vd:0 },
+{ keys:["creatine","creatine scoop"], name:"Creatine (1 scoop)", cal:0, pro:0, carb:0, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
+{ keys:["oats tbsp","tbsp oats","raw oats"], name:"Oats (1 tbsp)", cal:20, pro:1, carb:3, fat:0.4, fib:0.5, se:0.4, io:0, zn:0.1, ir:0.2, mg:6, vd:0 },
+{ keys:["chia seeds","chia"], name:"Chia Seeds (1 tbsp)", cal:58, pro:2, carb:5, fat:3.7, fib:4, se:0.9, io:0, zn:0.5, ir:0.9, mg:33, vd:0 },
+{ keys:["wurze seasoning","maggi wurze","wurze"], name:"Maggi Würze Seasoning (1 tsp)", cal:3, pro:0.5, carb:0.3, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
   { keys:["pineapple peach oat chia smoothie", "smoothie pineapple peach banana"], name:"Pineapple Peach Banana Smoothie (w/ Oats, Chia, Greek Yogurt & Milk)", cal:475, pro:18, carb:76, fat:14, fib:11, se:8, io:45, zn:2, ir:1.5, mg:100, vd:2.5 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
@@ -720,42 +722,8 @@ const FOOD_DB = [
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
 ];
 
-const DEFAULT_PANTRY = [
-  { id:"seed-bouillon", name:"Vegetable Bouillon Cube", unit:"1 cube", keys:["bouillon","broth cube","vegetable cube","veg cube","stock cube","broth"], cal:10, pro:0.3, carb:1, fat:0.3, fib:0, se:0, io:0, zn:0, ir:0, mg:2, vd:0 },
-  { id:"seed-salt", name:"Iodized Salt", unit:"¼ tsp", keys:["iodized salt","iodised salt","salt"], cal:0, pro:0, carb:0, fat:0, fib:0, se:0, io:71, zn:0, ir:0, mg:0, vd:0 },
-  { id:"seed-paprika", name:"Paprika", unit:"1 tbsp", keys:["paprika"], cal:19, pro:1, carb:4, fat:1, fib:2.5, se:0.2, io:0, zn:0.3, ir:1.5, mg:14, vd:0 },
-  { id:"seed-blackpepper", name:"Ground Black Pepper", unit:"1 tbsp", keys:["black pepper","ground pepper","peppercorn","black peppercorn"], cal:16, pro:0.7, carb:4, fat:0.2, fib:1.7, se:0, io:0, zn:0.2, ir:0.6, mg:11, vd:0 },
-];
-
-const SEASONINGS_REF = [
-  { name:"Cumin (ground)", unit:"1 tbsp", keys:["cumin","ground cumin","jeera"], cal:22, pro:1.1, carb:2.6, fat:1.3, fib:0.6, se:0.3, io:0, zn:0.3, ir:4.0, mg:22, vd:0 },
-  { name:"Garlic Powder", unit:"1 tbsp", keys:["garlic powder","garlic"], cal:33, pro:1.6, carb:7.3, fat:0.1, fib:0.9, se:2.4, io:0, zn:0.3, ir:0.6, mg:10, vd:0 },
-  { name:"Onion Powder", unit:"1 tbsp", keys:["onion powder"], cal:24, pro:0.7, carb:5.6, fat:0.1, fib:0.5, se:0.3, io:0, zn:0.2, ir:0.3, mg:7, vd:0 },
-  { name:"Oregano (dried)", unit:"1 tbsp", keys:["oregano"], cal:8, pro:0.3, carb:2.1, fat:0.1, fib:1.3, se:0.1, io:0, zn:0.1, ir:1.1, mg:8, vd:0 },
-  { name:"Cinnamon (ground)", unit:"1 tbsp", keys:["cinnamon"], cal:19, pro:0.3, carb:6.3, fat:0.1, fib:4.1, se:0.2, io:0, zn:0.1, ir:0.6, mg:4, vd:0 },
-  { name:"Turmeric (ground)", unit:"1 tbsp", keys:["turmeric"], cal:29, pro:0.9, carb:6.3, fat:0.3, fib:2.1, se:0.5, io:0, zn:0.4, ir:5.0, mg:18, vd:0 },
-  { name:"Chili Powder", unit:"1 tbsp", keys:["chili powder","chilli powder"], cal:24, pro:0.9, carb:4.1, fat:1.2, fib:2.6, se:0.3, io:0, zn:0.2, ir:1.1, mg:12, vd:0 },
-  { name:"Cayenne Pepper", unit:"1 tbsp", keys:["cayenne"], cal:17, pro:0.6, carb:3.1, fat:0.9, fib:1.5, se:0.1, io:0, zn:0.1, ir:0.4, mg:8, vd:0 },
-  { name:"Curry Powder", unit:"1 tbsp", keys:["curry powder","curry"], cal:20, pro:0.8, carb:3.7, fat:0.9, fib:2.1, se:0.1, io:0, zn:0.3, ir:1.9, mg:16, vd:0 },
-  { name:"Coriander (ground)", unit:"1 tbsp", keys:["coriander","ground coriander"], cal:15, pro:0.6, carb:2.8, fat:0.9, fib:2.1, se:0.1, io:0, zn:0.2, ir:0.8, mg:16, vd:0 },
-  { name:"Ginger (ground)", unit:"1 tbsp", keys:["ground ginger","ginger powder"], cal:18, pro:0.5, carb:3.9, fat:0.2, fib:0.8, se:3.0, io:0, zn:0.2, ir:1.1, mg:11, vd:0 },
-  { name:"Basil (dried)", unit:"1 tbsp", keys:["dried basil","basil"], cal:10, pro:1.0, carb:2.4, fat:0.2, fib:1.6, se:0, io:0, zn:0.3, ir:2.5, mg:30, vd:0 },
-  { name:"Thyme (dried)", unit:"1 tbsp", keys:["thyme"], cal:8, pro:0.3, carb:1.9, fat:0.2, fib:1.0, se:0.1, io:0, zn:0.2, ir:3.3, mg:6, vd:0 },
-  { name:"Rosemary (dried)", unit:"1 tbsp", keys:["rosemary"], cal:11, pro:0.2, carb:2.1, fat:0.5, fib:1.4, se:0, io:0, zn:0.1, ir:1.1, mg:7, vd:0 },
-  { name:"Parsley (dried)", unit:"1 tbsp", keys:["dried parsley","parsley"], cal:4, pro:0.3, carb:0.7, fat:0.1, fib:0.4, se:0.1, io:0, zn:0.1, ir:1.2, mg:5, vd:0 },
-  { name:"Nutmeg (ground)", unit:"1 tbsp", keys:["nutmeg"], cal:37, pro:0.4, carb:3.5, fat:2.5, fib:1.5, se:0, io:0, zn:0.1, ir:0.2, mg:13, vd:0 },
-  { name:"Garam Masala", unit:"1 tbsp", keys:["garam masala"], cal:22, pro:0.9, carb:3.4, fat:0.9, fib:1.8, se:0.2, io:0, zn:0.3, ir:1.5, mg:15, vd:0 },
-  { name:"Bay Leaf (crumbled)", unit:"1 tbsp", keys:["bay leaf","bay leaves"], cal:6, pro:0.1, carb:1.4, fat:0.1, fib:0.5, se:0, io:0, zn:0.1, ir:0.8, mg:2, vd:0 },
-  { name:"Olive Oil", unit:"1 tbsp", keys:["olive oil","evoo"], cal:119, pro:0, carb:0, fat:13.5, fib:0, se:0, io:0, zn:0, ir:0.1, mg:0, vd:0 },
-  { name:"Vegetable Oil", unit:"1 tbsp", keys:["vegetable oil","canola oil","cooking oil"], cal:120, pro:0, carb:0, fat:13.6, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
-  { name:"Butter", unit:"1 tbsp", keys:["butter"], cal:102, pro:0.1, carb:0, fat:11.5, fib:0, se:0.2, io:0, zn:0, ir:0, mg:0.3, vd:9 },
-  { name:"Soy Sauce", unit:"1 tbsp", keys:["soy sauce","soya sauce"], cal:8, pro:1.3, carb:0.8, fat:0.1, fib:0.1, se:0.1, io:0, zn:0.1, ir:0.4, mg:5, vd:0 },
-  { name:"Honey", unit:"1 tbsp", keys:["honey"], cal:64, pro:0.1, carb:17.3, fat:0, fib:0, se:0.2, io:0, zn:0.1, ir:0.1, mg:0.4, vd:0 },
-  { name:"Tomato Paste", unit:"1 tbsp", keys:["tomato paste"], cal:13, pro:0.7, carb:3.1, fat:0.1, fib:0.7, se:0.1, io:0, zn:0.1, ir:0.5, mg:6, vd:0 },
-  { name:"Lemon Juice", unit:"1 tbsp", keys:["lemon juice"], cal:3, pro:0.1, carb:1.0, fat:0, fib:0.1, se:0, io:0, zn:0, ir:0, mg:1, vd:0 },
-];
-
 function estimateNutrients(q) {
+  // Find best matching food
   let best = null, bestScore = 0;
   for (const food of FOOD_DB) {
     for (const key of food.keys) {
@@ -809,6 +777,20 @@ function estimateNutrients(q) {
   };
 }
 
+function parseServings(v) {
+  if (v == null) return 1;
+  const str = String(v).trim();
+  if (!str) return 1;
+  // Handle simple fractions like "1/2" or "3/4"
+  const fracMatch = str.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if (fracMatch) {
+    const num = parseFloat(fracMatch[1]), den = parseFloat(fracMatch[2]);
+    return den ? num / den : 1;
+  }
+  const n = parseFloat(str);
+  return isNaN(n) ? 1 : n;
+}
+
 function LogMeal({ onSave }) {
   const [query, setQuery] = useState("");
   const [servings, setServings] = useState(1);
@@ -830,7 +812,7 @@ function LogMeal({ onSave }) {
     try {
       const q = query.toLowerCase();
       const raw = estimateNutrients(q);
-      const sv = parseFloat(servings)||1;
+      const sv = parseServings(servings);
       const multiply = (v) => v ? Math.round(v * sv * 10) / 10 : "";
       const n = {
         ...raw,
@@ -897,12 +879,13 @@ function LogMeal({ onSave }) {
           <div style={{ flex:1 }}>
             <label style={{ ...s.label, marginBottom:4 }}>Servings</label>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <button onClick={()=>setServings(s=>Math.max(0.5, Math.round((parseFloat(s)-0.5)*10)/10))}
+              <button onClick={()=>setServings(s=>Math.max(0.5, Math.round((parseServings(s)-0.5)*10)/10))}
                 style={{ width:30, height:30, borderRadius:"50%", border:`1px solid ${COLORS.tealLight}`, background:COLORS.white, color:COLORS.tealMid, cursor:"pointer", fontSize:"1rem", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>−</button>
-              <input type="number" min="0.5" step="0.5"
+              <input type="text" inputMode="decimal" placeholder="1 or 1/2"
                 style={{...s.input, width:60, textAlign:"center", borderColor:COLORS.tealLight}}
-                value={servings} onChange={e=>setServings(parseFloat(e.target.value)||1)}/>
-              <button onClick={()=>setServings(s=>Math.round((parseFloat(s)+0.5)*10)/10)}
+                value={servings} onChange={e=>setServings(e.target.value)}
+                onBlur={e=>setServings(parseServings(e.target.value))}/>
+              <button onClick={()=>setServings(s=>Math.round((parseServings(s)+0.5)*10)/10)}
                 style={{ width:30, height:30, borderRadius:"50%", border:`1px solid ${COLORS.tealLight}`, background:COLORS.tealMid, color:"white", cursor:"pointer", fontSize:"1rem", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>+</button>
               <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>× nutrients</span>
             </div>
@@ -1205,21 +1188,10 @@ function History({ logs, onDelete }) {
   );
 }
 
-function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals = [], onSavePersonalGoals }) {
+function Settings({ goals, presets, onSaveGoals, onUpdatePresets }) {
   const [form, setForm] = useState({...goals});
   const [pName, setPName] = useState(""); const [pDose, setPDose] = useState(""); const [pType, setPType] = useState("med");
-  const [pgText, setPgText] = useState(""); const [pgType, setPgType] = useState("check"); const [pgTarget, setPgTarget] = useState(""); const [pgUnit, setPgUnit] = useState("");
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
-  const addPersonalGoal = () => {
-    if (!pgText.trim()) return;
-    const g = pgType === "target"
-      ? { id:Date.now(), text:pgText.trim(), type:"target", current:0, target:parseFloat(pgTarget)||0, unit:pgUnit.trim() }
-      : { id:Date.now(), text:pgText.trim(), type:"check", done:false };
-    onSavePersonalGoals([...(personalGoals||[]), g]);
-    setPgText(""); setPgTarget(""); setPgUnit(""); setPgType("check");
-  };
-  const updatePersonalGoal = (id, patch) => onSavePersonalGoals((personalGoals||[]).map(g => g.id===id ? {...g, ...patch} : g));
-  const removePersonalGoal = (id) => onSavePersonalGoals((personalGoals||[]).filter(g => g.id!==id));
 
   const addPreset = () => {
     if (!pName.trim()) return;
@@ -1235,8 +1207,7 @@ function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals 
 
   return (
     <div>
-          <p style={s.sectionTitle}>Evidence-Based Goals</p>
-      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:10 }}>Grounded in RDA and standard nutrition guidelines. Vitamin D reflects your prescribed target.</p>
+      <p style={s.sectionTitle}>My Nutrient Goals</p>
       <div style={s.card}>
         {[["calories","Calories / day"],["protein","Protein (g)"],["carbs","Carbs (g)"],["fat","Fat (g)"],["fiber","Fiber (g)"],["water","Water (cups)"]].reduce((rows,item,i,arr)=>{
           if(i%2===0) rows.push([item, arr[i+1]]);
@@ -1257,54 +1228,6 @@ function Settings({ goals, presets, onSaveGoals, onUpdatePresets, personalGoals 
           </div>
         ))}
         <button style={s.btnPrimary} onClick={()=>onSaveGoals(Object.fromEntries(Object.entries(form).map(([k,v])=>[k,parseFloat(v)||DEFAULT_GOALS[k]])))}>Save Goals</button>
-      </div>
-
-      <p style={s.sectionTitle}>Personal Goals</p>
-      <div style={s.card}>
-        <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginBottom:10 }}>Your own goals — check-off items or targets with a progress bar.</p>
-        <div style={s.formGroup}><label style={s.label}>Goal</label>
-          <input style={s.input} value={pgText} onChange={e=>setPgText(e.target.value)} placeholder="e.g. Walk 20 minutes / Lose 5 lbs / 100 oz water"/>
-        </div>
-        <div style={s.formRow}>
-          <div style={s.formGroup}><label style={s.label}>Type</label>
-            <select style={s.select} value={pgType} onChange={e=>setPgType(e.target.value)}>
-              <option value="check">Check off when done</option>
-              <option value="target">Target with progress</option>
-            </select>
-          </div>
-          {pgType==="target" && <div style={s.formGroup}><label style={s.label}>Target</label><input type="number" style={s.input} value={pgTarget} onChange={e=>setPgTarget(e.target.value)} placeholder="e.g. 100"/></div>}
-          {pgType==="target" && <div style={s.formGroup}><label style={s.label}>Unit</label><input style={s.input} value={pgUnit} onChange={e=>setPgUnit(e.target.value)} placeholder="oz, lbs, hrs…"/></div>}
-        </div>
-        <button style={{...s.btnPrimary,...s.btnSm}} onClick={addPersonalGoal}>Add Goal</button>
-        <div style={{ marginTop:14 }}>
-          {(personalGoals||[]).length === 0 ? (
-            <div style={{ fontSize:"0.78rem", color:COLORS.textSec }}>No personal goals yet.</div>
-          ) : (personalGoals||[]).map(g => (
-            <div key={g.id} style={{ padding:"10px 0", borderBottom:`1px solid ${COLORS.divider}` }}>
-              {g.type==="target" ? (
-                <div>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, marginBottom:6 }}>
-                    <span style={{ fontSize:"0.84rem", fontWeight:500 }}>{g.text}</span>
-                    <button style={s.btnDanger} onClick={()=>removePersonalGoal(g.id)}>Remove</button>
-                  </div>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                    <input type="number" style={{...s.input, width:76, padding:"5px 8px"}} value={g.current} onChange={e=>updatePersonalGoal(g.id,{current:parseFloat(e.target.value)||0})}/>
-                    <span style={{ fontSize:"0.76rem", color:COLORS.textSec }}>/ {g.target} {g.unit}</span>
-                  </div>
-                  <div style={{ height:6, background:COLORS.mist, borderRadius:3, overflow:"hidden" }}>
-                    <div style={{ height:"100%", width:`${Math.min(100, g.target>0 ? (g.current/g.target)*100 : 0)}%`, background:COLORS.tealMid, borderRadius:3, transition:"width 0.4s" }} />
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <input type="checkbox" checked={!!g.done} onChange={e=>updatePersonalGoal(g.id,{done:e.target.checked})} style={{ width:18, height:18, flexShrink:0 }}/>
-                  <span style={{ flex:1, fontSize:"0.84rem", textDecoration: g.done?"line-through":"none", color: g.done?COLORS.textSec:COLORS.ink }}>{g.text}</span>
-                  <button style={s.btnDanger} onClick={()=>removePersonalGoal(g.id)}>Remove</button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
       </div>
 
       <p style={s.sectionTitle}>My Medications & Vitamins</p>
@@ -1523,14 +1446,11 @@ function Calendar({ logs, onDelete }) {
 
 
 // ── WEIGHT TRACKER ────────────────────────────────────────────────────────────
-function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) {
+function WeightTracker({ weightLog, onSave, onDelete }) {
   const [weightDate, setWeightDate] = useState(today());
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("lbs");
   const [note, setNote] = useState("");
-  const [ft, setFt] = useState(heightIn ? Math.floor(heightIn/12) : "");
-  const [inch, setInch] = useState(heightIn ? Math.round(heightIn%12) : "");
-  const persistHeight = (f, i) => { const tot = (parseFloat(f)||0)*12 + (parseFloat(i)||0); onSaveHeight(tot > 0 ? tot : ""); };
 
   const save = () => {
     if (!weight || isNaN(parseFloat(weight))) { alert("Please enter a weight."); return; }
@@ -1570,25 +1490,7 @@ function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) 
 
   const latest = sorted[0];
   const prev   = sorted[1];
-    const diff   = latest && prev ? (toDisplay(latest.weight, latest.unit) - toDisplay(prev.weight, prev.unit)) : null;
-
-  // Rolling averages (in the current display unit)
-  const daysAgoStr = (n) => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); };
-  const avgSince = (n) => {
-    const cutoff = daysAgoStr(n);
-    const vals = weightLog.filter(e => e.date >= cutoff).map(e => toDisplay(e.weight, e.unit));
-    return vals.length ? Math.round((vals.reduce((s,v)=>s+v,0)/vals.length)*10)/10 : null;
-  };
-  const avg7  = avgSince(7);
-  const avg30 = avgSince(30);
-
-  // BMI from latest weight + entered height
-  const heightInches = (parseFloat(ft)||0)*12 + (parseFloat(inch)||0);
-  const latestKg = latest ? (latest.unit === "kg" ? latest.weight : latest.weight*0.453592) : null;
-  const heightM = heightInches*0.0254;
-  const bmi = (latestKg && heightM) ? Math.round((latestKg/(heightM*heightM))*10)/10 : null;
-  const bmiCat = bmi === null ? "" : bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese";
-  const bmiColor = bmi === null ? COLORS.ink : (bmi < 18.5 || bmi >= 30) ? COLORS.coral : (bmi >= 25 ? COLORS.amber : COLORS.sage);
+  const diff   = latest && prev ? (toDisplay(latest.weight, latest.unit) - toDisplay(prev.weight, prev.unit)) : null;
 
   return (
     <div>
@@ -1646,39 +1548,6 @@ function WeightTracker({ weightLog, onSave, onDelete, heightIn, onSaveHeight }) 
             <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>Entries</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"1.5rem", color:COLORS.tealDeep }}>{weightLog.length}</div>
             <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>logged</div>
-          </div>
-        </div>
-      )}
-
-           {/* Height (for BMI) + rolling averages */}
-      <div style={{ display:"flex", gap:10, marginBottom:14, flexWrap:"wrap" }}>
-        <div style={{ ...s.card, flex:1, minWidth:150, marginBottom:0 }}>
-          <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:6 }}>Height (for BMI)</div>
-          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-            <input type="number" min="0" style={{...s.input, width:56, textAlign:"center", padding:"6px"}} value={ft} onChange={e=>{ setFt(e.target.value); persistHeight(e.target.value, inch); }} placeholder="ft"/>
-            <span style={{ fontSize:"0.8rem", color:COLORS.textSec }}>ft</span>
-            <input type="number" min="0" max="11" style={{...s.input, width:56, textAlign:"center", padding:"6px"}} value={inch} onChange={e=>{ setInch(e.target.value); persistHeight(ft, e.target.value); }} placeholder="in"/>
-            <span style={{ fontSize:"0.8rem", color:COLORS.textSec }}>in</span>
-          </div>
-        </div>
-      </div>
-
-      {(avg7 !== null || avg30 !== null || bmi !== null) && (
-        <div style={{ display:"flex", gap:10, marginBottom:14, flexWrap:"wrap" }}>
-          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
-            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>7-Day Avg</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:COLORS.tealDeep }}>{avg7 ?? "—"}</div>
-            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{avg7 !== null ? unit : "no data"}</div>
-          </div>
-          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
-            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>30-Day Avg</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:COLORS.tealDeep }}>{avg30 ?? "—"}</div>
-            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{avg30 !== null ? unit : "no data"}</div>
-          </div>
-          <div style={{ ...s.card, flex:1, minWidth:96, textAlign:"center", marginBottom:0 }}>
-            <div style={{ fontSize:"0.68rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:COLORS.textSec, marginBottom:4 }}>BMI</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"1.4rem", color:bmiColor }}>{bmi ?? "—"}</div>
-            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{bmi !== null ? bmiCat : "add height"}</div>
           </div>
         </div>
       )}
@@ -2827,429 +2696,7 @@ function describeCorr(r) {
   return { strength, dir };
 }
 
-function FoodLibrary({ recipes = [], onLog, embedded = false }) {
-  const [search, setSearch] = useState("");
-  const [flash, setFlash] = useState(null);
-  const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
-  const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
-  const items = [
-    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
-    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), nutrients: foodNut(f) })),
-  ];
-  const q = search.trim().toLowerCase();
-  const filtered = q
-    ? items.filter(it => it.name.toLowerCase().includes(q) || it.keys.some(k => k.includes(q)))
-    : (embedded ? [] : items.slice().sort((a,b)=> (b.isRecipe?1:0)-(a.isRecipe?1:0) || a.name.localeCompare(b.name)));
-  const log = (it) => {
-    onLog({ id: Date.now(), date: today(), type:"meal", mealType: mealGuess(), time: nowTime(), name: it.name, nutrients: it.nutrients, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
-    setFlash(it.name); setTimeout(()=>setFlash(null), 2200);
-  };
-
-  return (
-    <div>
-      {!embedded && <p style={s.sectionTitle}>Foods</p>}
-      {!embedded && <p style={{fontSize:"0.76rem",color:COLORS.textSec,marginTop:-6,marginBottom:12}}>Everything in your food database plus your recipes. Tap Log to add it to today.</p>}
-      {embedded && <div style={{fontSize:"0.85rem",fontWeight:600,color:COLORS.tealDeep,marginBottom:8}}>🔎 Quick-log from your foods</div>}
-      <input style={{...s.input, borderColor:COLORS.tealLight, marginBottom:10}} value={search} onChange={e=>setSearch(e.target.value)} placeholder={embedded ? "Search a food or recipe to log…" : "Search your foods & recipes…"} />
-      {flash && <div style={{background:COLORS.sagePale,color:COLORS.tealDeep,borderRadius:8,padding:"7px 11px",marginBottom:10,fontSize:"0.76rem",fontWeight:600}}>✓ Logged {flash} to today</div>}
-      {embedded && !q ? (
-        <p style={{fontSize:"0.74rem",color:COLORS.textSec}}>Start typing to find a food or recipe and log it in one tap.</p>
-      ) : filtered.length === 0 ? (
-        <div style={s.emptyState}>No matches for "{search}".</div>
-      ) : (
-        <div style={embedded ? {maxHeight:340, overflowY:"auto"} : undefined}>
-          {filtered.map((it,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
-              <div style={{flex:1, minWidth:0}}>
-                <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
-                  {it.isRecipe && <span style={{fontSize:"0.58rem",fontWeight:700,background:COLORS.amberPale,color:COLORS.amber,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🍳</span>}
-                </div>
-                <div style={{fontSize:"0.66rem",color:COLORS.textSec,marginTop:2}}>
-                  {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
-                </div>
-              </div>
-              <button style={{...s.btnOutline,...s.btnSm}} onClick={()=>log(it)}>Log</button>
-            </div>
-          ))}
-        </div>
-      )}
-      {!embedded && !q && <div style={{fontSize:"0.7rem",color:COLORS.textSec,marginTop:10}}>{items.length} items total</div>}
-    </div>
-  );
-}
-
-function Pantry({ pantry = [], onAdd, onDelete }) {
-  const FIELDS = [
-    { f:"cal", label:"Calories", unit:"" }, { f:"pro", label:"Protein", unit:"g" }, { f:"carb", label:"Carbs", unit:"g" },
-    { f:"fat", label:"Fat", unit:"g" }, { f:"fib", label:"Fiber", unit:"g" }, { f:"se", label:"Selenium", unit:"mcg" },
-    { f:"io", label:"Iodine", unit:"mcg" }, { f:"zn", label:"Zinc", unit:"mg" }, { f:"ir", label:"Iron", unit:"mg" },
-    { f:"mg", label:"Magnesium", unit:"mg" }, { f:"vd", label:"Vitamin D", unit:"IU" },
-  ];
-  const SUMMARY = [
-    { f:"cal", label:"cal", unit:"" }, { f:"pro", label:"protein", unit:"g" }, { f:"carb", label:"carbs", unit:"g" },
-    { f:"fat", label:"fat", unit:"g" }, { f:"fib", label:"fiber", unit:"g" }, { f:"se", label:"Se", unit:"mcg" },
-    { f:"io", label:"iodine", unit:"mcg" }, { f:"zn", label:"zinc", unit:"mg" }, { f:"ir", label:"iron", unit:"mg" },
-    { f:"mg", label:"Mg", unit:"mg" }, { f:"vd", label:"Vit D", unit:"IU" },
-  ];
-  const blank = () => Object.fromEntries(FIELDS.map(x => [x.f, ""]));
-  const [name, setName] = useState("");
-  const [unit, setUnit] = useState("");
-  const [alt, setAlt] = useState("");
-  const [vals, setVals] = useState(blank());
-  const [flash, setFlash] = useState(false);
-
-  const setV = (f, v) => setVals(o => ({ ...o, [f]: v }));
-  const [notFound, setNotFound] = useState(false);
-  const SHORT = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
-  const autoFill = () => {
-    const q = name.trim().toLowerCase();
-    if (!q) return;
-    const refPool = [
-      ...SEASONINGS_REF,
-      ...FOOD_DB.map(fd => ({ name: fd.name, unit: "serving", keys: fd.keys || [], ...fd })),
-    ];
-    let best = null, bestScore = 0;
-    for (const it of refPool) {
-      for (const key of [it.name.toLowerCase(), ...(it.keys||[]).map(k=>k.toLowerCase())]) {
-        if (key && (q === key || q.includes(key) || key.includes(q)) && key.length > bestScore) { bestScore = key.length; best = it; }
-      }
-    }
-    if (!best) { setNotFound(true); setTimeout(() => setNotFound(false), 3000); return; }
-    setNotFound(false);
-    setName(best.name);
-    if (best.unit) setUnit(best.unit);
-    setVals(Object.fromEntries(SHORT.map(f => [f, best[f] != null ? String(best[f]) : "0"])));
-    if (best.keys && best.keys.length) setAlt(best.keys.filter(k => k !== best.name.toLowerCase()).join(", "));
-  };
-  const canAdd = name.trim() && unit.trim();
-  const add = () => {
-    if (!canAdd) { alert("Give the item a name and a serving unit (e.g. 1 tbsp)."); return; }
-    const nums = Object.fromEntries(FIELDS.map(x => [x.f, parseFloat(vals[x.f]) || 0]));
-    const keys = [name.toLowerCase().trim(), ...alt.split(",").map(k => k.trim().toLowerCase()).filter(Boolean)];
-    onAdd({ id: Date.now(), name: name.trim(), unit: unit.trim(), keys, ...nums });
-    setName(""); setUnit(""); setAlt(""); setVals(blank());
-    setFlash(true); setTimeout(() => setFlash(false), 2500);
-  };
-
-  return (
-    <div>
-      <p style={s.sectionTitle}>Pantry</p>
-      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:12 }}>
-        Staples and seasonings with their per-serving nutrients. These are searchable in the Recipe builder and recognized by the recipe text parser.
-      </p>
-
-      <div style={s.card}>
-        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>➕ Add pantry item</div>
-        <div style={s.formRow}>
-          <div style={s.formGroup}><label style={s.label}>Name</label><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Cumin"/></div>
-          <div style={s.formGroup}><label style={s.label}>Serving unit</label><input style={s.input} value={unit} onChange={e=>setUnit(e.target.value)} placeholder="e.g. 1 tbsp, ¼ tsp, 1 cube"/></div>
-        </div>
-        <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10, flexWrap:"wrap" }}>
-          <button style={{...s.btnOutline, ...s.btnSm}} onClick={autoFill}>✨ Auto-fill from name</button>
-          <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>Fills values for known spices, oils & staples (editable after).</span>
-        </div>
-        {notFound && (
-          <div style={{ background:COLORS.amberPale, borderRadius:8, padding:"7px 11px", marginBottom:10, fontSize:"0.72rem", color:COLORS.amber }}>
-            ⚠️ "{name}" isn't in the reference list — enter its values by hand below.
-          </div>
-        )}
-        <div style={s.formGroup}><label style={s.label}>Also matches (optional, comma-separated)</label><input style={s.input} value={alt} onChange={e=>setAlt(e.target.value)} placeholder="e.g. ground cumin, jeera"/></div>
-        <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", margin:"6px 0 8px" }}>Nutrients per serving</div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
-          {FIELDS.map(({f,label,unit:u}) => (
-            <div key={f}>
-              <label style={{ ...s.label, marginBottom:2 }}>{label}{u?` (${u})`:""}</label>
-              <input type="number" step="0.1" style={{...s.input, padding:"6px 8px"}} value={vals[f]} onChange={e=>setV(f, e.target.value)} placeholder="0"/>
-            </div>
-          ))}
-        </div>
-        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
-          <button style={{...s.btnPrimary, opacity: canAdd?1:0.5}} onClick={add} disabled={!canAdd}>Add to pantry</button>
-          {flash && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Added</span>}
-        </div>
-      </div>
-
-      <p style={{ ...s.sectionTitle, fontSize:"0.92rem", marginTop:18 }}>Your Pantry ({pantry.length})</p>
-      {pantry.length === 0 ? (
-        <div style={s.emptyState}>No pantry items yet.</div>
-      ) : (
-        pantry.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p => (
-          <div key={p.id} style={{ ...s.card, padding:"12px 14px" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"0.86rem", fontWeight:600, color:COLORS.ink }}>{p.name} <span style={{ fontSize:"0.7rem", color:COLORS.textSec, fontWeight:400 }}>· {p.unit}</span></div>
-                <div style={{ marginTop:6, display:"flex", flexWrap:"wrap", gap:5 }}>
-                  {SUMMARY.map(({f,label,unit:u}) => ((p[f]||0) > 0 ?
-                    <span key={f} style={s.chip}>{p[f]}{u} {label}</span> : null))}
-                </div>
-              </div>
-              <button style={{...s.btnDanger}} onClick={()=>onDelete(p.id)}>Delete</button>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
-
-function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
-  const ALL_FIELDS = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
-  const SUMMARY = [
-    { f:"cal", label:"cal", unit:"" }, { f:"pro", label:"protein", unit:"g" }, { f:"carb", label:"carbs", unit:"g" },
-    { f:"fat", label:"fat", unit:"g" }, { f:"fib", label:"fiber", unit:"g" }, { f:"se", label:"Se", unit:"mcg" },
-    { f:"io", label:"iodine", unit:"mcg" }, { f:"zn", label:"zinc", unit:"mg" }, { f:"ir", label:"iron", unit:"mg" },
-    { f:"mg", label:"Mg", unit:"mg" }, { f:"vd", label:"Vit D", unit:"IU" },
-  ];
-  const UNIT_WORDS = { tbsp:"tbsp", tbs:"tbsp", tablespoon:"tbsp", tablespoons:"tbsp", tsp:"tsp", teaspoon:"tsp", teaspoons:"tsp", cup:"cup", cups:"cup", cube:"cube", cubes:"cube" };
-  const pick = (x) => Object.fromEntries(ALL_FIELDS.map(f => [f, x[f] || 0]));
-  const rawPool = [
-    ...(pantry||[]).map(p => ({ name: p.name, unit: p.unit || "serving", keys: (p.keys||[]).map(k=>k.toLowerCase()), food: pick(p) })),
-    ...FOOD_DB.map(fd => ({ name: fd.name, unit: "serving", keys: (fd.keys||[]).map(k=>k.toLowerCase()), food: pick(fd) })),
-    ...SEASONINGS_REF.map(sr => ({ name: sr.name, unit: sr.unit || "serving", keys: (sr.keys||[]).map(k=>k.toLowerCase()), food: pick(sr) })),
-  ];
-  const seen = new Set();
-  const searchPool = rawPool.filter(it => { const n = it.name.toLowerCase(); if (seen.has(n)) return false; seen.add(n); return true; });
-
-  const [name, setName] = useState("");
-  const [prep, setPrep] = useState("");
-  const [servings, setServings] = useState(1);
-  const [ingredients, setIngredients] = useState([]);
-  const [search, setSearch] = useState("");
-  const [text, setText] = useState("");
-  const [missed, setMissed] = useState([]);
-    const [logServings, setLogServings] = useState({});
-  const [flash, setFlash] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-
-  const matches = search.trim().length >= 2
-    ? searchPool.filter(it => it.name.toLowerCase().includes(search.toLowerCase()) || it.keys.some(k => k.includes(search.toLowerCase()))).slice(0, 6)
-    : [];
-
-  const addIngredient = (it) => {
-    setIngredients(list => [...list, { name: it.name, qty: 1, unit: it.unit, food: it.food }]);
-    setSearch("");
-  };
-  const setQty = (i, qty) => setIngredients(list => list.map((it, j) => j === i ? { ...it, qty } : it));
-  const removeIngredient = (i) => setIngredients(list => list.filter((_, j) => j !== i));
-
-  const matchFood = (phrase) => {
-    const q = phrase.toLowerCase();
-    let best = null, bestScore = 0;
-    for (const it of searchPool) {
-      for (const key of [it.name.toLowerCase(), ...it.keys]) {
-        if (key && q.includes(key) && key.length > bestScore) { bestScore = key.length; best = it; }
-      }
-    }
-    return best;
-  };
-
-  const parseText = () => {
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return;
-    let ingLines;
-    if (/^\d/.test(lines[0])) {
-      ingLines = lines; // every line is an ingredient; keep whatever name is typed
-    } else {
-      setName(lines[0].replace(/^["']|["']$/g, "").trim());
-      ingLines = lines.slice(1);
-    }
-    const parsed = [], miss = [];
-    ingLines.forEach(line => {
-      const numM = line.match(/^(\d+(?:[.,]\d+)?)/);
-      const num = numM ? parseFloat(numM[1].replace(",", ".")) : 1;
-      const lower = line.toLowerCase();
-      let unit = null;
-      for (const w of Object.keys(UNIT_WORDS)) { if (new RegExp(`\\b${w}\\b`).test(lower)) { unit = UNIT_WORDS[w]; break; } }
-      const item = matchFood(line);
-      if (!item) { miss.push(line); return; }
-      let qty = num;
-      const iu = (item.unit || "").toLowerCase();
-      if (iu.includes("¼ tsp") || iu.includes("1/4 tsp")) {
-        if (unit === "tbsp") qty = num * 12; else if (unit === "tsp") qty = num * 4; else qty = num;
-      } else if (iu.includes("tbsp")) {
-        if (unit === "tsp") qty = Math.round((num / 3) * 100) / 100; else qty = num;
-      }
-      qty = Math.round(qty * 100) / 100;
-      parsed.push({ name: item.name, qty, unit: item.unit, food: item.food });
-    });
-    if (parsed.length) setIngredients(list => [...list, ...parsed]);
-    setMissed(miss);
-    setText("");
-  };
-
-  const total = ALL_FIELDS.reduce((acc, f) => {
-    acc[f] = Math.round(ingredients.reduce((s, it) => s + (it.food[f] || 0) * (parseFloat(it.qty) || 0), 0) * 10) / 10;
-    return acc;
-  }, {});
-  const sv = Math.max(1, parseFloat(servings) || 1);
-  const per = ALL_FIELDS.reduce((acc, f) => { acc[f] = Math.round((total[f] / sv) * 10) / 10; return acc; }, {});
-
-  const canSave = name.trim() && ingredients.length > 0;
-    const startEdit = (r) => {
-    setEditingId(r.id); setName(r.name); setPrep(r.prep || ""); setServings(r.servings || 1);
-    setIngredients((r.ingredients || []).map(it => ({ ...it }))); setSearch(""); setText(""); setMissed([]);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  const cancelEdit = () => {
-    setEditingId(null); setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setText(""); setMissed([]);
-  };
-  const save = () => {
-    if (!canSave) { alert("Give the recipe a name and at least one ingredient."); return; }
-    onSave({ id: editingId || Date.now(), name: name.trim(), prep: prep.trim(), servings: sv, ingredients, total, per });
-    setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setMissed([]);
-    setFlash(editingId ? "updated" : "saved"); setEditingId(null); setTimeout(() => setFlash(null), 2500);
-  };
-
-  const logRecipe = (r) => {
-    const n = Math.max(0.5, parseFloat(logServings[r.id]) || 1);
-    const m = (v) => Math.round((v || 0) * n * 10) / 10;
-    const nutrients = {
-      calories: Math.round((r.per.cal || 0) * n), protein: m(r.per.pro), carbs: m(r.per.carb), fat: m(r.per.fat),
-      fiber: m(r.per.fib), water: 0, selenium: m(r.per.se), iodine: m(r.per.io), zinc: m(r.per.zn),
-      iron: m(r.per.ir), magnesium: m(r.per.mg), vitd: m(r.per.vd),
-    };
-    onLog({ id: Date.now(), date: today(), type: "meal", mealType: "Dinner", time: nowTime(),
-      name: n === 1 ? r.name : `${r.name} (×${n})`, nutrients, notes: r.prep ? `Recipe: ${r.prep}` : "Logged from recipe" });
-    setFlash("logged:" + r.id); setTimeout(() => setFlash(null), 2500);
-  };
-
-  return (
-    <div>
-      <p style={s.sectionTitle}>Recipes</p>
-      <p style={{ fontSize:"0.76rem", color:COLORS.textSec, marginTop:-6, marginBottom:12 }}>
-        Build a dish from your food database and pantry. Nutrients auto-scale per serving, and saved recipes become loggable foods that also feed your Score Boost recommendations.
-      </p>
-
-      <div style={s.card}>
-        <FoodLibrary recipes={recipes} onLog={onLog} embedded={true} />
-      </div>
-
-      {/* Free-text quick add */}
-      <div style={s.aiBox}>
-        <div style={s.aiBadge}>✍️ Quick add from text</div>
-        <p style={{ fontSize:"0.72rem", color:COLORS.textSec, marginBottom:8 }}>
-          First line = recipe name, then one ingredient per line (e.g. <em>1 cup of lentils</em>). I'll match each to your food DB / pantry and fill in the builder below for you to review.
-        </p>
-        <textarea style={{ ...s.textarea, borderColor:COLORS.tealLight, minHeight:96 }} value={text} onChange={e=>setText(e.target.value)}
-          placeholder={"Lentil soup\n1 cup of lentils\n2 vegetable broth cubes\n1 tbsp of iodized salt\n1 tbsp of paprika\n1 tbsp of ground black pepper"}/>
-        <div style={{ display:"flex", gap:10, marginTop:8, alignItems:"center" }}>
-          <button style={s.btnPrimary} onClick={parseText}>Parse ingredients</button>
-          <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>Review & edit quantities below before saving.</span>
-        </div>
-        {missed.length > 0 && (
-          <div style={{ marginTop:10, background:COLORS.amberPale, borderRadius:8, padding:"8px 11px" }}>
-            <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.amber, marginBottom:3 }}>⚠️ Couldn't match {missed.length} line{missed.length!==1?"s":""}</div>
-            <div style={{ fontSize:"0.7rem", color:COLORS.textSec }}>{missed.join("; ")}</div>
-            <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:3 }}>Add them in the Pantry tab (or search below), then parse again.</div>
-          </div>
-        )}
-      </div>
-
-      {/* Builder */}
-      <div style={s.card}>
-        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>🍳 Recipe builder</div>
-        <div style={s.formRow}>
-          <div style={s.formGroup}><label style={s.label}>Recipe name</label><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Lentil soup"/></div>
-          <div style={s.formGroup}>
-            <label style={s.label}>Makes (servings)</label>
-            <input type="number" min="1" step="1" style={s.input} value={servings} onChange={e=>setServings(e.target.value)}/>
-          </div>
-        </div>
-        <div style={s.formGroup}>
-          <label style={s.label}>Prep-method notes (optional)</label>
-          <input style={s.input} value={prep} onChange={e=>setPrep(e.target.value)} placeholder="e.g. slow-cooked, no added salt"/>
-        </div>
-
-        {/* Ingredient search */}
-        <div style={s.formGroup}>
-          <label style={s.label}>Add ingredient (food database + pantry)</label>
-          <input style={{...s.input, borderColor:COLORS.tealLight}} value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search foods… e.g. lentils, paprika"/>
-          {matches.length > 0 && (
-            <div style={{ border:`1px solid ${COLORS.divider}`, borderRadius:8, marginTop:6, overflow:"hidden" }}>
-              {matches.map((it, i) => (
-                <div key={i} onClick={()=>addIngredient(it)} style={{ padding:"8px 11px", fontSize:"0.8rem", color:COLORS.ink, cursor:"pointer", borderTop: i>0?`1px solid ${COLORS.divider}`:"none", display:"flex", justifyContent:"space-between", alignItems:"center", background:COLORS.white }}>
-                  <span>{it.name} <span style={{ fontSize:"0.68rem", color:COLORS.textSec }}>· {it.unit}</span></span>
-                  <span style={{ fontSize:"0.7rem", color:COLORS.tealMid, fontWeight:600 }}>+ add</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Ingredient list */}
-        {ingredients.length > 0 && (
-          <div style={{ marginTop:4 }}>
-            {ingredients.map((it, i) => (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 0", borderTop: i>0?`1px solid ${COLORS.divider}`:"none" }}>
-                <span style={{ flex:1, fontSize:"0.8rem", color:COLORS.ink }}>{it.name}</span>
-                <input type="number" min="0.5" step="0.5" value={it.qty} onChange={e=>setQty(i, e.target.value)}
-                  style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
-                <span style={{ fontSize:"0.68rem", color:COLORS.textSec, width:58 }}>× {it.unit || "serving"}</span>
-                <button style={{...s.btnDanger, padding:"4px 9px"}} onClick={()=>removeIngredient(i)}>✕</button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Live totals */}
-        {ingredients.length > 0 && (
-          <div style={{ marginTop:12, background:COLORS.tealPale, borderRadius:8, padding:"10px 12px" }}>
-            <div style={{ fontSize:"0.72rem", fontWeight:700, color:COLORS.tealDeep, marginBottom:6 }}>Per serving (of {sv})</div>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
-              {SUMMARY.map(({f,label,unit}) => (per[f] > 0 ?
-                <span key={f} style={s.chip}>{per[f]}{unit} {label}</span> : null))}
-            </div>
-          </div>
-        )}
-
-        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
-                    <button style={{...s.btnPrimary, opacity: canSave?1:0.5}} onClick={save} disabled={!canSave}>{editingId ? "Update recipe" : "Save recipe"}</button>
-          {editingId && <button style={{...s.btnOutline}} onClick={cancelEdit}>Cancel edit</button>}
-          {flash === "saved" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe saved</span>}
-          {flash === "updated" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe updated</span>}
-        </div>
-      </div>
-
-      {/* Saved recipes */}
-      <p style={{ ...s.sectionTitle, fontSize:"0.92rem", marginTop:18 }}>Your Recipes</p>
-      {recipes.length === 0 ? (
-        <div style={s.emptyState}>No recipes yet. Build one above to reuse it as a single loggable food.</div>
-      ) : (
-        recipes.slice().sort((a,b)=>b.id-a.id).map(r => (
-          <div key={r.id} style={s.card}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"0.9rem", fontWeight:600, color:COLORS.ink }}>{r.name}</div>
-                <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:2 }}>Makes {r.servings} · {r.ingredients.length} ingredient{r.ingredients.length!==1?"s":""}{r.prep ? ` · ${r.prep}` : ""}</div>
-              </div>
-              <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-                <button style={{...s.btnOutline, ...s.btnSm}} onClick={()=>startEdit(r)}>Edit</button>
-                <button style={{...s.btnDanger}} onClick={()=>onDelete(r.id)}>Delete</button>
-              </div>
-            </div>
-            <div style={{ fontSize:"0.68rem", color:COLORS.textSec, marginTop:6 }}>{r.ingredients.map(it => `${it.name}${it.qty!==1?` ×${it.qty}`:""}`).join(", ")}</div>
-            <div style={{ marginTop:8, display:"flex", flexWrap:"wrap", gap:5 }}>
-              {SUMMARY.map(({f,label,unit}) => (r.per[f] > 0 ?
-                <span key={f} style={s.chip}>{r.per[f]}{unit} {label}</span> : null))}
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, flexWrap:"wrap" }}>
-              <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>Log</span>
-              <input type="number" min="0.5" step="0.5" value={logServings[r.id] ?? 1}
-                onChange={e=>setLogServings(m=>({...m, [r.id]: e.target.value}))}
-                style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
-              <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>serving(s) today</span>
-              <button style={{...s.btnOutline, ...s.btnSm}} onClick={()=>logRecipe(r)}>Log meal</button>
-              {flash === "logged:"+r.id && <span style={{ fontSize:"0.74rem", color:COLORS.sage, fontWeight:600 }}>✓ Logged</span>}
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
-
-function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], wellnessLog = [], presets = { meds: [], vits: [] } }) {
+function Insights({ logs, labLog = [], weightLog = [], goals }) {
   const GOALS = goals || DEFAULT_GOALS;
   const [section, setSection] = useState("overview");
   const [range, setRange] = useState(14);
@@ -3297,20 +2744,6 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   let streak = 0;
   for (let i = medDays.length - 1; i >= 0; i--) { if (medDays[i].taken) streak++; else break; }
 
-  // True trailing 7-day adherence, tracked separately for meds vs vitamins (independent of the range slider)
-  const week7 = windowDates(0, 7).map(dateStr => {
-    const d = new Date(dateStr + "T12:00:00");
-    return { dateStr, label: d.toLocaleDateString("en-US", { weekday: "narrow" }) };
-  });
-  const adhFor = (t) => {
-    const rows = week7.map(d => ({ ...d, taken: logs.some(l => l.type === t && l.date === d.dateStr) }));
-    const pct = Math.round((rows.filter(r => r.taken).length / rows.length) * 100);
-    let stk = 0; for (let i = rows.length - 1; i >= 0; i--) { if (rows[i].taken) stk++; else break; }
-    return { rows, pct, streak: stk };
-  };
-  const medWeek = adhFor("med");
-  const vitWeek = adhFor("vit");
-
   const symptomLogs = logs.filter(l => l.type === "symptom" && days.some(d => d.dateStr === l.date));
   const freq = {};
   symptomLogs.forEach(l => (l.symptoms || []).forEach(sym => { freq[sym] = (freq[sym] || 0) + 1; }));
@@ -3326,7 +2759,6 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   // ── Shared all-time lookups ──
   const mealDateSet = new Set(logs.filter(l => l.type === "meal").map(l => l.date));
   const medDateSet = new Set(logs.filter(l => l.type === "med").map(l => l.date));
-  const vitDateSet = new Set(logs.filter(l => l.type === "vit").map(l => l.date));
   const symptomMap = {};
   logs.filter(l => l.type === "symptom").forEach(l => { symptomMap[l.date] = l; });
 
@@ -3390,8 +2822,6 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   const improveAreas = weekCompare.filter(w => w.thisPct < 0.5 || w.delta <= -0.1);
   const medPctFor = dates => dates.filter(dt => medDateSet.has(dt)).length / dates.length;
   const medThisWk = medPctFor(thisWeekDates), medLastWk = medPctFor(lastWeekDates);
-  const vitPctFor = dates => dates.filter(dt => vitDateSet.has(dt)).length / dates.length;
-  const vitThisWk = vitPctFor(thisWeekDates), vitLastWk = vitPctFor(lastWeekDates);
   const energyAvgFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.energy).filter(Boolean); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const sympCountFor = dates => { const vs = dates.map(dt => symptomMap[dt]?.symptoms?.length).filter(v => v != null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const energyThisWk = energyAvgFor(thisWeekDates), energyLastWk = energyAvgFor(lastWeekDates);
@@ -3458,23 +2888,12 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
 
    const gapKeys = ["selenium", "iodine", "zinc", "iron", "vitd", "protein", "fiber"].filter(k => (GOALS[k] || 0) - (todayTotals[k] || 0) > 0);
   const gapSummary = gapKeys.map(k => ({
-    key: k,
     label: NUTRIENT_LABEL[k],
     remaining: Math.round(((GOALS[k] || 0) - (todayTotals[k] || 0)) * 10) / 10,
-    goal: GOALS[k] || 0,
     unit: UNIT_FOR[k],
   }));
-  // Variety factor (#5): foods eaten in the last 3 days get a small ranking penalty
-  const varietyCutoff = new Date(); varietyCutoff.setDate(varietyCutoff.getDate() - 3);
-  const recentNames = logs
-    .filter(l => l.type === "meal" && l.name && new Date(l.date) >= varietyCutoff)
-    .map(l => l.name.toLowerCase());
-  const VARIETY_PENALTY = 1.5;
-  // Recipes act as loggable foods and feed the recommendation engine (#6)
-  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, ...(r.per || {}) }));
-  const CANDIDATE_FOODS = [...FOOD_DB, ...recipeFoods];
   const foodBoosts = [];
-  CANDIDATE_FOODS.forEach(food => {
+  FOOD_DB.forEach(food => {
     const simulated = { ...todayTotals };
     const helps = [];
     let overCeiling = false;
@@ -3485,28 +2904,14 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
       const ceiling = CEILING_FOR[k] ?? Infinity;
       if (newVal > ceiling) overCeiling = true;
       simulated[k] = newVal;
-      if (gapKeys.includes(k)) helps.push({ key: k, label: NUTRIENT_LABEL[k], amount: Math.round(contribution * 10) / 10, unit: UNIT_FOR[k], pct: Math.min(100, Math.round((contribution / (GOALS[k] || 1)) * 100)) });
+      if (gapKeys.includes(k)) helps.push(NUTRIENT_LABEL[k]);
     });
     if (overCeiling || helps.length === 0) return;
     const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
-    if (ptsRaw <= 0.5) return;
-    const nm = food.name.toLowerCase();
-    const recent = recentNames.some(n => n.includes(nm) || nm.includes(n));
-    const adjRaw = ptsRaw - (recent ? VARIETY_PENALTY : 0);
-    foodBoosts.push({
-      name: food.name, points: Math.round(ptsRaw), helps, ptsRaw, adjRaw, recent,
-      isRecipe: !!food.isRecipe,
-      projected: Math.round(baselineRaw + ptsRaw),
-      coverage: gapKeys.length ? helps.length / gapKeys.length : 0,
-    });
+    if (ptsRaw > 0.5) foodBoosts.push({ name: food.name, points: Math.round(ptsRaw), helps, ptsRaw });
   });
-  // Rank by variety-adjusted boost so recently eaten foods yield to fresh options with similar impact (#5)
-  foodBoosts.sort((a, b) => b.adjRaw - a.adjRaw);
-  const topFoodBoosts = foodBoosts.slice(0, 5).map((f, i) => ({
-    ...f,
-    bestMatch: i === 0,
-    confidence: f.coverage >= 0.6 ? "High" : f.coverage >= 0.35 ? "Medium" : "Fair",
-  }));
+  foodBoosts.sort((a, b) => b.ptsRaw - a.ptsRaw);
+  const topFoodBoosts = foodBoosts.slice(0, 5);
 
 
 
@@ -3617,120 +3022,9 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   }
   if (streak >= 5) predictions.push({ icon: "🔥", text: `At your current pace, you're on track to hit a ${streak + 7}-day medication streak by next week.` });
 
-  // ── PATTERNS: unified daily dataset + same-day / next-day correlations ───────
-  const ALCOHOL_KEYS = ["wine","cocktail","margarita","daiquiri","pina colada","mojito","sangria","champagne","prosecco","whiskey","whisky","vodka","tequila","bourbon","brandy","liquor","liqueur","aperol","negroni","martini","beer"];
-  const COLD_MAP = { none: 0, mild: 1, moderate: 2, severe: 3 };
-  const isAlcoholName = (nm) => { const s = (nm || "").toLowerCase(); return ALCOHOL_KEYS.some(k => s.includes(k)); };
-  const wellnessByDate = {};
-  (wellnessLog || []).forEach(e => { if (e && e.date) wellnessByDate[e.date] = e; });
-
-  const patternWindow = windowDates(0, 60);
-  const patternDays = patternWindow.map(dt => {
-    const dayLogs = logs.filter(l => l.date === dt);
-    const totals = getDayTotals(dt);
-    const alcoholCount = dayLogs.filter(l => l.type === "meal" && isAlcoholName(l.name)).length;
-    const eveningAlcohol = dayLogs.some(l => l.type === "meal" && isAlcoholName(l.name) && (l.time || "") >= "17:00");
-    const sym = symptomMap[dt];
-    const symList = (sym && sym.symptoms) || [];
-    const well = wellnessByDate[dt] || {};
-    const numOrNull = (v) => (v === "" || v == null || isNaN(parseFloat(v))) ? null : parseFloat(v);
-    return {
-      date: dt,
-      totals,
-      hadAlcohol: alcoholCount > 0,
-      eveningAlcohol,
-      energy: (sym && sym.energy) ? sym.energy : null,
-      hasSymptomLog: !!sym,
-      constipation: symList.includes("constipation") ? 1 : 0,
-      sleepHours: numOrNull(well.sleepHours),
-      wokeUp: typeof well.wokeUp === "boolean" ? (well.wokeUp ? 1 : 0) : null,
-      mood: well.mood != null ? well.mood : null,
-      anxiety: well.anxiety != null ? well.anxiety : null,
-      stress: well.stress != null ? well.stress : null,
-      cold: well.coldSensitivity != null ? (COLD_MAP[String(well.coldSensitivity).toLowerCase()] ?? null) : null,
-    };
-  });
-
-    const pearsonPairs = (pairs) => {
-    const pts = pairs.filter(p => p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1]));
-    const n = pts.length;
-    if (n < 5) return { r: null, n };
-    const mx = pts.reduce((s, p) => s + p[0], 0) / n, my = pts.reduce((s, p) => s + p[1], 0) / n;
-    let sxy = 0, sxx = 0, syy = 0;
-    pts.forEach(p => { const dx = p[0] - mx, dy = p[1] - my; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; });
-    if (sxx === 0 || syy === 0) return { r: null, n };
-    return { r: sxy / Math.sqrt(sxx * syy), n };
-  };
-  const corr = (inFn, outFn, lag = 0) => {
-    const pairs = [];
-    patternDays.forEach((d, i) => { const t = patternDays[i + lag]; if (t) pairs.push([inFn(d), outFn(t)]); });
-    return pearsonPairs(pairs);
-  };
-  const groupDiff = (condFn, outFn, lag = 0) => {
-    const w = [], wo = [];
-    patternDays.forEach((d, i) => {
-      const t = patternDays[i + lag]; if (!t) return;
-      const o = outFn(t); if (o == null || isNaN(o)) return;
-      (condFn(d) ? w : wo).push(o);
-    });
-    const mean = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
-    return { withMean: mean(w), withoutMean: mean(wo), nWith: w.length, nWithout: wo.length };
-  };
-  const strengthWord = r => { const a = Math.abs(r); return a >= 0.6 ? "strong" : a >= 0.4 ? "moderate" : "mild"; };
-
-  const patternFindings = [];
-  const pushCorr = (icon, label, inFn, outFn, lag, thresh = 0.3) => {
-    const c = corr(inFn, outFn, lag);
-    if (c.r != null && Math.abs(c.r) >= thresh) {
-      patternFindings.push({ icon, strength: Math.abs(c.r), text: `${label}: ${strengthWord(c.r)} ${c.r > 0 ? "positive" : "inverse"} link (r=${c.r.toFixed(2)}, ${c.n} days).` });
-    }
-  };
-  // Fiber ↔ constipation
-  pushCorr("🌾", "Fiber vs constipation (same day)", d => d.totals.fiber, d => d.constipation, 0, 0.25);
-  pushCorr("🌾", "Fiber → next-day constipation", d => d.totals.fiber, d => d.constipation, 1, 0.25);
-  // Evening alcohol → next-day energy / mood / sleep / night-waking
-  [["energy", d => d.energy], ["mood", d => d.mood], ["sleep hours", d => d.sleepHours], ["night waking", d => d.wokeUp]].forEach(([lbl, fn]) => {
-    const g = groupDiff(d => d.eveningAlcohol, fn, 1);
-    if (g.withMean != null && g.withoutMean != null && g.nWith >= 3 && g.nWithout >= 3) {
-      const diff = Math.round((g.withMean - g.withoutMean) * 10) / 10;
-      if (Math.abs(diff) >= 0.3) patternFindings.push({ icon: "🍷", strength: Math.abs(diff) / 2, text: `Evening drinking → next-day ${lbl}: ${diff > 0 ? "+" : ""}${diff} avg (${g.withMean.toFixed(1)} after drinking vs ${g.withoutMean.toFixed(1)} otherwise; ${g.nWith}/${g.nWithout} days).` });
-    }
-  });
-  // Per-medication and per-vitamin → same-day energy
-  [["med", presets.meds || []], ["vit", presets.vits || []]].forEach(([type, list]) => {
-    list.forEach(item => {
-      const nm = (item.name || "").toLowerCase(); if (!nm) return;
-      const g = groupDiff(d => logs.some(l => l.type === type && l.date === d.date && (l.name || "").toLowerCase().includes(nm)), d => d.energy, 0);
-      if (g.withMean != null && g.withoutMean != null && g.nWith >= 3 && g.nWithout >= 3) {
-        const diff = Math.round((g.withMean - g.withoutMean) * 10) / 10;
-        if (Math.abs(diff) >= 0.4) patternFindings.push({ icon: "💊", strength: Math.abs(diff) / 2, text: `${item.name} vs energy: ${diff > 0 ? "+" : ""}${diff} on days taken (${g.withMean.toFixed(1)} vs ${g.withoutMean.toFixed(1)}; ${g.nWith}/${g.nWithout} days).` });
-      }
-    });
-  });
-  // Key nutrients → next-day energy
-  [["protein", "Protein"], ["iron", "Iron"], ["magnesium", "Magnesium"], ["selenium", "Selenium"], ["iodine", "Iodine"], ["zinc", "Zinc"], ["water", "Water"]].forEach(([k, lbl]) => {
-    pushCorr("⚡", `${lbl} → next-day energy`, d => d.totals[k], d => d.energy, 1, 0.3);
-  });
-  // Sleep → next-day energy & mood
-  pushCorr("😴", "Sleep hours → next-day energy", d => d.sleepHours, d => d.energy, 1, 0.3);
-  pushCorr("😴", "Sleep hours → next-day mood", d => d.sleepHours, d => d.mood, 1, 0.3);
-  patternFindings.sort((a, b) => b.strength - a.strength);
-
-  const wellAvg = (fn, arr) => { const vs = arr.map(fn).filter(v => v != null && !isNaN(v)); return vs.length ? Math.round((vs.reduce((s, v) => s + v, 0) / vs.length) * 10) / 10 : null; };
-  const last30 = patternDays.slice(-30);
-  const avgSleep30 = wellAvg(d => d.sleepHours, last30);
-  const avgMood30 = wellAvg(d => d.mood, last30);
-  const avgAnx30 = wellAvg(d => d.anxiety, last30);
-  const avgStress30 = wellAvg(d => d.stress, last30);
-  const wakeVals30 = last30.map(d => d.wokeUp).filter(v => v != null);
-  const wakeRate30 = wakeVals30.length ? Math.round((wakeVals30.reduce((s, v) => s + v, 0) / wakeVals30.length) * 100) : null;
-  const daysWithWellness = patternDays.filter(d => d.sleepHours != null || d.mood != null || d.anxiety != null || d.stress != null).length;
-  const daysWithSymptom = patternDays.filter(d => d.hasSymptomLog).length;
-
   const SECTIONS = [
     { key: "overview", label: "Overview" },
     { key: "correlations", label: "Correlations" },
-    { key: "patterns", label: "Patterns" },
     { key: "weekly", label: "Weekly Review" },
     { key: "reports", label: "Reports" },
     { key: "predictions", label: "Predictions" },
@@ -3754,41 +3048,6 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
           </button>
         ))}
       </div>
-
-      {section === "patterns" && (
-        <div>
-          <div style={s.card}>
-            <div style={{ fontSize: "0.76rem", fontWeight: 600, color: COLORS.textSec, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Wellness trends · last 30 days</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <span style={s.chip}>😴 sleep {avgSleep30 ?? "—"}h</span>
-              <span style={s.chip}>🌙 woke up {wakeRate30 != null ? wakeRate30 + "%" : "—"} of nights</span>
-              <span style={s.chip}>😊 mood {avgMood30 ?? "—"}/10</span>
-              <span style={s.chip}>😰 anxiety {avgAnx30 ?? "—"}/10</span>
-              <span style={s.chip}>🧠 stress {avgStress30 ?? "—"}/10</span>
-            </div>
-            <div style={{ fontSize: "0.7rem", color: COLORS.textSec, marginTop: 8 }}>{daysWithWellness} days with wellness data · {daysWithSymptom} with symptom/energy data (of last 60).</div>
-          </div>
-
-          <div style={s.card}>
-            <div style={{ fontSize: "0.76rem", fontWeight: 600, color: COLORS.textSec, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Patterns found</div>
-            {patternFindings.length === 0 ? (
-              <div style={{ fontSize: "0.8rem", color: COLORS.textSec, lineHeight: 1.5 }}>
-                Not enough overlapping data yet. Correlations need roughly 5–7 days where you logged the relevant things together (e.g. meals + next-day energy, or wellness + symptoms). Keep logging and patterns will appear here automatically.
-              </div>
-            ) : (
-              patternFindings.map((f, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
-                  <span style={{ fontSize: "1rem", flexShrink: 0 }}>{f.icon}</span>
-                  <span style={{ fontSize: "0.82rem", color: COLORS.ink, lineHeight: 1.45 }}>{f.text}</span>
-                </div>
-              ))
-            )}
-            <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 10, lineHeight: 1.4, fontStyle: "italic" }}>
-              These are associations in your own logs over the last 60 days — not medical advice or proven cause-and-effect. "Next-day" links compare one day's input to the following day's outcome.
-            </div>
-          </div>
-        </div>
-      )}
 
       {section === "overview" && (
         <div>
@@ -3820,21 +3079,16 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
           </div>
 
           <div style={s.card}>
-            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>Adherence · last 7 days</span>
-            {[{ label: "💊 Medications", w: medWeek }, { label: "🌿 Vitamins & supplements", w: vitWeek }].map((row, ri) => (
-              <div key={ri} style={{ marginTop: ri === 0 ? 12 : 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>
-                  <span>{row.label}</span>
-                  <span style={{ color: COLORS.tealMid }}>{row.w.pct}%</span>
-                </div>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {row.w.rows.map((d, i) => (
-                    <div key={i} title={d.dateStr} style={{ flex: 1, height: 26, borderRadius: 5, background: d.taken ? COLORS.sage : COLORS.coralPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: d.taken ? "white" : COLORS.textSec, fontWeight: 700 }}>{d.label}</div>
-                  ))}
-                </div>
-                <div style={{ fontSize: "0.72rem", color: COLORS.textSec, marginTop: 5 }}>🔥 {row.w.streak} day streak</div>
-              </div>
-            ))}
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>💊 Medication Adherence</span>
+            <div style={{ display: "flex", gap: 4, marginTop: 10, marginBottom: 8 }}>
+              {medDays.map((d, i) => (
+                <div key={i} title={d.dateStr} style={{ flex: 1, height: 28, borderRadius: 5, background: d.taken ? COLORS.sage : COLORS.coralPale }} />
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.76rem", color: COLORS.textSec }}>
+              <span>{adherencePct}% of days logged</span>
+              <span>🔥 {streak} day streak</span>
+            </div>
           </div>
 
           <div style={s.card}>
@@ -3956,10 +3210,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
             ))}
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}`, fontSize: "0.74rem", color: COLORS.textSec }}>
-              <span>💊 {Math.round(medThisWk * 100)}% meds <span style={{ opacity: 0.7 }}>(was {Math.round(medLastWk * 100)}%)</span></span>
-              <span>🌿 {Math.round(vitThisWk * 100)}% vitamins <span style={{ opacity: 0.7 }}>(was {Math.round(vitLastWk * 100)}%)</span></span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 6, fontSize: "0.74rem", color: COLORS.textSec }}>
+              <span>💊 {Math.round(medThisWk * 100)}% adherence <span style={{ opacity: 0.7 }}>(was {Math.round(medLastWk * 100)}%)</span></span>
               <span>⚡ {fmt2(energyThisWk)} energy <span style={{ opacity: 0.7 }}>(was {fmt2(energyLastWk)})</span></span>
             </div>
           </div>
@@ -4064,58 +3315,26 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
             <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
-            {gapSummary.length > 0 && (() => {
-              const maxRem = Math.max(...gapSummary.map(g => g.remaining), 1);
-              const chipColor = (r) => {
-                const n = r / maxRem;
-                if (n >= 0.66) return { bg: COLORS.coralPale, fg: COLORS.coral };
-                if (n >= 0.33) return { bg: COLORS.amberPale, fg: COLORS.amber };
-                return { bg: COLORS.sagePale, fg: COLORS.tealDeep };
-              };
-              return (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-                  {gapSummary.map((g, i) => {
-                    const c = chipColor(g.remaining);
-                    return (
-                      <span key={i} style={{ background: c.bg, color: c.fg, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
-                        {g.label}: {g.remaining}{g.unit} left
-                      </span>
-                    );
-                  })}
-                </div>
-              );
-            })()}
+            {gapSummary.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                {gapSummary.map((g, i) => (
+                  <span key={i} style={{ background: COLORS.tealPale, color: COLORS.tealDeep, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
+                    {g.label}: {g.remaining}{g.unit} left
+                  </span>
+                ))}
+              </div>
+            )}
             {topFoodBoosts.length === 0 ? (
               <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>You're maxed out on trackable nutrients today — nice work!</p>
             ) : (
               topFoodBoosts.map((f, i) => (
-                <div key={i} style={{ padding: "10px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div key={i} style={{ padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
-                        {f.bestMatch && <span style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", background: COLORS.tealMid, color: "white", borderRadius: 4, padding: "1px 6px" }}>Best match</span>}
-                        {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px" }}>🍳 Recipe</span>}
-                      </div>
-                      <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>
-                        {f.confidence} match · covers {f.helps.length} of {gapSummary.length} gap{gapSummary.length !== 1 ? "s" : ""}{f.recent ? " · eaten recently" : ""}
-                      </div>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</div>
+                      <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 2 }}>Boosts {f.helps.join(", ")}</div>
                     </div>
-                    <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      <div style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid }}>+{f.points} pt{f.points !== 1 ? "s" : ""}</div>
-                      <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 1 }}>{baselineScore} → {f.projected}</div>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
-                    {f.helps.map((h, j) => (
-                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: "0.64rem", color: COLORS.textSec, width: 92, flexShrink: 0 }}>{h.label} +{h.amount}{h.unit}</span>
-                        <div style={{ flex: 1, height: 6, background: COLORS.divider, borderRadius: 3, overflow: "hidden" }}>
-                          <div style={{ width: `${h.pct}%`, height: "100%", background: COLORS.tealMid, borderRadius: 3 }} />
-                        </div>
-                        <span style={{ fontSize: "0.62rem", color: COLORS.tealMid, fontWeight: 600, width: 34, textAlign: "right", flexShrink: 0 }}>{h.pct}%</span>
-                      </div>
-                    ))}
+                    <span style={{ fontSize: "0.76rem", fontWeight: 700, color: COLORS.tealMid, whiteSpace: "nowrap" }}>+{f.points} pt{f.points !== 1 ? "s" : ""}</span>
                   </div>
                 </div>
               ))
@@ -4161,7 +3380,6 @@ export default function App() {
     useEffect(() => {
     loadFromStorage().then(saved => {
       const cleaned = { ...saved, logs: dedupeSymptoms(saved.logs || []) };
-      if (!cleaned.pantry || cleaned.pantry.length === 0) cleaned.pantry = DEFAULT_PANTRY.map(p=>({...p}));
       setData(cleaned);
       setLoaded(true);
     });
@@ -4185,23 +3403,17 @@ export default function App() {
   const deleteLog = useCallback(id => setData(d=>({...d, logs:d.logs.filter(l=>l.id!==id)})), []);
   const editLog   = useCallback(updated => setData(d=>({...d, logs:d.logs.map(l=>l.id===updated.id?updated:l)})), []);
   const [editingLog, setEditingLog] = useState(null);
-    const addWeight     = useCallback(entry => setData(d=>({...d, weightLog:[...(d.weightLog||[]), entry]})), []);
-  const saveHeight    = useCallback(h => setData(d=>({...d, heightIn:h})), []);
+  const addWeight     = useCallback(entry => setData(d=>({...d, weightLog:[...(d.weightLog||[]), entry]})), []);
   const addWellness   = useCallback(entry => setData(d=>({...d, wellnessLog:[...(d.wellnessLog||[]).filter(e=>e.date!==entry.date), entry]})), []);
   const deleteWellness = useCallback(id => setData(d=>({...d, wellnessLog:(d.wellnessLog||[]).filter(e=>e.id!==id)})), []);
   const addLab        = useCallback(entry => setData(d=>({...d, labLog:[...(d.labLog||[]), entry]})), []);
   const deleteLab     = useCallback(id => setData(d=>({...d, labLog:(d.labLog||[]).filter(e=>e.id!==id)})), []);
-  const addRecipe     = useCallback(entry => setData(d=>{ const list=(d.recipes||[]); return {...d, recipes: list.some(r=>r.id===entry.id) ? list.map(r=>r.id===entry.id?entry:r) : [...list, entry]}; }), []);
-  const deleteRecipe  = useCallback(id => setData(d=>({...d, recipes:(d.recipes||[]).filter(r=>r.id!==id)})), []);
-  const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
-  const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
   const deleteWeight = useCallback(id => setData(d=>({...d, weightLog:(d.weightLog||[]).filter(e=>e.id!==id)})), []);
-    const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
-  const savePersonalGoals = useCallback(pg => setData(d=>({...d, personalGoals:pg})), []);
+  const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
 
-  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","foods","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
-  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Foods","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
+  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
+  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
 
   if (!loaded) return (
     <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:COLORS.mist, flexDirection:"column", gap:12 }}>
@@ -4233,18 +3445,15 @@ export default function App() {
      {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
-        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog}/>}
-        {tab==="recipes"    && <Recipes recipes={data.recipes||[]} pantry={data.pantry||[]} onSave={addRecipe} onDelete={deleteRecipe} onLog={addLog}/>}
-        {tab==="pantry"     && <Pantry pantry={data.pantry||[]} onAdd={addPantry} onDelete={deletePantry}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
         {tab==="labs"       && <LabResults labLog={data.labLog||[]} onSave={addLab} onDelete={deleteLab}/>}
         {tab==="weekly"     && <WeeklyDashboard logs={data.logs}/>}
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
-        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]} wellnessLog={data.wellnessLog||[]} presets={data.presets||{meds:[],vits:[]}}/>}
+        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
-              {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight} heightIn={data.heightIn||""} onSaveHeight={saveHeight}/>}
+        {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
-             {tab==="settings"   && <Settings goals={data.goals} presets={data.presets} onSaveGoals={saveGoals} onUpdatePresets={updatePresets} personalGoals={data.personalGoals||[]} onSavePersonalGoals={savePersonalGoals}/>}
+        {tab==="settings"   && <Settings goals={data.goals} presets={data.presets} onSaveGoals={saveGoals} onUpdatePresets={updatePresets}/>}
       </main>
       {editingLog && editingLog.type==="meal" && <EditMealModal log={editingLog} onSave={updated=>{ editLog(updated); setEditingLog(null); }} onClose={()=>setEditingLog(null)}/>}
       {editingLog && (editingLog.type==="med"||editingLog.type==="vit") && <EditMedModal log={editingLog} onSave={updated=>{ editLog(updated); setEditingLog(null); }} onClose={()=>setEditingLog(null)}/>}
