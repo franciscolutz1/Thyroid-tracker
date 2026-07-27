@@ -683,6 +683,7 @@ const FOOD_DB = [
 { keys:["creatine","creatine scoop"], name:"Creatine (1 scoop)", cal:0, pro:0, carb:0, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
 { keys:["oats tbsp","tbsp oats","raw oats"], name:"Oats (1 tbsp)", cal:20, pro:1, carb:3, fat:0.4, fib:0.5, se:0.4, io:0, zn:0.1, ir:0.2, mg:6, vd:0 },
 { keys:["chia seeds","chia"], name:"Chia Seeds (1 tbsp)", cal:58, pro:2, carb:5, fat:3.7, fib:4, se:0.9, io:0, zn:0.5, ir:0.9, mg:33, vd:0 },
+{ keys:["wurze seasoning","maggi wurze","wurze"], name:"Maggi Würze Seasoning (1 tsp)", cal:3, pro:0.5, carb:0.3, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
   { keys:["toblerone"], name:"Toblerone (1 triangle/10g)", cal:55, pro:0.6, carb:6, fat:3, fib:0.2, se:0.5, io:3, zn:0.2, ir:0.2, mg:8, vd:0 },
  { keys:["soup","chicken soup","vegetable soup"], name:"Soup (1 bowl)", cal:140, pro:8, carb:18, fat:4, fib:3, se:5, io:5, zn:0.5, ir:1.0, mg:20, vd:0 },
 { keys:["homemade scrambled eggs with ham","scrambled eggs with ham"], name:"Homemade Scrambled Eggs with Ham", cal:275, pro:29, carb:2, fat:16, fib:0, se:50, io:134, zn:1.7, ir:2.8, mg:18, vd:100 },
