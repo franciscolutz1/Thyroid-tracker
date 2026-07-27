@@ -2848,6 +2848,7 @@ function describeCorr(r) {
 function FoodLibrary({ recipes = [], onLog, embedded = false }) {
   const [search, setSearch] = useState("");
   const [flash, setFlash] = useState(null);
+  const [qtys, setQtys] = useState({});
   const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
   const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
   const items = [
@@ -2858,15 +2859,20 @@ function FoodLibrary({ recipes = [], onLog, embedded = false }) {
   const filtered = q
     ? items.filter(it => it.name.toLowerCase().includes(q) || it.keys.some(k => k.includes(q)))
     : (embedded ? [] : items.slice().sort((a,b)=> (b.isRecipe?1:0)-(a.isRecipe?1:0) || a.name.localeCompare(b.name)));
+  const getQty = (name) => qtys[name] ?? "1";
+  const setQty = (name, v) => setQtys(o => ({ ...o, [name]: v }));
   const log = (it) => {
-    onLog({ id: Date.now(), date: today(), type:"meal", mealType: mealGuess(), time: nowTime(), name: it.name, nutrients: it.nutrients, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
-    setFlash(it.name); setTimeout(()=>setFlash(null), 2200);
+    const mult = parseServings(getQty(it.name));
+    const scaled = Object.fromEntries(Object.entries(it.nutrients).map(([k,v]) => [k, v ? Math.round(v*mult*10)/10 : v]));
+    const label = mult !== 1 ? `${it.name} (×${mult})` : it.name;
+    onLog({ id: Date.now(), date: today(), type:"meal", mealType: mealGuess(), time: nowTime(), name: label, nutrients: scaled, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
+    setFlash(label); setTimeout(()=>setFlash(null), 2200);
   };
 
   return (
     <div>
       {!embedded && <p style={s.sectionTitle}>Foods</p>}
-      {!embedded && <p style={{fontSize:"0.76rem",color:COLORS.textSec,marginTop:-6,marginBottom:12}}>Everything in your food database plus your recipes. Tap Log to add it to today.</p>}
+      {!embedded && <p style={{fontSize:"0.76rem",color:COLORS.textSec,marginTop:-6,marginBottom:12}}>Everything in your food database plus your recipes. Set a quantity (e.g. 0.5 or 1/2) and tap Log to add it to today.</p>}
       {embedded && <div style={{fontSize:"0.85rem",fontWeight:600,color:COLORS.tealDeep,marginBottom:8}}>🔎 Quick-log from your foods</div>}
       <input style={{...s.input, borderColor:COLORS.tealLight, marginBottom:10}} value={search} onChange={e=>setSearch(e.target.value)} placeholder={embedded ? "Search a food or recipe to log…" : "Search your foods & recipes…"} />
       {flash && <div style={{background:COLORS.sagePale,color:COLORS.tealDeep,borderRadius:8,padding:"7px 11px",marginBottom:10,fontSize:"0.76rem",fontWeight:600}}>✓ Logged {flash} to today</div>}
@@ -2877,7 +2883,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false }) {
       ) : (
         <div style={embedded ? {maxHeight:340, overflowY:"auto"} : undefined}>
           {filtered.map((it,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
               <div style={{flex:1, minWidth:0}}>
                 <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6}}>
                   <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
@@ -2887,7 +2893,9 @@ function FoodLibrary({ recipes = [], onLog, embedded = false }) {
                   {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
                 </div>
               </div>
-              <button style={{...s.btnOutline,...s.btnSm}} onClick={()=>log(it)}>Log</button>
+              <input type="text" inputMode="decimal" value={getQty(it.name)} onChange={e=>setQty(it.name, e.target.value)}
+                style={{...s.input, width:44, padding:"6px 4px", textAlign:"center", fontSize:"0.74rem", flexShrink:0}}/>
+              <button style={{...s.btnOutline,...s.btnSm, flexShrink:0}} onClick={()=>log(it)}>Log</button>
             </div>
           ))}
         </div>
@@ -2919,6 +2927,7 @@ function Pantry({ pantry = [], onAdd, onDelete }) {
 
   const setV = (f, v) => setVals(o => ({ ...o, [f]: v }));
   const [notFound, setNotFound] = useState(false);
+  const [scaleBy, setScaleBy] = useState("1");
   const SHORT = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
   const autoFill = () => {
     const q = name.trim().toLowerCase();
@@ -2936,9 +2945,16 @@ function Pantry({ pantry = [], onAdd, onDelete }) {
     if (!best) { setNotFound(true); setTimeout(() => setNotFound(false), 3000); return; }
     setNotFound(false);
     setName(best.name);
-    if (best.unit) setUnit(best.unit);
+    if (best.unit && !unit.trim()) setUnit(best.unit); // only fill unit if the user hasn't typed their own
     setVals(Object.fromEntries(SHORT.map(f => [f, best[f] != null ? String(best[f]) : "0"])));
     if (best.keys && best.keys.length) setAlt(best.keys.filter(k => k !== best.name.toLowerCase()).join(", "));
+  };
+  const applyScale = () => {
+    const mult = parseServings(scaleBy);
+    setVals(o => Object.fromEntries(SHORT.map(f => {
+      const cur = parseFloat(o[f]) || 0;
+      return [f, String(Math.round(cur * mult * 100) / 100)];
+    })));
   };
   const canAdd = name.trim() && unit.trim();
   const add = () => {
@@ -2966,6 +2982,13 @@ function Pantry({ pantry = [], onAdd, onDelete }) {
         <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10, flexWrap:"wrap" }}>
           <button style={{...s.btnOutline, ...s.btnSm}} onClick={autoFill}>✨ Auto-fill from name</button>
           <span style={{ fontSize:"0.7rem", color:COLORS.textSec }}>Fills values for known spices, oils & staples (editable after).</span>
+        </div>
+        <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10, flexWrap:"wrap", background:COLORS.tealPale, borderRadius:8, padding:"8px 10px" }}>
+          <span style={{ fontSize:"0.72rem", color:COLORS.tealDeep, fontWeight:600 }}>Scale filled values ×</span>
+          <input type="text" inputMode="decimal" value={scaleBy} onChange={e=>setScaleBy(e.target.value)} placeholder="e.g. 0.5 or 1/2"
+            style={{...s.input, width:70, padding:"5px 8px", fontSize:"0.76rem"}}/>
+          <button style={{...s.btnOutline, ...s.btnSm}} onClick={applyScale}>Apply</button>
+          <span style={{ fontSize:"0.68rem", color:COLORS.textSec }}>e.g. autofill gives 1 cup → scale by 0.5 for ½ cup, then set Serving unit below to match.</span>
         </div>
         {notFound && (
           <div style={{ background:COLORS.amberPale, borderRadius:8, padding:"7px 11px", marginBottom:10, fontSize:"0.72rem", color:COLORS.amber }}>
@@ -3097,10 +3120,10 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   };
 
   const total = ALL_FIELDS.reduce((acc, f) => {
-    acc[f] = Math.round(ingredients.reduce((s, it) => s + (it.food[f] || 0) * (parseFloat(it.qty) || 0), 0) * 10) / 10;
+    acc[f] = Math.round(ingredients.reduce((s, it) => s + (it.food[f] || 0) * (parseServings(it.qty) || 0), 0) * 10) / 10;
     return acc;
   }, {});
-  const sv = Math.max(1, parseFloat(servings) || 1);
+  const sv = Math.max(1, parseServings(servings) || 1);
   const per = ALL_FIELDS.reduce((acc, f) => { acc[f] = Math.round((total[f] / sv) * 10) / 10; return acc; }, {});
 
   const canSave = name.trim() && ingredients.length > 0;
@@ -3120,7 +3143,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   };
 
   const logRecipe = (r) => {
-    const n = Math.max(0.5, parseFloat(logServings[r.id]) || 1);
+    const n = Math.max(0.5, parseServings(logServings[r.id]) || 1);
     const m = (v) => Math.round((v || 0) * n * 10) / 10;
     const nutrients = {
       calories: Math.round((r.per.cal || 0) * n), protein: m(r.per.pro), carbs: m(r.per.carb), fat: m(r.per.fat),
@@ -3201,7 +3224,8 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
             {ingredients.map((it, i) => (
               <div key={i} style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 0", borderTop: i>0?`1px solid ${COLORS.divider}`:"none" }}>
                 <span style={{ flex:1, fontSize:"0.8rem", color:COLORS.ink }}>{it.name}</span>
-                <input type="number" min="0.5" step="0.5" value={it.qty} onChange={e=>setQty(i, e.target.value)}
+                <input type="text" inputMode="decimal" value={it.qty} onChange={e=>setQty(i, e.target.value)}
+                  onBlur={e=>setQty(i, parseServings(e.target.value))}
                   style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
                 <span style={{ fontSize:"0.68rem", color:COLORS.textSec, width:58 }}>× {it.unit || "serving"}</span>
                 <button style={{...s.btnDanger, padding:"4px 9px"}} onClick={()=>removeIngredient(i)}>✕</button>
@@ -3253,7 +3277,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, flexWrap:"wrap" }}>
               <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>Log</span>
-              <input type="number" min="0.5" step="0.5" value={logServings[r.id] ?? 1}
+              <input type="text" inputMode="decimal" value={logServings[r.id] ?? 1}
                 onChange={e=>setLogServings(m=>({...m, [r.id]: e.target.value}))}
                 style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
               <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>serving(s) today</span>
