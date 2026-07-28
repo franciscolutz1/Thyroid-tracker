@@ -721,11 +721,11 @@ const FOOD_DB = [
 { keys:["seasons 52 scallops","caramelized sea scallops","seasons 52 sea scallops"], name:"Seasons 52 Caramelized Sea Scallops", cal:440, pro:38, carb:28, fat:14, fib:4, se:30, io:130, zn:1.6, ir:1.2, mg:40, vd:0 },
 { keys:["seasons 52 smores","seasons 52 s'mores","chocolate smores","belgian chocolate smore"], name:"Seasons 52 Chocolate S'Mores (mini)", cal:300, pro:4, carb:36, fat:17, fib:4, se:0, io:0, zn:0, ir:0, mg:0, vd:0 },
 { keys:["lentil soup","homemade lentil soup"], name:"Homemade Lentil Soup", cal:175, pro:12, carb:30, fat:1, fib:16, se:2, io:33, zn:1.6, ir:3.9, mg:31, vd:0 },
-  { keys:["smoothie","bmp smoothie","recovery smoothie","protein smoothie"], name:"BMP Smoothie", cal:650, pro:50, carb:92, fat:14, fib:12, se:23, io:91, zn:3.2, ir:2.5, mg:146, vd:3 },
+  { keys:["smoothie","bmp smoothie","recovery smoothie","protein smoothie"], name:"BMP Smoothie", cal:650, pro:50, carb:92, fat:14, fib:12, se:23, io:91, zn:3.2, ir:2.5, mg:146, vd:3, mealTypes:["Snack"] },
  { keys:["smoothie #2","smoothie 2","high protein smoothie","high-protein smoothie","whey creatine smoothie"], name:"Smoothie #2 (High-Protein)", cal:555, pro:35, carb:85, fat:11, fib:10, se:24, io:59, zn:2.7, ir:1.8, mg:113, vd:120 },
   { keys:["pineapple peach oat chia smoothie", "smoothie pineapple peach banana"], name:"Pineapple Peach Banana Smoothie (w/ Oats, Chia, Greek Yogurt & Milk)", cal:475, pro:18, carb:76, fat:14, fib:11, se:8, io:45, zn:2, ir:1.5, mg:100, vd:2.5 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
-{ keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0 },
+{ keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0, mealTypes:["Lunch","Dinner"] },
   { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
 ];
@@ -3060,6 +3060,8 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
 
   const [name, setName] = useState("");
   const [prep, setPrep] = useState("");
+  const [mealTypes, setMealTypes] = useState(["Breakfast"]);
+  const toggleMealType = (t) => setMealTypes(list => list.includes(t) ? list.filter(x => x !== t) : [...list, t]);
   const [servings, setServings] = useState(1);
   const [ingredients, setIngredients] = useState([]);
   const [search, setSearch] = useState("");
@@ -3134,17 +3136,17 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
 
   const canSave = name.trim() && ingredients.length > 0;
     const startEdit = (r) => {
-    setEditingId(r.id); setName(r.name); setPrep(r.prep || ""); setServings(r.servings || 1);
+    setEditingId(r.id); setName(r.name); setPrep(r.prep || ""); setServings(r.servings || 1); setMealTypes(r.mealTypes && r.mealTypes.length ? r.mealTypes : (r.mealType ? [r.mealType] : ["Breakfast"]));
     setIngredients((r.ingredients || []).map(it => ({ ...it }))); setSearch(""); setText(""); setMissed([]);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const cancelEdit = () => {
-    setEditingId(null); setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setText(""); setMissed([]);
+    setEditingId(null); setName(""); setPrep(""); setServings(1); setMealTypes(["Breakfast"]); setIngredients([]); setSearch(""); setText(""); setMissed([]);
   };
   const save = () => {
     if (!canSave) { alert("Give the recipe a name and at least one ingredient."); return; }
-    onSave({ id: editingId || Date.now(), name: name.trim(), prep: prep.trim(), servings: sv, ingredients, total, per });
-    setName(""); setPrep(""); setServings(1); setIngredients([]); setSearch(""); setMissed([]);
+    onSave({ id: editingId || Date.now(), name: name.trim(), prep: prep.trim(), mealTypes, servings: sv, ingredients, total, per });
+    setName(""); setPrep(""); setServings(1); setMealTypes(["Breakfast"]); setIngredients([]); setSearch(""); setMissed([]);
     setFlash(editingId ? "updated" : "saved"); setEditingId(null); setTimeout(() => setFlash(null), 2500);
   };
 
@@ -3156,7 +3158,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
       fiber: m(r.per.fib), water: 0, selenium: m(r.per.se), iodine: m(r.per.io), zinc: m(r.per.zn),
       iron: m(r.per.ir), magnesium: m(r.per.mg), vitd: m(r.per.vd),
     };
-    onLog({ id: Date.now(), date: today(), type: "meal", mealType: "Dinner", time: nowTime(),
+    onLog({ id: Date.now(), date: today(), type: "meal", mealType: (r.mealTypes && r.mealTypes[0]) || r.mealType || "Dinner", time: nowTime(),
       name: n === 1 ? r.name : `${r.name} (×${n})`, nutrients, notes: r.prep ? `Recipe: ${r.prep}` : "Logged from recipe" });
     setFlash("logged:" + r.id); setTimeout(() => setFlash(null), 2500);
   };
@@ -3201,6 +3203,19 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
           <div style={s.formGroup}>
             <label style={s.label}>Makes (servings)</label>
             <input type="number" min="1" step="1" style={s.input} value={servings} onChange={e=>setServings(e.target.value)}/>
+          </div>
+        </div>
+        <div style={s.formGroup}>
+          <label style={s.label}>Meal type (select all that apply)</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {["Breakfast","Lunch","Dinner","Snack"].map(t => (
+              <button key={t} type="button" onClick={()=>toggleMealType(t)}
+                style={{ padding: "6px 12px", borderRadius: 16, border: `1px solid ${mealTypes.includes(t) ? COLORS.tealMid : COLORS.divider}`,
+                  background: mealTypes.includes(t) ? COLORS.tealPale : COLORS.white, color: mealTypes.includes(t) ? COLORS.tealDeep : COLORS.textSec,
+                  fontSize: "0.76rem", fontWeight: 600, cursor: "pointer" }}>
+                {mealTypes.includes(t) ? "✓ " : ""}{t}
+              </button>
+            ))}
           </div>
         </div>
         <div style={s.formGroup}>
@@ -3269,7 +3284,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:"0.9rem", fontWeight:600, color:COLORS.ink }}>{r.name}</div>
-                <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:2 }}>Makes {r.servings} · {r.ingredients.length} ingredient{r.ingredients.length!==1?"s":""}{r.prep ? ` · ${r.prep}` : ""}</div>
+                <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginTop:2 }}>{(r.mealTypes && r.mealTypes.length) ? `${r.mealTypes.join(" / ")} · ` : ""}Makes {r.servings} · {r.ingredients.length} ingredient{r.ingredients.length!==1?"s":""}{r.prep ? ` · ${r.prep}` : ""}</div>
               </div>
               <div style={{ display:"flex", gap:6, flexShrink:0 }}>
                 <button style={{...s.btnOutline, ...s.btnSm}} onClick={()=>startEdit(r)}>Edit</button>
@@ -3519,7 +3534,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     .map(l => l.name.toLowerCase());
   const VARIETY_PENALTY = 1.5;
   // Recipes act as loggable foods and feed the recommendation engine (#6)
-  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, ...(r.per || {}) }));
+  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, mealTypes: r.mealTypes && r.mealTypes.length ? r.mealTypes : (r.mealType ? [r.mealType] : []), ...(r.per || {}) }));
   const CANDIDATE_FOODS = [...FOOD_DB, ...recipeFoods];
   const foodBoosts = [];
   CANDIDATE_FOODS.forEach(food => {
@@ -3555,6 +3570,50 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     bestMatch: i === 0,
     confidence: f.coverage >= 0.6 ? "High" : f.coverage >= 0.35 ? "Medium" : "Fair",
   }));
+
+  // ── Calorie-aware gatekeeper: don't push more food once the day's calorie budget is spent ──
+  const caloriesGoalVal = GOALS.calories || 0;
+  const caloriesToday = todayTotals.calories || 0;
+  const overCalorieGoal = caloriesGoalVal > 0 && caloriesToday >= caloriesGoalVal;
+  const caloriesRemaining = Math.max(0, Math.round(caloriesGoalVal - caloriesToday));
+  const excellentAndDone = baselineScore >= 95 || (baselineScore >= 90 && overCalorieGoal);
+
+  // "Tomorrow's Best Foods" — same recurring gaps, ranked without a calorie ceiling since it's for a fresh day
+  const tomorrowBoosts = gapKeys.length ? CANDIDATE_FOODS.map(food => {
+    let rank = 0; const helps = [];
+    Object.entries(NUTRIENT_FOR_FIELD).forEach(([field, k]) => {
+      const contribution = food[field];
+      if (!contribution || contribution <= 0 || !gapKeys.includes(k)) return;
+      rank += contribution / (GOALS[k] || 1);
+      helps.push({ label: NUTRIENT_LABEL[k], amount: Math.round(contribution * 10) / 10, unit: UNIT_FOR[k] });
+    });
+    return { name: food.name, rank, helps, isRecipe: !!food.isRecipe };
+  }).filter(f => f.helps.length > 0).sort((a, b) => b.rank - a.rank).slice(0, 5) : [];
+
+  // Group tomorrow's suggestions by meal type where the source recipe has one tagged
+  const MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
+  const tomorrowByMeal = gapKeys.length ? MEAL_SLOTS.map(slot => {
+    const items = CANDIDATE_FOODS.filter(f => (f.mealTypes || []).includes(slot)).map(food => {
+      let rank = 0; const helps = [];
+      Object.entries(NUTRIENT_FOR_FIELD).forEach(([field, k]) => {
+        const contribution = food[field];
+        if (!contribution || contribution <= 0 || !gapKeys.includes(k)) return;
+        rank += contribution / (GOALS[k] || 1);
+        helps.push({ label: NUTRIENT_LABEL[k], amount: Math.round(contribution * 10) / 10, unit: UNIT_FOR[k] });
+      });
+      return { name: food.name, rank, helps, isRecipe: !!food.isRecipe };
+    }).filter(f => f.helps.length > 0).sort((a, b) => b.rank - a.rank).slice(0, 2);
+    return { slot, items };
+  }).filter(g => g.items.length > 0) : [];
+  const taggedNames = new Set(tomorrowByMeal.flatMap(g => g.items.map(i => i.name)));
+  const tomorrowUntagged = tomorrowBoosts.filter(f => !taggedNames.has(f.name));
+
+  const lifestyleTips = [
+    { icon: "🚶", action: "Take a 20-minute walk", note: "Supports metabolism and energy" },
+    { icon: "💧", action: "Hydrate", note: (todayTotals.water || 0) < GOALS.water ? `${Math.max(1, Math.ceil(GOALS.water - (todayTotals.water || 0)))} more cup(s) would hit your goal` : "You're on track for water today" },
+    { icon: "😴", action: "Go to bed before 11pm", note: "Consistent sleep supports thyroid hormone regulation" },
+    { icon: "💊", action: medTakenTodayBool ? "Meds logged — nice work" : "Log your medication", note: medTakenTodayBool ? "" : "Still pending for today" },
+  ];
 
 
 
@@ -3782,7 +3841,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     { key: "weekly", label: "Weekly Review" },
     { key: "reports", label: "Reports" },
     { key: "predictions", label: "Predictions" },
-        { key: "score", label: "Score Boosts" },
+        { key: "score", label: "Optimize" },
   ];
 
   const fmt2 = v => v == null ? "—" : (Number.isInteger(v) ? v : v.toFixed(1));
@@ -4109,9 +4168,120 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
       
            {section === "score" && (
               <div>
+          {excellentAndDone ? (
+            <>
+              <div style={s.card}>
+                <span style={{ fontSize: "0.9rem", fontWeight: 600, color: COLORS.tealDeep }}>🎉 Excellent day!</span>
+                <p style={{ fontSize: "0.8rem", color: COLORS.textSec, marginTop: 6, lineHeight: 1.5 }}>
+                  Today's thyroid support score is already <b style={{ color: COLORS.tealDeep }}>{baselineScore}/100</b>{overCalorieGoal ? <> and you've hit your calorie goal ({caloriesToday} / {caloriesGoalVal})</> : ""}. No additional food is necessary today.
+                </p>
+                {gapSummary.length > 0 && (
+                  <div style={{ marginTop: 10 }}>
+                    <p style={{ fontSize: "0.7rem", color: COLORS.textSec, marginBottom: 6 }}>The remaining gaps are minor:</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {gapSummary.map((g, i) => (
+                        <span key={i} style={{ background: COLORS.sagePale, color: COLORS.tealDeep, borderRadius: 20, padding: "3px 10px", fontSize: "0.7rem", fontWeight: 600 }}>
+                          {g.label}: {g.remaining}{g.unit}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ ...s.card, marginTop: 12 }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🌅 Tomorrow's Best Foods</span>
+                <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>Consider these tomorrow — they naturally cover what you were a little low on today.</p>
+                {tomorrowBoosts.length === 0 ? (
+                  <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>Nothing specific stands out — whatever you log tomorrow, you're in good shape.</p>
+                ) : (
+                  <>
+                    {tomorrowByMeal.map(g => (
+                      <div key={g.slot} style={{ marginBottom: 10 }}>
+                        <p style={{ fontSize: "0.72rem", fontWeight: 700, color: COLORS.tealDeep, marginBottom: 4 }}>Tomorrow's {g.slot}</p>
+                        {g.items.map((f, i) => (
+                          <div key={i} style={{ padding: "6px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                            <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
+                            {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px", marginLeft: 6 }}>🍳 Recipe</span>}
+                            <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>{f.helps.map(h => `${h.label} +${h.amount}${h.unit}`).join(" · ")}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {tomorrowUntagged.length > 0 && (
+                      <div>
+                        {tomorrowByMeal.length > 0 && <p style={{ fontSize: "0.72rem", fontWeight: 700, color: COLORS.tealDeep, marginBottom: 4 }}>Also worth considering</p>}
+                        {tomorrowUntagged.map((f, i) => (
+                          <div key={i} style={{ padding: "6px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                            <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
+                            {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px", marginLeft: 6 }}>🍳 Recipe</span>}
+                            <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>{f.helps.map(h => `${h.label} +${h.amount}${h.unit}`).join(" · ")}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </>
+          ) : overCalorieGoal ? (
+            <>
+              <div style={s.card}>
+                <span style={{ fontSize: "0.9rem", fontWeight: 600, color: COLORS.tealDeep }}>✅ Calorie goal reached</span>
+                <p style={{ fontSize: "0.8rem", color: COLORS.textSec, marginTop: 6, lineHeight: 1.5 }}>
+                  You're at {caloriesToday} / {caloriesGoalVal} calories today (score: {baselineScore}/100). Rather than more food, here are a few non-food ways to keep supporting your thyroid today.
+                </p>
+              </div>
+              <div style={{ ...s.card, marginTop: 12 }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🌿 Lifestyle</span>
+                {lifestyleTips.map((t, i) => (
+                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                    <span style={{ fontSize: "1.1rem" }}>{t.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{t.action}</div>
+                      {t.note && <div style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 2 }}>{t.note}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {tomorrowBoosts.length > 0 && (
+                <div style={{ ...s.card, marginTop: 12 }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🌅 Tomorrow's Best Foods</span>
+                  {tomorrowByMeal.map(g => (
+                    <div key={g.slot} style={{ marginTop: 10 }}>
+                      <p style={{ fontSize: "0.72rem", fontWeight: 700, color: COLORS.tealDeep, marginBottom: 4 }}>Tomorrow's {g.slot}</p>
+                      {g.items.map((f, i) => (
+                        <div key={i} style={{ padding: "6px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
+                          {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px", marginLeft: 6 }}>🍳 Recipe</span>}
+                          <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>{f.helps.map(h => `${h.label} +${h.amount}${h.unit}`).join(" · ")}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {tomorrowUntagged.length > 0 && (
+                    <div style={{ marginTop: 10 }}>
+                      {tomorrowByMeal.length > 0 && <p style={{ fontSize: "0.72rem", fontWeight: 700, color: COLORS.tealDeep, marginBottom: 4 }}>Also worth considering</p>}
+                      {tomorrowUntagged.map((f, i) => (
+                        <div key={i} style={{ padding: "6px 0", borderTop: i > 0 ? `1px solid ${COLORS.divider}` : "none" }}>
+                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: COLORS.ink }}>{f.name}</span>
+                          {f.isRecipe && <span style={{ fontSize: "0.6rem", fontWeight: 700, background: COLORS.amberPale, color: COLORS.amber, borderRadius: 4, padding: "1px 6px", marginLeft: 6 }}>🍳 Recipe</span>}
+                          <div style={{ fontSize: "0.64rem", color: COLORS.textSec, marginTop: 2 }}>{f.helps.map(h => `${h.label} +${h.amount}${h.unit}`).join(" · ")}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
-            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>Today's score: {baselineScore}/100 — options from your own food log, ranked by impact</p>
+            <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>
+              Today's score: {baselineScore}/100 — options from your own food log, ranked by impact
+              {caloriesGoalVal > 0 && <> · you have about {caloriesRemaining} calories left today</>}
+            </p>
             {gapSummary.length > 0 && (() => {
               const maxRem = Math.max(...gapSummary.map(g => g.remaining), 1);
               const chipColor = (r) => {
@@ -4192,6 +4362,8 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
               </div>
             ))}
           </div>
+            </>
+          )}
         </div>
       )}
 
