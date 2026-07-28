@@ -57,7 +57,7 @@ const SYMPTOMS_LIST = [
   {key:"good day",emoji:"✨",label:"Good Day!"}
 ];
 
-const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})), foodMealTags: {}, exerciseLog: [] });
+const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})), foodMealTags: {}, exerciseLog: [], excludedFoods: {} });
 
 async function loadFromStorage() {
   // Always try Firebase first — this is the cross-device sync source
@@ -589,7 +589,7 @@ const FOOD_DB = [
  { keys:["shrimp","prawn"], name:"Shrimp (3oz)", cal:84, pro:18, carb:0, fat:1, fib:0, se:33, io:35, zn:1.3, ir:2.6, mg:29, vd:0 },
  { keys:["cod","tilapia","white fish","fish fillet"], name:"White Fish (4oz)", cal:120, pro:26, carb:0, fat:1, fib:0, se:40, io:130, zn:0.5, ir:0.3, mg:38, vd:44 },
  { keys:["sardine","sardines"], name:"Sardines (3oz)", cal:177, pro:21, carb:0, fat:10, fib:0, se:45, io:35, zn:1.3, ir:2.5, mg:35, vd:193 },
- { keys:["oyster","oysters"], name:"Oysters (6)", cal:100, pro:10, carb:9, fat:3, fib:0, se:51, io:93, zn:39, ir:7.8, mg:47, vd:320 },
+ { keys:["oyster","oysters"], name:"Oysters (6)", cal:100, pro:10, carb:9, fat:3, fib:0, se:51, io:93, zn:39, ir:7.8, mg:47, vd:320, excludeDefault:true },
  { keys:["seaweed","nori","kelp"], name:"Seaweed/Nori", cal:10, pro:1, carb:1, fat:0, fib:0.5, se:1, io:232, zn:0.1, ir:0.4, mg:7, vd:0 },
  { keys:["mussel","mussels","steamed mussels"], name:"Mussels (3oz)", cal:146, pro:20, carb:6, fat:4, fib:0, se:76, io:140, zn:2.3, ir:6.7, mg:30, vd:0 },
  { keys:["chicken breast","grilled chicken","baked chicken","chicken"], name:"Chicken Breast (4oz)",cal:185, pro:35, carb:0, fat:4, fib:0, se:27, io:8, zn:1.0, ir:1.1, mg:32, vd:4 },
@@ -3086,7 +3086,7 @@ function describeCorr(r) {
   return { strength, dir };
 }
 
-function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {}, onSetMealTags }) {
+function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {}, onSetMealTags, excludedFoods = {}, onSetExcluded }) {
   const [search, setSearch] = useState("");
   const [flash, setFlash] = useState(null);
   const [qtys, setQtys] = useState({});
@@ -3100,9 +3100,14 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
     if (foodMealTags[key]) return foodMealTags[key];
     return builtIn || [];
   };
+  const isExcluded = (name, builtInDefault) => {
+    const key = name.toLowerCase();
+    if (excludedFoods[key] !== undefined) return excludedFoods[key];
+    return !!builtInDefault;
+  };
   const items = [
-    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
-    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), mealTypes: tagsFor(f.name, f.mealTypes), nutrients: foodNut(f) })),
+    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), excluded: isExcluded(r.name, false), nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
+    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), mealTypes: tagsFor(f.name, f.mealTypes), excluded: isExcluded(f.name, f.excludeDefault), nutrients: foodNut(f) })),
   ];
   const q = search.trim().toLowerCase();
   const filtered = q
@@ -3139,8 +3144,9 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{flex:1, minWidth:0}}>
                   <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                    <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
+                    <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap", opacity: it.excluded ? 0.55 : 1}}>{it.name}</span>
                     {it.isRecipe && <span style={{fontSize:"0.58rem",fontWeight:700,background:COLORS.amberPale,color:COLORS.amber,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🍳</span>}
+                    {!embedded && it.excluded && <span style={{fontSize:"0.56rem",fontWeight:700,background:COLORS.coralPale,color:COLORS.coral,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🚫 not suggested</span>}
                     {!embedded && (it.mealTypes||[]).map(t => (
                       <span key={t} style={{fontSize:"0.56rem",fontWeight:700,background:COLORS.tealPale,color:COLORS.tealDeep,borderRadius:4,padding:"1px 5px",flexShrink:0}}>{t}</span>
                     ))}
@@ -3160,7 +3166,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
               {editing===it.name && (
                 <div style={{marginTop:8, padding:"10px", background:COLORS.tealPale, borderRadius:8}}>
                   <div style={{fontSize:"0.7rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:6}}>Which meals is this for?</div>
-                  <div style={{display:"flex", gap:6, flexWrap:"wrap", marginBottom:8}}>
+                  <div style={{display:"flex", gap:6, flexWrap:"wrap", marginBottom:10}}>
                     {MEAL_TYPE_OPTIONS.map(t => (
                       <button key={t} onClick={()=>toggleEditTag(t)}
                         style={{ padding:"5px 10px", borderRadius:14, border:`1px solid ${editTags.includes(t) ? COLORS.tealMid : COLORS.divider}`,
@@ -3169,6 +3175,18 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
                         {editTags.includes(t) ? "✓ " : ""}{t}
                       </button>
                     ))}
+                  </div>
+                  <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, paddingTop:8, borderTop:`1px solid ${COLORS.tealLight}`}}>
+                    <div>
+                      <div style={{fontSize:"0.74rem", fontWeight:600, color:COLORS.ink}}>Suggest this in Optimize?</div>
+                      <div style={{fontSize:"0.64rem", color:COLORS.textSec, marginTop:1}}>Turn off for foods you rarely eat (e.g. only at restaurants)</div>
+                    </div>
+                    <button onClick={()=>onSetExcluded && onSetExcluded(it.name, !it.excluded)}
+                      style={{ padding:"5px 12px", borderRadius:14, border:`1px solid ${it.excluded ? COLORS.coral : COLORS.tealMid}`,
+                        background: it.excluded ? COLORS.coralPale : COLORS.tealPale, color: it.excluded ? COLORS.coral : COLORS.tealDeep,
+                        fontSize:"0.74rem", fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", flexShrink:0 }}>
+                      {it.excluded ? "🚫 Off" : "✓ On"}
+                    </button>
                   </div>
                   <button style={{...s.btnPrimary,...s.btnSm}} onClick={()=>saveTags(it.name)}>Save</button>
                 </div>
@@ -3583,7 +3601,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   );
 }
 
-function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], wellnessLog = [], presets = { meds: [], vits: [] }, foodMealTags = {}, exerciseLog = [] }) {
+function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], wellnessLog = [], presets = { meds: [], vits: [] }, foodMealTags = {}, exerciseLog = [], excludedFoods = {} }) {
   const GOALS = goals || DEFAULT_GOALS;
   const [section, setSection] = useState("overview");
   const [range, setRange] = useState(14);
@@ -3698,6 +3716,15 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   const exerciseComparison = (exerciseDays.length >= minGroupSize && noExerciseDays.length >= minGroupSize) ? {
     energyExercise: avgEnergyFor(exerciseDays) != null ? Math.round(avgEnergyFor(exerciseDays) * 10) / 10 : null,
     energyRest: avgEnergyFor(noExerciseDays) != null ? Math.round(avgEnergyFor(noExerciseDays) * 10) / 10 : null,
+  } : null;
+
+  // Compound: days with 8+ cups water AND a logged workout, vs. all other days — rate of a specific symptom
+  const waterExerciseDays = symDates.filter(dt => (getDayTotals(dt).water || 0) >= 8 && exerciseDateSet.has(dt));
+  const otherSymptomDays = symDates.filter(dt => !((getDayTotals(dt).water || 0) >= 8 && exerciseDateSet.has(dt)));
+  const rateOfSymptom = (arr, symptomKey) => arr.length ? Math.round((arr.filter(dt => (symptomMap[dt].symptoms || []).includes(symptomKey)).length / arr.length) * 100) : null;
+  const hydrationExerciseComparison = (waterExerciseDays.length >= minGroupSize && otherSymptomDays.length >= minGroupSize) ? {
+    rateWith: rateOfSymptom(waterExerciseDays, "constipation"),
+    rateWithout: rateOfSymptom(otherSymptomDays, "constipation"),
   } : null;
 
   const pairCounts = {};
@@ -3815,9 +3842,14 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
   const VARIETY_PENALTY = 1.5;
   // Recipes act as loggable foods and feed the recommendation engine (#6)
   const tagsFor = (name, builtIn) => foodMealTags[name.toLowerCase()] || builtIn || [];
+  const isExcludedFromSuggestions = (name, builtInDefault) => {
+    const key = name.toLowerCase();
+    if (excludedFoods[key] !== undefined) return excludedFoods[key];
+    return !!builtInDefault;
+  };
   const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, mealTypes: tagsFor(r.name, r.mealTypes), ...(r.per || {}) }));
   const taggedFoodDb = FOOD_DB.map(f => ({ ...f, mealTypes: tagsFor(f.name, f.mealTypes) }));
-  const CANDIDATE_FOODS = [...taggedFoodDb, ...recipeFoods];
+  const CANDIDATE_FOODS = [...taggedFoodDb, ...recipeFoods].filter(f => !isExcludedFromSuggestions(f.name, f.excludeDefault));
   const foodBoosts = [];
   CANDIDATE_FOODS.forEach(food => {
     const simulated = { ...todayTotals };
@@ -3838,15 +3870,22 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     const nm = food.name.toLowerCase();
     const recent = recentNames.some(n => n.includes(nm) || nm.includes(n));
     const adjRaw = ptsRaw - (recent ? VARIETY_PENALTY : 0);
+    // Fair gap-closure score: how much of each *remaining* gap this food fills, weighted equally across all 7 tracked nutrients
+    // (unlike the score formula, this doesn't discount protein/fiber/water — so genuinely fiber-heavy foods can surface)
+    const gapCloseScore = helps.length ? helps.reduce((s, h) => {
+      const remainingAmt = (GOALS[h.key] || 0) - (todayTotals[h.key] || 0);
+      return s + (remainingAmt > 0 ? Math.min(1, h.amount / remainingAmt) : 0);
+    }, 0) / gapKeys.length : 0;
     foodBoosts.push({
-      name: food.name, points: Math.round(ptsRaw), helps, ptsRaw, adjRaw, recent,
+      name: food.name, points: Math.round(ptsRaw), helps, ptsRaw, adjRaw, recent, gapCloseScore,
       isRecipe: !!food.isRecipe,
       projected: Math.round(baselineRaw + ptsRaw),
       coverage: gapKeys.length ? helps.length / gapKeys.length : 0,
     });
   });
-  // Rank by variety-adjusted boost so recently eaten foods yield to fresh options with similar impact (#5)
-  foodBoosts.sort((a, b) => b.adjRaw - a.adjRaw);
+  // Rank primarily by fair gap-closure (so fiber/protein/water aren't structurally buried under selenium/iodine/zinc/iron/vitD),
+  // falling back to variety-adjusted score points to break ties
+  foodBoosts.sort((a, b) => b.gapCloseScore - a.gapCloseScore || b.adjRaw - a.adjRaw);
   const topFoodBoosts = foodBoosts.slice(0, 5).map((f, i) => ({
     ...f,
     bestMatch: i === 0,
@@ -4314,6 +4353,15 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
             </div>
           )}
 
+          {hydrationExerciseComparison && (
+            <div style={{ marginBottom: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Hydration + Exercise ↔ Constipation</p>
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.4 }}>
+                On days with 8+ cups of water and a workout logged, constipation showed up <b style={{ color: COLORS.tealDeep }}>{hydrationExerciseComparison.rateWith}%</b> of the time, vs <b style={{ color: COLORS.coral }}>{hydrationExerciseComparison.rateWithout}%</b> on other days.
+              </p>
+            </div>
+          )}
+
           {topPair && (
             <div style={{ paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
               <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Symptoms That Cluster</p>
@@ -4323,7 +4371,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
             </div>
           )}
 
-          {!medComparison && !topPair && corrResults.length === 0 && (
+          {!medComparison && !topPair && !exerciseComparison && !hydrationExerciseComparison && corrResults.length === 0 && (
             <p style={{ fontSize: "0.72rem", color: COLORS.textSec }}>Keep logging daily — correlations get more reliable with more data.</p>
           )}
         </div>
@@ -4707,6 +4755,7 @@ export default function App() {
   const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
   const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
   const setFoodMealTags = useCallback((name, tags) => setData(d => ({ ...d, foodMealTags: { ...(d.foodMealTags||{}), [name.toLowerCase()]: tags } })), []);
+  const setFoodExcluded = useCallback((name, excluded) => setData(d => ({ ...d, excludedFoods: { ...(d.excludedFoods||{}), [name.toLowerCase()]: excluded } })), []);
   const addExercise    = useCallback(entry => setData(d=>({...d, exerciseLog:[...(d.exerciseLog||[]), entry]})), []);
   const deleteExercise = useCallback(id => setData(d=>({...d, exerciseLog:(d.exerciseLog||[]).filter(e=>e.id!==id)})), []);
   const deleteWeight = useCallback(id => setData(d=>({...d, weightLog:(d.weightLog||[]).filter(e=>e.id!==id)})), []);
@@ -4747,7 +4796,7 @@ export default function App() {
      {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
-        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog} foodMealTags={data.foodMealTags||{}} onSetMealTags={setFoodMealTags}/>}
+        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog} foodMealTags={data.foodMealTags||{}} onSetMealTags={setFoodMealTags} excludedFoods={data.excludedFoods||{}} onSetExcluded={setFoodExcluded}/>}
         {tab==="recipes"    && <Recipes recipes={data.recipes||[]} pantry={data.pantry||[]} onSave={addRecipe} onDelete={deleteRecipe} onLog={addLog}/>}
         {tab==="pantry"     && <Pantry pantry={data.pantry||[]} onAdd={addPantry} onDelete={deletePantry}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
@@ -4755,7 +4804,7 @@ export default function App() {
         {tab==="labs"       && <LabResults labLog={data.labLog||[]} onSave={addLab} onDelete={deleteLab}/>}
         {tab==="weekly"     && <WeeklyDashboard logs={data.logs}/>}
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
-        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]} wellnessLog={data.wellnessLog||[]} presets={data.presets||{meds:[],vits:[]}} foodMealTags={data.foodMealTags||{}} exerciseLog={data.exerciseLog||[]}/>}
+        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]} wellnessLog={data.wellnessLog||[]} presets={data.presets||{meds:[],vits:[]}} foodMealTags={data.foodMealTags||{}} exerciseLog={data.exerciseLog||[]} excludedFoods={data.excludedFoods||{}}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
               {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight} heightIn={data.heightIn||""} onSaveHeight={saveHeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
