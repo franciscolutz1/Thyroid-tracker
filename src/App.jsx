@@ -31,7 +31,7 @@ const DEFAULT_PRESETS = {
   meds: [{name:"Synthroid (Levothyroxine)",dose:"125mcg"},{name:"Lamotrigine",dose:"25mg"},{name:"Sertraline",dose:"100mg"}],
   vits: [{name:"Vitamin K",dose:"6090mcg"},{name:"Vitamin D3",dose:"2000IU"},{name:"Vitamin B12",dose:"1mg"},{name:"Selenium",dose:"200mcg"},{name:"Magnesium Glycinate",dose:"200mg"},{name:"Valerian Root",dose:"320mg"},{name:"GABA",dose:"250mg"}]
 };
-const NUTRIENT_KEYS = ["calories","protein","carbs","fat","fiber","water","selenium","iodine","zinc","iron","magnesium","vitd","vitk","b12"];
+const NUTRIENT_KEYS = ["calories","protein","carbs","fat","fiber","water","selenium","iodine","zinc","iron","magnesium","vitd","vitk","b12","sodium","addedSugar"];
 const EXERCISE_ACTIVITIES = [
   { key: "walking", emoji: "🚶", label: "Walking", points: 2 },
   { key: "swimming", emoji: "🏊", label: "Swimming", points: 4 },
@@ -176,6 +176,16 @@ const VITD_RANGES = [
   { max:10000,     color:"#f2994a", label:"Caution" },
   { max:Infinity,  color:"#e0554f", label:"Above safe limit" },
 ];
+const SODIUM_RANGES = [
+  { max:2300,      color:"#2fbf8f", label:"On target" },
+  { max:3000,      color:"#f0c14b", label:"Caution" },
+  { max:Infinity,  color:"#e0554f", label:"High" },
+];
+const ADDED_SUGAR_RANGES = [
+  { max:25,        color:"#2fbf8f", label:"On target" },
+  { max:36,        color:"#f0c14b", label:"Caution" },
+  { max:Infinity,  color:"#e0554f", label:"High" },
+];
 
 function RangeBar({ label, badge, current, unit, ranges, scaleMax, note, weekAvg }) {
   const tier = rangeTier(current, ranges);
@@ -315,6 +325,12 @@ function EditMealModal({ log, onSave, onClose }) {
         <div style={s.formRow}>
           <div style={s.formGroup}><label style={s.label}>Magnesium (mg)</label><input type="number" style={s.input} value={form.nutrients.magnesium||""} onChange={e=>setN("magnesium",e.target.value)} min="0"/></div>
           <div style={s.formGroup}><label style={s.label}>Vitamin D (IU)</label><input type="number" style={s.input} value={form.nutrients.vitd||""} onChange={e=>setN("vitd",e.target.value)} min="0"/></div>
+        </div>
+
+        <div style={{ fontSize:"0.74rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", margin:"6px 0 8px" }}>Diet Ceilings — lower is better</div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Sodium (mg)</label><input type="number" style={s.input} value={form.nutrients.sodium||""} onChange={e=>setN("sodium",e.target.value)} min="0"/></div>
+          <div style={s.formGroup}><label style={s.label}>Added Sugar (g)</label><input type="number" style={s.input} value={form.nutrients.addedSugar||""} onChange={e=>setN("addedSugar",e.target.value)} min="0"/></div>
         </div>
 
         <div style={s.formGroup}><label style={s.label}>Notes</label><textarea style={s.textarea} value={form.notes} onChange={e=>set("notes",e.target.value)}/></div>
@@ -507,6 +523,8 @@ function Dashboard({ logs, goals, wellnessLog = [], exerciseLog = [], onDelete, 
         <NutrientBar label="Water" current={totals.water} goal={goals.water} unit=" cups" weekAvg={weekAvg.water} />
         <NutrientBar label="Vitamin K" current={totals.vitk||0} goal={goals.vitk} unit="mcg" weekAvg={weekAvg.vitk} />
         <NutrientBar label="Vitamin B12" current={totals.b12||0} goal={goals.b12} unit="mcg" weekAvg={weekAvg.b12} />
+        <RangeBar label="Sodium" badge="Ceiling ⬇" current={totals.sodium||0} unit="mg" ranges={SODIUM_RANGES} scaleMax={4000} note="Target: ≤2300mg/day" weekAvg={weekAvg.sodium} />
+        <RangeBar label="Added Sugar" badge="Ceiling ⬇" current={totals.addedSugar||0} unit="g" ranges={ADDED_SUGAR_RANGES} scaleMax={50} note="Target: <25g/day" weekAvg={weekAvg.addedSugar} />
       </div>
 
       {/* Insights */}
@@ -828,6 +846,7 @@ function estimateNutrients(q) {
     // Generic fallback estimate
     return { name: q.slice(0,40), calories:300, protein:15, carbs:30, fat:10, fiber:3,
              selenium:10, iodine:20, zinc:1, iron:1.5, magnesium:30, vitd:20,
+             sodium:200, addedSugar:0,
              thyroid_note:"Estimated values — verify with a nutrition label for accuracy." };
   }
 
@@ -855,6 +874,7 @@ function estimateNutrients(q) {
     fiber: Math.round(best.fib*mult*10)/10, selenium: Math.round(best.se*mult*10)/10,
     iodine: Math.round(best.io*mult*10)/10, zinc: Math.round(best.zn*mult*10)/10,
     iron: Math.round(best.ir*mult*10)/10, magnesium: Math.round(best.mg*mult), vitd: Math.round(best.vd*mult),
+    sodium: Math.round((best.sod||0)*mult), addedSugar: Math.round((best.asug||0)*mult*10)/10,
     thyroid_note: note
   };
 }
@@ -903,6 +923,7 @@ function LogMeal({ onSave }) {
         iodine:    multiply(raw.iodine),    zinc:      multiply(raw.zinc),
         iron:      multiply(raw.iron),      magnesium: multiply(raw.magnesium),
         vitd:      multiply(raw.vitd),
+        sodium:    multiply(raw.sodium),    addedSugar: multiply(raw.addedSugar),
       };
       const servLabel = sv !== 1 ? ` (×${sv})` : "";
       setForm(f => ({
@@ -912,7 +933,8 @@ function LogMeal({ onSave }) {
           calories: n.calories, protein: n.protein, carbs: n.carbs,
           fat: n.fat, fiber: n.fiber, water: f.nutrients.water,
           selenium: n.selenium, iodine: n.iodine, zinc: n.zinc,
-          iron: n.iron, magnesium: n.magnesium, vitd: n.vitd
+          iron: n.iron, magnesium: n.magnesium, vitd: n.vitd,
+          sodium: n.sodium, addedSugar: n.addedSugar
         }
       }));
       setAiChips([`${n.calories} cal`,`${n.protein}g protein`,`${n.carbs}g carbs`,`${n.fat}g fat`,`${n.selenium}mcg Se`,`${n.iodine}mcg iodine`,`${n.zinc}mg zinc`,`${n.iron}mg iron`]);
@@ -1100,6 +1122,12 @@ function LogMeal({ onSave }) {
         <div style={s.formRow}>
           <div style={s.formGroup}><label style={s.label}>Magnesium (mg)</label><input type="number" style={s.input} value={form.nutrients.magnesium} onChange={e=>setN("magnesium",e.target.value)} placeholder="0" min="0"/></div>
           <div style={s.formGroup}><label style={s.label}>Vitamin D (IU)</label><input type="number" style={s.input} value={form.nutrients.vitd} onChange={e=>setN("vitd",e.target.value)} placeholder="0" min="0"/></div>
+        </div>
+
+        <div style={{ fontSize:"0.76rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", margin:"8px 0 8px" }}>Diet Ceilings — lower is better</div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Sodium (mg)</label><input type="number" style={s.input} value={form.nutrients.sodium} onChange={e=>setN("sodium",e.target.value)} placeholder="0" min="0"/></div>
+          <div style={s.formGroup}><label style={s.label}>Added Sugar (g)</label><input type="number" style={s.input} value={form.nutrients.addedSugar} onChange={e=>setN("addedSugar",e.target.value)} placeholder="0" min="0"/></div>
         </div>
 
         <div style={s.formGroup}><label style={s.label}>Notes</label><textarea style={s.textarea} value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="e.g. Had raw kale, or took meds near this meal…"/></div>
