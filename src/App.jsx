@@ -678,7 +678,9 @@ const FOOD_DB = [
  { keys:["spinach","baby spinach"], name:"Spinach (2 cups)", cal:14, pro:2, carb:2, fat:0, fib:1.4, se:0.6, io:0, zn:0.3, ir:1.6, mg:47, vd:0 },
  { keys:["broccoli"], name:"Broccoli (1 cup)", cal:55, pro:4, carb:11, fat:1, fib:5, se:1.6, io:8, zn:0.4, ir:0.7, mg:33, vd:0 },
  { keys:["cauliflower"], name:"Cauliflower (1 cup)", cal:27, pro:2, carb:5, fat:0, fib:3, se:0.6, io:0, zn:0.3, ir:0.4, mg:16, vd:0 },
- { keys:["sweet potato","yam"], name:"Sweet Potato", cal:103, pro:2, carb:24, fat:0, fib:4, se:0.2, io:0, zn:0.3, ir:0.7, mg:27, vd:0 },
+ { keys:["smoked chuck roast","chuck roast","smoked chuck","beef chuck","smoked beef chuck"], name:"Smoked Chuck Roast (6oz)", cal:440, pro:46, carb:1, fat:28, fib:0, se:26, io:8, zn:7.5, ir:3.2, mg:34, vd:8, sod:650, asug:0 },
+ { keys:["steamed veggies","steamed vegetables","veggie side","steamed veggie side","mixed steamed veggies"], name:"Steamed Veggie Side", cal:90, pro:4, carb:10, fat:5, fib:4, se:6, io:2, zn:0.7, ir:1.2, mg:30, vd:6, sod:30, asug:0 },
+  { keys:["sweet potato","yam"], name:"Sweet Potato", cal:103, pro:2, carb:24, fat:0, fib:4, se:0.2, io:0, zn:0.3, ir:0.7, mg:27, vd:0 },
  { keys:["potato","baked potato"], name:"Potato (medium)", cal:161, pro:4, carb:37, fat:0, fib:4, se:0.4, io:0, zn:0.4, ir:1.9, mg:48, vd:0 },
  { keys:["pictsweet","roasted veggies","roasted vegetables","vegetables for roasting","broccoli potato carrot roast","roasted veggie blend"], name:"Roasted Veggies (Pictsweet, 1 cup)", cal:70, pro:2, carb:12, fat:1, fib:2, se:1, io:3, zn:0.4, ir:0.7, mg:25, vd:0 },
   { keys:["carrot","carrots"], name:"Carrots (1 cup)", cal:52, pro:1, carb:12, fat:0, fib:3.6, se:0.1, io:0, zn:0.3, ir:0.4, mg:15, vd:0 },
@@ -825,12 +827,22 @@ const SEASONINGS_REF = [
 
 function estimateNutrients(q) {
   let best = null, bestScore = 0;
+  const norm = s => ` ${s.replace(/[^a-z0-9]+/g, " ").trim()} `;
+  const tokenize = s => s.replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  const stemEq = (a, b) => { if (a === b) return true; const [x, y] = a.length < b.length ? [a, b] : [b, a]; return y === x + "s" || y === x + "es"; };
+  const nq = norm(q), qWords = tokenize(q);
   for (const food of FOOD_DB) {
     for (const key of food.keys) {
-      if (q.includes(key)) {
-        const score = key.length;
-        if (score > bestScore) { bestScore = score; best = food; }
+      let score = 0;
+      if (q === key) score = 1000;                             // exact match
+      else if (nq.includes(norm(key))) score = key.length + 50; // key is a whole phrase inside the query
+      else if (norm(key).includes(nq)) score = q.length + 40;   // query is a whole phrase inside the key
+      else {                                                     // otherwise, count shared whole words
+        const kWords = tokenize(key);
+        const shared = qWords.filter(w => w.length > 2 && kWords.some(kw => stemEq(w, kw)));
+        if (shared.length) score = shared.join("").length;
       }
+      if (score > bestScore) { bestScore = score; best = food; }
     }
   }
 
