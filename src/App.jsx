@@ -32,6 +32,20 @@ const DEFAULT_PRESETS = {
   vits: [{name:"Vitamin K",dose:"6090mcg"},{name:"Vitamin D3",dose:"2000IU"},{name:"Vitamin B12",dose:"1mg"},{name:"Selenium",dose:"200mcg"},{name:"Magnesium Glycinate",dose:"200mg"},{name:"Valerian Root",dose:"320mg"},{name:"GABA",dose:"250mg"}]
 };
 const NUTRIENT_KEYS = ["calories","protein","carbs","fat","fiber","water","selenium","iodine","zinc","iron","magnesium","vitd","vitk","b12"];
+const EXERCISE_ACTIVITIES = [
+  { key: "walking", emoji: "🚶", label: "Walking", points: 2 },
+  { key: "swimming", emoji: "🏊", label: "Swimming", points: 4 },
+  { key: "strength", emoji: "💪", label: "Strength training", points: 5 },
+  { key: "cycling", emoji: "🚴", label: "Cycling", points: 4 },
+  { key: "running", emoji: "🏃", label: "Running", points: 4 },
+  { key: "other", emoji: "🏋️", label: "Other", points: 2 },
+];
+const INTENSITY_LEVELS = ["Easy", "Moderate", "Vigorous"];
+function exercisePointsForDate(exerciseLog, dateStr) {
+  const entries = (exerciseLog || []).filter(e => e.date === dateStr);
+  const total = entries.reduce((s, e) => s + (EXERCISE_ACTIVITIES.find(a => a.key === e.activity)?.points || 2), 0);
+  return Math.min(10, total); // cap the daily bonus
+}
 const SYMPTOMS_LIST = [
   {key:"fatigue",emoji:"😴",label:"Fatigue"},{key:"brain fog",emoji:"🌫️",label:"Brain Fog"},
   {key:"weight gain",emoji:"⚖️",label:"Wt. Gain"},{key:"weight loss",emoji:"📉",label:"Wt. Loss"},
@@ -43,7 +57,7 @@ const SYMPTOMS_LIST = [
   {key:"good day",emoji:"✨",label:"Good Day!"}
 ];
 
-const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})) });
+const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})), foodMealTags: {}, exerciseLog: [] });
 
 async function loadFromStorage() {
   // Always try Firebase first — this is the cross-device sync source
@@ -108,7 +122,7 @@ const s = {
   insight: (type) => ({ display:"flex", gap:10, alignItems:"flex-start", padding:11, borderRadius:8, marginBottom:8, background: type==="good"?COLORS.sagePale: type==="warn"?COLORS.amberPale: COLORS.tealPale }),
 };
 
-function NutrientBar({ label, badge, current, goal, unit, thyroid }) {
+function NutrientBar({ label, badge, current, goal, unit, thyroid, weekAvg }) {
   const pct = Math.min(100, (current / (goal||1)) * 100);
   const color = pct >= 90 ? COLORS.tealLight : pct >= 50 ? COLORS.amber : pct > 0 ? "#cce5e5" : COLORS.divider;
   return (
@@ -124,6 +138,7 @@ function NutrientBar({ label, badge, current, goal, unit, thyroid }) {
       <div style={{ height:5, background:COLORS.mist, borderRadius:3, overflow:"hidden" }}>
         <div style={{ height:"100%", width:`${pct}%`, background:color, borderRadius:3, transition:"width 0.4s" }} />
       </div>
+      {weekAvg != null && <div style={{ fontSize:"0.62rem", color:COLORS.textSec, marginTop:4 }}>7-day avg: {weekAvg}{unit}</div>}
     </div>
   );
 }
@@ -162,7 +177,7 @@ const VITD_RANGES = [
   { max:Infinity,  color:"#e0554f", label:"Above safe limit" },
 ];
 
-function RangeBar({ label, badge, current, unit, ranges, scaleMax, note }) {
+function RangeBar({ label, badge, current, unit, ranges, scaleMax, note, weekAvg }) {
   const tier = rangeTier(current, ranges);
   const p = v => Math.min(100, (v/scaleMax)*100);
   let stops = [], prevPct = 0;
@@ -187,6 +202,7 @@ function RangeBar({ label, badge, current, unit, ranges, scaleMax, note }) {
         <div style={{ position:"absolute", left:`calc(${markerPct}% - 1px)`, top:-2, width:2, height:10, background:"#1f2937", borderRadius:1 }} />
       </div>
       {note && <div style={{ fontSize:"0.58rem", color:COLORS.textSec, marginTop:4 }}>{note}</div>}
+      {weekAvg != null && <div style={{ fontSize:"0.62rem", color:COLORS.textSec, marginTop:4 }}>7-day avg: {weekAvg}{unit}</div>}
     </div>
   );
 }
@@ -346,7 +362,7 @@ function suppNutrients(name, dose) {
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
 
-function Dashboard({ logs, goals, onDelete, onEdit }) {
+function Dashboard({ logs, goals, wellnessLog = [], exerciseLog = [], onDelete, onEdit }) {
   const todayLogs = logs.filter(l => l.date === today());
   const totals = Object.fromEntries(NUTRIENT_KEYS.map(k => [k, 0]));
   todayLogs.filter(l => l.type==="meal").forEach(l => NUTRIENT_KEYS.forEach(k => { totals[k] += l.nutrients?.[k]||0; }));
@@ -355,6 +371,24 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
     const n = suppNutrients(l.name, l.dose);
     Object.entries(n).forEach(([k,v]) => { if(totals[k]!==undefined) totals[k] += v; });
   });
+
+  // 7-day average (including today) for each nutrient, for context next to today's value
+  const last7Dates = [];
+  for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); last7Dates.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`); }
+  const dayTotalsFor = (dateStr) => {
+    const dayLogs = logs.filter(l => l.date === dateStr);
+    const t = Object.fromEntries(NUTRIENT_KEYS.map(k => [k, 0]));
+    dayLogs.filter(l => l.type==="meal").forEach(l => NUTRIENT_KEYS.forEach(k => { t[k] += l.nutrients?.[k]||0; }));
+    dayLogs.filter(l => l.type==="vit").forEach(l => { const n = suppNutrients(l.name, l.dose); Object.entries(n).forEach(([k,v]) => { if(t[k]!==undefined) t[k] += v; }); });
+    return t;
+  };
+  const daysWithData = last7Dates.filter(dt => logs.some(l => l.date === dt && (l.type==="meal"||l.type==="vit")));
+  const weekAvg = Object.fromEntries(NUTRIENT_KEYS.map(k => {
+    if (daysWithData.length === 0) return [k, null];
+    const sum = daysWithData.reduce((s, dt) => s + (dayTotalsFor(dt)[k] || 0), 0);
+    return [k, Math.round((sum / daysWithData.length) * 10) / 10];
+  }));
+
   const symptomEntry = todayLogs.find(l => l.type==="symptom");
   const medLogged = todayLogs.some(l => l.type==="med"||l.type==="vit");
 
@@ -364,7 +398,8 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
   ["protein","fiber","water"].forEach(k => { scoreSum += Math.min(1, totals[k]/(goals[k]||1))*0.5; scoreCount+=0.5; });
   if (symptomEntry?.energy) { scoreSum += symptomEntry.energy/10; scoreCount++; }
   if (medLogged) { scoreSum+=1; scoreCount++; }
-  const score = scoreCount>0 ? Math.round((scoreSum/scoreCount)*100) : null;
+  const exerciseBonus = exercisePointsForDate(exerciseLog, today());
+  const score = scoreCount>0 ? Math.min(100, Math.round((scoreSum/scoreCount)*100) + exerciseBonus) : null;
   const circumference = 226;
   const offset = score!=null ? circumference-(score/100)*circumference : circumference;
   const ringColor = score==null ? COLORS.divider : score>=75 ? COLORS.tealLight : score>=50 ? COLORS.amber : COLORS.coral;
@@ -446,6 +481,11 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
                  return low.length ? `Focus on: ${low.join(", ")} — and take meds on time.` : "Focus on thyroid-key nutrients and taking meds on time.";
                })()}
             </div>
+            {exerciseBonus > 0 && (
+              <div style={{ fontSize:"0.72rem", color:COLORS.tealDeep, fontWeight:600, marginTop:6 }}>
+                🏃 +{exerciseBonus} points from today's exercise
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -453,20 +493,20 @@ function Dashboard({ logs, goals, onDelete, onEdit }) {
       {/* Nutrients grid */}
       <p style={s.sectionTitle}>Today's Nutrients</p>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9, marginBottom:14 }}>
-                <RangeBar label="Protein" badge="Macro" current={totals.protein} unit="g" ranges={PROTEIN_RANGES} scaleMax={300} />
-        <NutrientBar label="Carbs" badge="Macro" current={totals.carbs} goal={goals.carbs} unit="g" />
-        <NutrientBar label="Fat" badge="Macro" current={totals.fat} goal={goals.fat} unit="g" />
-        <NutrientBar label="Fiber" badge="Macro" current={totals.fiber} goal={goals.fiber} unit="g" thyroid />
-        <RangeBar label="Selenium" badge="Thyroid ★" current={totals.selenium} unit="mcg" ranges={SELENIUM_RANGES} scaleMax={450} note="Optimal range: 55–200mcg" />
-        <RangeBar label="Iodine" badge="Thyroid ★" current={totals.iodine} unit="mcg" ranges={IODINE_RANGES} scaleMax={1300} note="Optimal range: 150–300mcg" />
-        <NutrientBar label="Zinc" badge="Thyroid ★" current={totals.zinc} goal={goals.zinc} unit="mg" thyroid />
-        <NutrientBar label="Iron" badge="Thyroid ★" current={totals.iron} goal={goals.iron} unit="mg" thyroid />
-        <RangeBar label="Vitamin D" badge="Thyroid ★" current={totals.vitd} unit="IU" ranges={VITD_RANGES} scaleMax={11000} note="Optimal range: 600–4000IU" />       
-        <NutrientBar label="Magnesium" current={totals.magnesium} goal={goals.magnesium} unit="mg" />
-        <NutrientBar label="Calories" current={totals.calories} goal={goals.calories} unit="" />
-        <NutrientBar label="Water" current={totals.water} goal={goals.water} unit=" cups" />
-        <NutrientBar label="Vitamin K" current={totals.vitk||0} goal={goals.vitk} unit="mcg" />
-        <NutrientBar label="Vitamin B12" current={totals.b12||0} goal={goals.b12} unit="mcg" />
+                <RangeBar label="Protein" badge="Macro" current={totals.protein} unit="g" ranges={PROTEIN_RANGES} scaleMax={300} weekAvg={weekAvg.protein} />
+        <NutrientBar label="Carbs" badge="Macro" current={totals.carbs} goal={goals.carbs} unit="g" weekAvg={weekAvg.carbs} />
+        <NutrientBar label="Fat" badge="Macro" current={totals.fat} goal={goals.fat} unit="g" weekAvg={weekAvg.fat} />
+        <NutrientBar label="Fiber" badge="Macro" current={totals.fiber} goal={goals.fiber} unit="g" thyroid weekAvg={weekAvg.fiber} />
+        <RangeBar label="Selenium" badge="Thyroid ★" current={totals.selenium} unit="mcg" ranges={SELENIUM_RANGES} scaleMax={450} note="Optimal range: 55–200mcg" weekAvg={weekAvg.selenium} />
+        <RangeBar label="Iodine" badge="Thyroid ★" current={totals.iodine} unit="mcg" ranges={IODINE_RANGES} scaleMax={1300} note="Optimal range: 150–300mcg" weekAvg={weekAvg.iodine} />
+        <NutrientBar label="Zinc" badge="Thyroid ★" current={totals.zinc} goal={goals.zinc} unit="mg" thyroid weekAvg={weekAvg.zinc} />
+        <NutrientBar label="Iron" badge="Thyroid ★" current={totals.iron} goal={goals.iron} unit="mg" thyroid weekAvg={weekAvg.iron} />
+        <RangeBar label="Vitamin D" badge="Thyroid ★" current={totals.vitd} unit="IU" ranges={VITD_RANGES} scaleMax={11000} note="Optimal range: 600–4000IU" weekAvg={weekAvg.vitd} />       
+        <NutrientBar label="Magnesium" current={totals.magnesium} goal={goals.magnesium} unit="mg" weekAvg={weekAvg.magnesium} />
+        <NutrientBar label="Calories" current={totals.calories} goal={goals.calories} unit="" weekAvg={weekAvg.calories} />
+        <NutrientBar label="Water" current={totals.water} goal={goals.water} unit=" cups" weekAvg={weekAvg.water} />
+        <NutrientBar label="Vitamin K" current={totals.vitk||0} goal={goals.vitk} unit="mcg" weekAvg={weekAvg.vitk} />
+        <NutrientBar label="Vitamin B12" current={totals.b12||0} goal={goals.b12} unit="mcg" weekAvg={weekAvg.b12} />
       </div>
 
       {/* Insights */}
@@ -2086,6 +2126,7 @@ function WellnessTracker({ wellnessLog, onSave, onDeleteEntry }) {
   return (
     <div>
       <p style={s.sectionTitle}>Daily Wellness Check-in</p>
+      <p style={{ fontSize:"0.74rem", color:COLORS.textSec, marginTop:-6, marginBottom:10 }}>Logging a workout? Head to the <b>Exercise</b> tab — it also adds a small bonus to today's score.</p>
 
     <div style={{ ...s.card, padding:"10px 14px", marginBottom:10, background:COLORS.tealPale, borderColor:COLORS.tealLight }}>
       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -2546,6 +2587,200 @@ function WeeklyDashboard({ logs }) {
 }
 
 
+// ── EXERCISE TRACKER ──────────────────────────────────────────────────────────
+function ExerciseTracker({ exerciseLog = [], onSave, onDelete }) {
+  const [logDate, setLogDate] = useState(today());
+  const [activity, setActivity] = useState("walking");
+  const [duration, setDuration] = useState("");
+  const [intensity, setIntensity] = useState("Moderate");
+  const [distance, setDistance] = useState("");
+  const [laps, setLaps] = useState("");
+  const [steps, setSteps] = useState("");
+  const [calories, setCalories] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const activityDef = EXERCISE_ACTIVITIES.find(a => a.key === activity);
+  const showDistance = ["walking", "cycling", "running"].includes(activity);
+  const showLaps = activity === "swimming";
+
+  const clearForm = () => {
+    setDuration(""); setDistance(""); setLaps(""); setSteps(""); setCalories(""); setNotes(""); setIntensity("Moderate");
+  };
+
+  const save = () => {
+    if (!duration || parseFloat(duration) <= 0) { alert("Add a duration in minutes."); return; }
+    onSave({
+      id: Date.now(), date: logDate, time: nowTime(), activity, intensity,
+      duration: parseFloat(duration) || 0,
+      distance: distance ? parseFloat(distance) : null,
+      laps: laps ? parseFloat(laps) : null,
+      steps: steps ? parseFloat(steps) : null,
+      calories: calories ? parseFloat(calories) : null,
+      notes: notes.trim(),
+    });
+    clearForm();
+  };
+
+  const todayEntries = exerciseLog.filter(e => e.date === logDate).sort((a,b) => a.time > b.time ? 1 : -1);
+  const todayPoints = exercisePointsForDate(exerciseLog, logDate);
+
+  // This Week summary
+  const weekDates = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); weekDates.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`); }
+  const weekEntries = exerciseLog.filter(e => weekDates.includes(e.date));
+  const summaryFor = (key) => {
+    const entries = weekEntries.filter(e => e.activity === key);
+    const sessions = entries.length;
+    const totalDistance = entries.reduce((s,e) => s + (e.distance || 0), 0);
+    const totalLaps = entries.reduce((s,e) => s + (e.laps || 0), 0);
+    return { sessions, totalDistance: Math.round(totalDistance * 10) / 10, totalLaps };
+  };
+  const totalMinutes = weekEntries.reduce((s,e) => s + (e.duration || 0), 0);
+  const allHistory = [...exerciseLog].sort((a,b) => (a.date+a.time) > (b.date+b.time) ? -1 : 1).slice(0, 30);
+
+  return (
+    <div>
+      <p style={s.sectionTitle}>Exercise</p>
+
+      <div style={{ ...s.card, padding:"10px 14px", marginBottom:10, background:COLORS.tealPale, borderColor:COLORS.tealLight }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <span style={{ fontSize:"0.8rem", fontWeight:600, color:COLORS.tealDeep, whiteSpace:"nowrap" }}>📅 Logging for:</span>
+          <input type="date" style={{ ...s.input, flex:1, borderColor:COLORS.tealLight }}
+            value={logDate} onChange={e=>setLogDate(e.target.value)} max={today()}/>
+        </div>
+      </div>
+
+      <div style={s.card}>
+        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>🏆 Log a Workout</div>
+
+        <div style={s.formGroup}>
+          <label style={s.label}>Activity</label>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            {EXERCISE_ACTIVITIES.map(a => (
+              <button key={a.key} type="button" onClick={()=>setActivity(a.key)}
+                style={{ padding:"7px 12px", borderRadius:16, border:`1px solid ${activity===a.key ? COLORS.tealMid : COLORS.divider}`,
+                  background: activity===a.key ? COLORS.tealPale : COLORS.white, color: activity===a.key ? COLORS.tealDeep : COLORS.textSec,
+                  fontSize:"0.78rem", fontWeight:600, cursor:"pointer" }}>
+                {a.emoji} {a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.formRow}>
+          <div style={s.formGroup}>
+            <label style={s.label}>Duration (minutes)</label>
+            <input type="number" min="0" style={s.input} value={duration} onChange={e=>setDuration(e.target.value)} placeholder="e.g. 20"/>
+          </div>
+          <div style={s.formGroup}>
+            <label style={s.label}>Intensity</label>
+            <select style={s.select} value={intensity} onChange={e=>setIntensity(e.target.value)}>
+              {INTENSITY_LEVELS.map(l => <option key={l}>{l}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div style={{ fontSize:"0.7rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", margin:"8px 0 6px" }}>Optional</div>
+        <div style={s.formRow}>
+          {showDistance && (
+            <div style={s.formGroup}><label style={s.label}>Distance (miles)</label>
+              <input type="number" min="0" style={s.input} value={distance} onChange={e=>setDistance(e.target.value)} placeholder="e.g. 2.2"/>
+            </div>
+          )}
+          {showLaps && (
+            <div style={s.formGroup}><label style={s.label}>Laps</label>
+              <input type="number" min="0" style={s.input} value={laps} onChange={e=>setLaps(e.target.value)} placeholder="e.g. 17"/>
+            </div>
+          )}
+          <div style={s.formGroup}><label style={s.label}>Steps</label>
+            <input type="number" min="0" style={s.input} value={steps} onChange={e=>setSteps(e.target.value)} placeholder="optional"/>
+          </div>
+        </div>
+        <div style={s.formRow}>
+          <div style={s.formGroup}><label style={s.label}>Calories burned</label>
+            <input type="number" min="0" style={s.input} value={calories} onChange={e=>setCalories(e.target.value)} placeholder="optional"/>
+          </div>
+        </div>
+        <div style={s.formGroup}>
+          <label style={s.label}>Notes</label>
+          <input style={s.input} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="optional"/>
+        </div>
+
+        <div style={{ fontSize:"0.72rem", color:COLORS.tealDeep, fontWeight:600, marginBottom:8 }}>
+          This activity adds +{activityDef?.points || 2} points to today's score (max +10/day)
+        </div>
+        <button style={s.btnPrimary} onClick={save}>Save Workout</button>
+      </div>
+
+      {todayEntries.length > 0 && (
+        <div style={s.card}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+            <span style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep }}>Logged for {dateLabel(logDate)}</span>
+            <span style={{ fontSize:"0.74rem", fontWeight:700, color:COLORS.tealMid }}>+{todayPoints} pts</span>
+          </div>
+          {todayEntries.map(e => {
+            const def = EXERCISE_ACTIVITIES.find(a => a.key === e.activity);
+            return (
+              <div key={e.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderTop:`1px solid ${COLORS.divider}` }}>
+                <div>
+                  <div style={{ fontSize:"0.8rem", fontWeight:600, color:COLORS.ink }}>{def?.emoji} {def?.label} · {e.duration} min · {e.intensity}</div>
+                  <div style={{ fontSize:"0.68rem", color:COLORS.textSec, marginTop:2 }}>
+                    {[e.distance ? `${e.distance} mi` : null, e.laps ? `${e.laps} laps` : null, e.steps ? `${e.steps} steps` : null, e.calories ? `${e.calories} cal` : null, e.notes || null].filter(Boolean).join(" · ")}
+                  </div>
+                </div>
+                <button style={s.btnDanger} onClick={()=>onDelete(e.id)}>✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div style={s.card}>
+        <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:10 }}>📊 This Week</div>
+        {["swimming","walking","strength","cycling","running"].map(key => {
+          const def = EXERCISE_ACTIVITIES.find(a => a.key === key);
+          const sum = summaryFor(key);
+          if (sum.sessions === 0) return null;
+          return (
+            <div key={key} style={{ padding:"8px 0", borderTop: key!=="swimming" ? `1px solid ${COLORS.divider}` : "none" }}>
+              <div style={{ fontSize:"0.8rem", fontWeight:600, color:COLORS.ink }}>{def.emoji} {def.label}</div>
+              <div style={{ fontSize:"0.72rem", color:COLORS.textSec, marginTop:2 }}>
+                {sum.sessions} session{sum.sessions!==1?"s":""}
+                {sum.totalDistance > 0 && ` · ${sum.totalDistance} miles`}
+                {sum.totalLaps > 0 && ` · ${sum.totalLaps} laps`}
+              </div>
+            </div>
+          );
+        })}
+        {weekEntries.length === 0 ? (
+          <p style={{ fontSize:"0.78rem", color:COLORS.textSec }}>No workouts logged this week yet.</p>
+        ) : (
+          <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${COLORS.divider}` }}>
+            <span style={{ fontSize:"0.8rem", fontWeight:600, color:COLORS.ink }}>Exercise Minutes</span>
+            <div style={{ fontSize:"0.72rem", color:COLORS.textSec, marginTop:2 }}>{totalMinutes} minutes this week</div>
+          </div>
+        )}
+      </div>
+
+      {allHistory.length > 0 && (
+        <div style={s.card}>
+          <div style={{ fontSize:"0.85rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:8 }}>History</div>
+          {allHistory.map(e => {
+            const def = EXERCISE_ACTIVITIES.find(a => a.key === e.activity);
+            return (
+              <div key={e.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 0", borderTop:`1px solid ${COLORS.divider}` }}>
+                <div style={{ fontSize:"0.76rem", color:COLORS.textSec }}>
+                  {dateLabel(e.date)} — {def?.emoji} {def?.label} · {e.duration} min
+                </div>
+                <button style={s.btnDanger} onClick={()=>onDelete(e.id)}>✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── WEEKLY WELLNESS DASHBOARD ─────────────────────────────────────────────────
 function WeeklyWellness({ logs, wellnessLog }) {
   const [weekOffset, setWeekOffset] = useState(0);
@@ -2851,15 +3086,23 @@ function describeCorr(r) {
   return { strength, dir };
 }
 
-function FoodLibrary({ recipes = [], onLog, embedded = false }) {
+function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {}, onSetMealTags }) {
   const [search, setSearch] = useState("");
   const [flash, setFlash] = useState(null);
   const [qtys, setQtys] = useState({});
+  const [editing, setEditing] = useState(null);
+  const [editTags, setEditTags] = useState([]);
+  const MEAL_TYPE_OPTIONS = ["Breakfast","Lunch","Dinner","Snack"];
   const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
   const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
+  const tagsFor = (name, builtIn) => {
+    const key = name.toLowerCase();
+    if (foodMealTags[key]) return foodMealTags[key];
+    return builtIn || [];
+  };
   const items = [
-    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
-    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), nutrients: foodNut(f) })),
+    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
+    ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), mealTypes: tagsFor(f.name, f.mealTypes), nutrients: foodNut(f) })),
   ];
   const q = search.trim().toLowerCase();
   const filtered = q
@@ -2871,9 +3114,12 @@ function FoodLibrary({ recipes = [], onLog, embedded = false }) {
     const mult = parseServings(getQty(it.name));
     const scaled = Object.fromEntries(Object.entries(it.nutrients).map(([k,v]) => [k, v ? Math.round(v*mult*10)/10 : v]));
     const label = mult !== 1 ? `${it.name} (×${mult})` : it.name;
-    onLog({ id: Date.now(), date: today(), type:"meal", mealType: mealGuess(), time: nowTime(), name: label, nutrients: scaled, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
+    onLog({ id: Date.now(), date: today(), type:"meal", mealType: (it.mealTypes && it.mealTypes[0]) || mealGuess(), time: nowTime(), name: label, nutrients: scaled, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
     setFlash(label); setTimeout(()=>setFlash(null), 2200);
   };
+  const startEditTags = (it) => { setEditing(it.name); setEditTags(it.mealTypes || []); };
+  const toggleEditTag = (t) => setEditTags(list => list.includes(t) ? list.filter(x=>x!==t) : [...list, t]);
+  const saveTags = (name) => { onSetMealTags && onSetMealTags(name, editTags); setEditing(null); };
 
   return (
     <div>
@@ -2889,19 +3135,44 @@ function FoodLibrary({ recipes = [], onLog, embedded = false }) {
       ) : (
         <div style={embedded ? {maxHeight:340, overflowY:"auto"} : undefined}>
           {filtered.map((it,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
-              <div style={{flex:1, minWidth:0}}>
-                <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
-                  {it.isRecipe && <span style={{fontSize:"0.58rem",fontWeight:700,background:COLORS.amberPale,color:COLORS.amber,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🍳</span>}
+            <div key={i} style={{padding:"9px 0",borderBottom:`1px solid ${COLORS.divider}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{flex:1, minWidth:0}}>
+                  <div style={{fontSize:"0.8rem",fontWeight:600,color:COLORS.ink,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                    <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</span>
+                    {it.isRecipe && <span style={{fontSize:"0.58rem",fontWeight:700,background:COLORS.amberPale,color:COLORS.amber,borderRadius:4,padding:"1px 5px",flexShrink:0}}>🍳</span>}
+                    {!embedded && (it.mealTypes||[]).map(t => (
+                      <span key={t} style={{fontSize:"0.56rem",fontWeight:700,background:COLORS.tealPale,color:COLORS.tealDeep,borderRadius:4,padding:"1px 5px",flexShrink:0}}>{t}</span>
+                    ))}
+                  </div>
+                  <div style={{fontSize:"0.66rem",color:COLORS.textSec,marginTop:2}}>
+                    {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
+                  </div>
                 </div>
-                <div style={{fontSize:"0.66rem",color:COLORS.textSec,marginTop:2}}>
-                  {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
-                </div>
+                {!embedded && (
+                  <button onClick={()=>editing===it.name ? setEditing(null) : startEditTags(it)}
+                    style={{...s.btnOutline,...s.btnSm, flexShrink:0, padding:"5px 9px"}}>{editing===it.name ? "Close" : "Edit"}</button>
+                )}
+                <input type="text" inputMode="decimal" value={getQty(it.name)} onChange={e=>setQty(it.name, e.target.value)}
+                  style={{...s.input, width:44, padding:"6px 4px", textAlign:"center", fontSize:"0.74rem", flexShrink:0}}/>
+                <button style={{...s.btnOutline,...s.btnSm, flexShrink:0}} onClick={()=>log(it)}>Log</button>
               </div>
-              <input type="text" inputMode="decimal" value={getQty(it.name)} onChange={e=>setQty(it.name, e.target.value)}
-                style={{...s.input, width:44, padding:"6px 4px", textAlign:"center", fontSize:"0.74rem", flexShrink:0}}/>
-              <button style={{...s.btnOutline,...s.btnSm, flexShrink:0}} onClick={()=>log(it)}>Log</button>
+              {editing===it.name && (
+                <div style={{marginTop:8, padding:"10px", background:COLORS.tealPale, borderRadius:8}}>
+                  <div style={{fontSize:"0.7rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:6}}>Which meals is this for?</div>
+                  <div style={{display:"flex", gap:6, flexWrap:"wrap", marginBottom:8}}>
+                    {MEAL_TYPE_OPTIONS.map(t => (
+                      <button key={t} onClick={()=>toggleEditTag(t)}
+                        style={{ padding:"5px 10px", borderRadius:14, border:`1px solid ${editTags.includes(t) ? COLORS.tealMid : COLORS.divider}`,
+                          background: editTags.includes(t) ? COLORS.white : "transparent", color: editTags.includes(t) ? COLORS.tealDeep : COLORS.textSec,
+                          fontSize:"0.74rem", fontWeight:600, cursor:"pointer" }}>
+                        {editTags.includes(t) ? "✓ " : ""}{t}
+                      </button>
+                    ))}
+                  </div>
+                  <button style={{...s.btnPrimary,...s.btnSm}} onClick={()=>saveTags(it.name)}>Save</button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -3312,7 +3583,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
   );
 }
 
-function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], wellnessLog = [], presets = { meds: [], vits: [] } }) {
+function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], wellnessLog = [], presets = { meds: [], vits: [] }, foodMealTags = {}, exerciseLog = [] }) {
   const GOALS = goals || DEFAULT_GOALS;
   const [section, setSection] = useState("overview");
   const [range, setRange] = useState(14);
@@ -3421,6 +3692,14 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     energyMissed: avgEnergyFor(missedSym) != null ? Math.round(avgEnergyFor(missedSym) * 10) / 10 : null,
   } : null;
 
+  const exerciseDateSet = new Set((exerciseLog || []).map(e => e.date));
+  const exerciseDays = symDates.filter(dt => exerciseDateSet.has(dt));
+  const noExerciseDays = symDates.filter(dt => !exerciseDateSet.has(dt));
+  const exerciseComparison = (exerciseDays.length >= minGroupSize && noExerciseDays.length >= minGroupSize) ? {
+    energyExercise: avgEnergyFor(exerciseDays) != null ? Math.round(avgEnergyFor(exerciseDays) * 10) / 10 : null,
+    energyRest: avgEnergyFor(noExerciseDays) != null ? Math.round(avgEnergyFor(noExerciseDays) * 10) / 10 : null,
+  } : null;
+
   const pairCounts = {};
   corrDates.forEach(dt => {
     const entry = symptomMap[dt];
@@ -3488,28 +3767,29 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     vitd: VITD_RANGES[2].max, protein: PROTEIN_RANGES[2].max,
   };
   // Returns the raw, unrounded score so small differences between foods aren't lost to rounding ties
-  const computeScoreRaw = (totalsObj, symptomEnergy, medTaken) => {
+  const computeScoreRaw = (totalsObj, symptomEnergy, medTaken, exerciseBonus = 0) => {
     let ss = 0, sc = 0;
     SCORE_KEYS.forEach(k => { ss += Math.min(1, (totalsObj[k] || 0) / (GOALS[k] || 1)); sc++; });
     ["protein", "fiber", "water"].forEach(k => { ss += Math.min(1, (totalsObj[k] || 0) / (GOALS[k] || 1)) * 0.5; sc += 0.5; });
     if (symptomEnergy) { ss += symptomEnergy / 10; sc++; }
     if (medTaken) { ss += 1; sc++; }
-    return sc > 0 ? (ss / sc) * 100 : 0;
+    const base = sc > 0 ? (ss / sc) * 100 : 0;
+    return Math.min(100, base + exerciseBonus);
   };
-  const computeScore = (totalsObj, symptomEnergy, medTaken) => Math.round(computeScoreRaw(totalsObj, symptomEnergy, medTaken));
   const todayEnergyVal = symptomMap[todayStr]?.energy;
   const medTakenTodayBool = medDateSet.has(todayStr);
-  const baselineRaw = computeScoreRaw(todayTotals, todayEnergyVal, medTakenTodayBool);
+  const todayExerciseBonus = exercisePointsForDate(exerciseLog, todayStr);
+  const baselineRaw = computeScoreRaw(todayTotals, todayEnergyVal, medTakenTodayBool, todayExerciseBonus);
   const baselineScore = Math.round(baselineRaw);
 
   const habitBoosts = [];
   if (!medTakenTodayBool) {
-    const ptsRaw = computeScoreRaw(todayTotals, todayEnergyVal, true) - baselineRaw;
+    const ptsRaw = computeScoreRaw(todayTotals, todayEnergyVal, true, todayExerciseBonus) - baselineRaw;
     if (ptsRaw > 0.05) habitBoosts.push({ icon: "💊", action: "Log your medication", points: Math.round(ptsRaw), ptsRaw });
   }
   if ((todayTotals.water || 0) < GOALS.water) {
     const simulated = { ...todayTotals, water: GOALS.water };
-    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
+    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool, todayExerciseBonus) - baselineRaw;
     const cupsNeeded = Math.max(1, Math.ceil(GOALS.water - (todayTotals.water || 0)));
     if (ptsRaw > 0.05) habitBoosts.push({ icon: "💧", action: `Drink ${cupsNeeded} more cup${cupsNeeded > 1 ? "s" : ""} of water`, points: Math.round(ptsRaw), ptsRaw });
   }
@@ -3534,8 +3814,10 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
     .map(l => l.name.toLowerCase());
   const VARIETY_PENALTY = 1.5;
   // Recipes act as loggable foods and feed the recommendation engine (#6)
-  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, mealTypes: r.mealTypes && r.mealTypes.length ? r.mealTypes : (r.mealType ? [r.mealType] : []), ...(r.per || {}) }));
-  const CANDIDATE_FOODS = [...FOOD_DB, ...recipeFoods];
+  const tagsFor = (name, builtIn) => foodMealTags[name.toLowerCase()] || builtIn || [];
+  const recipeFoods = (recipes || []).map(r => ({ name: r.name, isRecipe: true, mealTypes: tagsFor(r.name, r.mealTypes), ...(r.per || {}) }));
+  const taggedFoodDb = FOOD_DB.map(f => ({ ...f, mealTypes: tagsFor(f.name, f.mealTypes) }));
+  const CANDIDATE_FOODS = [...taggedFoodDb, ...recipeFoods];
   const foodBoosts = [];
   CANDIDATE_FOODS.forEach(food => {
     const simulated = { ...todayTotals };
@@ -3551,7 +3833,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
       if (gapKeys.includes(k)) helps.push({ key: k, label: NUTRIENT_LABEL[k], amount: Math.round(contribution * 10) / 10, unit: UNIT_FOR[k], pct: Math.min(100, Math.round((contribution / (GOALS[k] || 1)) * 100)) });
     });
     if (overCeiling || helps.length === 0) return;
-    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool) - baselineRaw;
+    const ptsRaw = computeScoreRaw(simulated, todayEnergyVal, medTakenTodayBool, todayExerciseBonus) - baselineRaw;
     if (ptsRaw <= 0.5) return;
     const nm = food.name.toLowerCase();
     const recent = recentNames.some(n => n.includes(nm) || nm.includes(n));
@@ -4023,6 +4305,15 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
             </div>
           )}
 
+          {exerciseComparison && (
+            <div style={{ marginBottom: 12, paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Exercise ↔ Energy</p>
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.4 }}>
+                On days with a logged workout, your energy averaged <b style={{ color: COLORS.tealDeep }}>{exerciseComparison.energyExercise}/10</b>, vs <b style={{ color: COLORS.textSec }}>{exerciseComparison.energyRest}/10</b> on rest days.
+              </p>
+            </div>
+          )}
+
           {topPair && (
             <div style={{ paddingTop: 10, borderTop: `1px solid ${COLORS.divider}` }}>
               <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Symptoms That Cluster</p>
@@ -4279,7 +4570,7 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
           <div style={s.card}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: COLORS.tealDeep }}>🍽️ Food</span>
             <p style={{ fontSize: "0.68rem", color: COLORS.textSec, marginTop: 4, marginBottom: 8 }}>
-              Today's score: {baselineScore}/100 — options from your own food log, ranked by impact
+              Today's score: {baselineScore}/100{todayExerciseBonus > 0 && <> (incl. +{todayExerciseBonus} from exercise)</>} — options from your own food log, ranked by impact
               {caloriesGoalVal > 0 && <> · you have about {caloriesRemaining} calories left today</>}
             </p>
             {gapSummary.length > 0 && (() => {
@@ -4415,13 +4706,16 @@ export default function App() {
   const deleteRecipe  = useCallback(id => setData(d=>({...d, recipes:(d.recipes||[]).filter(r=>r.id!==id)})), []);
   const addPantry     = useCallback(entry => setData(d=>({...d, pantry:[...(d.pantry||[]), entry]})), []);
   const deletePantry  = useCallback(id => setData(d=>({...d, pantry:(d.pantry||[]).filter(p=>p.id!==id)})), []);
+  const setFoodMealTags = useCallback((name, tags) => setData(d => ({ ...d, foodMealTags: { ...(d.foodMealTags||{}), [name.toLowerCase()]: tags } })), []);
+  const addExercise    = useCallback(entry => setData(d=>({...d, exerciseLog:[...(d.exerciseLog||[]), entry]})), []);
+  const deleteExercise = useCallback(id => setData(d=>({...d, exerciseLog:(d.exerciseLog||[]).filter(e=>e.id!==id)})), []);
   const deleteWeight = useCallback(id => setData(d=>({...d, weightLog:(d.weightLog||[]).filter(e=>e.id!==id)})), []);
     const updatePresets = useCallback(presets => setData(d=>({...d,presets})), []);
   const saveGoals = useCallback(goals => setData(d=>({...d,goals})), []);
   const savePersonalGoals = useCallback(pg => setData(d=>({...d, personalGoals:pg})), []);
 
-  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","foods","recipes","pantry","wellness","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
-  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Foods","Recipes","Pantry","Wellness","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
+  const TABS = ["dashboard","log-meal","log-med","symptoms","schedule","meals","foods","recipes","pantry","wellness","exercise","labs","weekly","wellweek","insights","calendar","weight","history","settings"];
+  const LABELS = ["Dashboard","Log Meal","Meds & Vitamins","Symptoms","Schedule","Meals","Foods","Recipes","Pantry","Wellness","Exercise","Labs","Weekly","Well. Week","Insights","Calendar","Weight","History","My Profile"];
 
   if (!loaded) return (
     <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:COLORS.mist, flexDirection:"column", gap:12 }}>
@@ -4447,20 +4741,21 @@ export default function App() {
       </nav>
 
       <main style={s.main}>
-        {tab==="dashboard"  && <Dashboard logs={data.logs} goals={data.goals} onDelete={deleteLog} onEdit={setEditingLog}/>}
+        {tab==="dashboard"  && <Dashboard logs={data.logs} goals={data.goals} wellnessLog={data.wellnessLog||[]} exerciseLog={data.exerciseLog||[]} onDelete={deleteLog} onEdit={setEditingLog}/>}
         {tab==="log-meal"   && <LogMeal onSave={addLog}/>}
         {tab==="log-med"    && <LogMed presets={data.presets} onSave={addLog} onUpdatePresets={updatePresets}/>}
      {tab==="symptoms"   && <Symptoms onSave={addLog} logs={data.logs}/>}
         {tab==="schedule"   && <MedSchedule logs={data.logs}/>}
         {tab==="meals"      && <MealsNutrients logs={data.logs}/>}
-        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog}/>}
+        {tab==="foods"      && <FoodLibrary recipes={data.recipes||[]} onLog={addLog} foodMealTags={data.foodMealTags||{}} onSetMealTags={setFoodMealTags}/>}
         {tab==="recipes"    && <Recipes recipes={data.recipes||[]} pantry={data.pantry||[]} onSave={addRecipe} onDelete={deleteRecipe} onLog={addLog}/>}
         {tab==="pantry"     && <Pantry pantry={data.pantry||[]} onAdd={addPantry} onDelete={deletePantry}/>}
         {tab==="wellness"   && <WellnessTracker wellnessLog={data.wellnessLog||[]} onSave={addWellness} onDeleteEntry={deleteWellness}/>}
+        {tab==="exercise"   && <ExerciseTracker exerciseLog={data.exerciseLog||[]} onSave={addExercise} onDelete={deleteExercise}/>}
         {tab==="labs"       && <LabResults labLog={data.labLog||[]} onSave={addLab} onDelete={deleteLab}/>}
         {tab==="weekly"     && <WeeklyDashboard logs={data.logs}/>}
         {tab==="wellweek"   && <WeeklyWellness logs={data.logs} wellnessLog={data.wellnessLog||[]}/>}
-        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]} wellnessLog={data.wellnessLog||[]} presets={data.presets||{meds:[],vits:[]}}/>}
+        {tab==="insights"   && <Insights logs={data.logs} labLog={data.labLog||[]} weightLog={data.weightLog||[]} goals={data.goals} recipes={data.recipes||[]} wellnessLog={data.wellnessLog||[]} presets={data.presets||{meds:[],vits:[]}} foodMealTags={data.foodMealTags||{}} exerciseLog={data.exerciseLog||[]}/>}
         {tab==="calendar"   && <Calendar logs={data.logs} onDelete={deleteLog}/>}
               {tab==="weight"     && <WeightTracker weightLog={data.weightLog||[]} onSave={addWeight} onDelete={deleteWeight} heightIn={data.heightIn||""} onSaveHeight={saveHeight}/>}
         {tab==="history"    && <History logs={data.logs} onDelete={deleteLog}/>}
