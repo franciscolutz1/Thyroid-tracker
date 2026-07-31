@@ -783,6 +783,7 @@ const FOOD_DB = [
 { keys:["lentil soup","homemade lentil soup"], name:"Homemade Lentil Soup", cal:175, pro:12, carb:30, fat:1, fib:16, se:2, io:33, zn:1.6, ir:3.9, mg:31, vd:0 },
   { keys:["smoothie","bmp smoothie","recovery smoothie","protein smoothie"], name:"BMP Smoothie", cal:650, pro:50, carb:92, fat:14, fib:12, se:23, io:91, zn:3.2, ir:2.5, mg:146, vd:3, mealTypes:["Snack"] },
  { keys:["smoothie #2","smoothie 2","high protein smoothie","high-protein smoothie","whey creatine smoothie"], name:"Smoothie #2 (High-Protein)", cal:555, pro:35, carb:85, fat:11, fib:10, se:24, io:59, zn:2.7, ir:1.8, mg:113, vd:120 },
+    { keys:["green superfood power smoothie","green superfood smoothie","superfood power smoothie","green power smoothie"], name:"Green Superfood Power Smoothie", cal:790, pro:49, carb:97, fat:29, fib:24, se:4, io:4, zn:4.5, ir:10, mg:260, vd:0, sod:80, asug:0 },
   { keys:["pineapple peach oat chia smoothie", "smoothie pineapple peach banana"], name:"Pineapple Peach Banana Smoothie (w/ Oats, Chia, Greek Yogurt & Milk)", cal:475, pro:18, carb:76, fat:14, fib:11, se:8, io:45, zn:2, ir:1.5, mg:100, vd:2.5 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0, mealTypes:["Lunch","Dinner"] },
