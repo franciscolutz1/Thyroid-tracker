@@ -3744,8 +3744,8 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
 
   // ── Correlations (This Week / 90 Days toggle) ──
   const corrDates = windowDates(0, corrWindow === "week" ? 7 : 90);
-  const corrResults = computeCorrForDates(corrDates).slice(0, 3);
-  const corrResultsLong = computeCorrForDates(windowDates(0, 90)); // fixed 90-day, used by Recommendations & Predictions
+    const corrResultsLong = computeCorrForDates(windowDates(0, 90)); // fixed 90-day, used by Recommendations & Predictions
+  const corrResults = corrResultsLong.slice(0, 3); // nutrient↔energy always uses 90 days — a single week is too short to be meaningful
 
   const symDates = corrDates.filter(dt => symptomMap[dt]);
   const takenSym = symDates.filter(dt => medDateSet.has(dt));
@@ -4365,11 +4365,19 @@ function Insights({ logs, labLog = [], weightLog = [], goals, recipes = [], well
             {corrWindow === "week" ? "Based on the last 7 days" : "Based on your last 90 days of logs"}
           </p>
 
-          {corrResults.length === 0 ? (
+                    {corrWindow === "week" ? (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Nutrients ↔ Energy</p>
+              <p style={{ fontSize: "0.76rem", color: COLORS.textSec, lineHeight: 1.4 }}>
+                A single week is too short to compute a reliable nutrient correlation. Switch to <b style={{ color: COLORS.tealDeep }}>90 Days</b> to see how protein, zinc, iodine and more line up with your energy.
+              </p>
+            </div>
+          ) : corrResults.length === 0 ? (
             <p style={{ fontSize: "0.78rem", color: COLORS.textSec }}>
-              {corrWindow === "week" ? "Not enough overlapping meal + symptom logs this week yet." : "Log more meals alongside symptoms to see nutrient ↔ energy correlations."}
+              Log more meals alongside symptoms to see nutrient ↔ energy correlations.
             </p>
           ) : (
+
             <div style={{ marginBottom: 12 }}>
               <p style={{ fontSize: "0.74rem", fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>Nutrients ↔ Energy</p>
               {corrResults.map(c => {
