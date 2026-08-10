@@ -766,6 +766,7 @@ const FOOD_DB = [
   { keys:["toblerone"], name:"Toblerone (1 triangle/10g)", cal:55, pro:0.6, carb:6, fat:3, fib:0.2, se:0.5, io:3, zn:0.2, ir:0.2, mg:8, vd:0 },
  { keys:["soup","chicken soup","vegetable soup"], name:"Soup (1 bowl)", cal:140, pro:8, carb:18, fat:4, fib:3, se:5, io:5, zn:0.5, ir:1.0, mg:20, vd:0 },
 { keys:["homemade scrambled eggs with ham","scrambled eggs with ham"], name:"Homemade Scrambled Eggs with Ham", cal:275, pro:29, carb:2, fat:16, fib:0, se:50, io:134, zn:1.7, ir:2.8, mg:18, vd:100 },
+  { keys:["heavy cream","heavy whipping cream","whipping cream","heavy whip cream"], name:"Heavy Whipping Cream (1 tbsp)", cal:51, pro:0.4, carb:0.4, fat:5.5, fib:0, se:0.3, io:3, zn:0, ir:0, mg:1, vd:1, sod:6, asug:0 },
   { keys:["homemade scrambled eggs","scrambled eggs"], name:"Homemade Scrambled Eggs", cal:160, pro:14, carb:4, fat:10, fib:1.5, se:33, io:24, zn:1.5, ir:2.7, mg:39, vd:90 },
   { keys:["homemade avocado salad","avocado salad"], name:"Homemade Avocado Salad", cal:500, pro:7, carb:31, fat:43, fib:17, se:1, io:0, zn:1.3, ir:1.5, mg:90, vd:0 },
 { keys:["nature valley bar","nature valley bars","nature valley granola bar"], name:"Nature Valley Bars (1 pouch/2 bars)", cal:190, pro:3, carb:29, fat:7, fib:2, se:2, io:0, zn:0.3, ir:1.0, mg:24, vd:0 },
