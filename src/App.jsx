@@ -3159,6 +3159,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
   const [search, setSearch] = useState("");
   const [flash, setFlash] = useState(null);
   const [qtys, setQtys] = useState({});
+  const [logDate, setLogDate] = useState(today());
   const [editing, setEditing] = useState(null);
   const [editTags, setEditTags] = useState([]);
   const MEAL_TYPE_OPTIONS = ["Breakfast","Lunch","Dinner","Snack"];
@@ -3188,8 +3189,8 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
     const mult = parseServings(getQty(it.name));
     const scaled = Object.fromEntries(Object.entries(it.nutrients).map(([k,v]) => [k, v ? Math.round(v*mult*10)/10 : v]));
     const label = mult !== 1 ? `${it.name} (×${mult})` : it.name;
-    onLog({ id: Date.now(), date: today(), type:"meal", mealType: (it.mealTypes && it.mealTypes[0]) || mealGuess(), time: nowTime(), name: label, nutrients: scaled, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
-    setFlash(label); setTimeout(()=>setFlash(null), 2200);
+    onLog({ id: Date.now(), date: logDate, type:"meal", mealType: (it.mealTypes && it.mealTypes[0]) || mealGuess(), time: nowTime(), name: label, nutrients: scaled, notes: it.isRecipe ? "Logged from recipe" : "Logged from food library" });
+    setFlash({ label, date: logDate }); setTimeout(()=>setFlash(null), 2200);
   };
   const startEditTags = (it) => { setEditing(it.name); setEditTags(it.mealTypes || []); };
   const toggleEditTag = (t) => setEditTags(list => list.includes(t) ? list.filter(x=>x!==t) : [...list, t]);
@@ -3200,8 +3201,18 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
       {!embedded && <p style={s.sectionTitle}>Foods</p>}
       {!embedded && <p style={{fontSize:"0.76rem",color:COLORS.textSec,marginTop:-6,marginBottom:12}}>Everything in your food database plus your recipes. Set a quantity (e.g. 0.5 or 1/2) and tap Log to add it to today.</p>}
       {embedded && <div style={{fontSize:"0.85rem",fontWeight:600,color:COLORS.tealDeep,marginBottom:8}}>🔎 Quick-log from your foods</div>}
+      {!embedded && (
+        <div style={{ ...s.card, padding:"10px 14px", marginBottom:10, background:COLORS.tealPale, borderColor:COLORS.tealLight }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:"0.8rem", fontWeight:600, color:COLORS.tealDeep, whiteSpace:"nowrap" }}>📅 Logging for:</span>
+            <input type="date" style={{ ...s.input, flex:1, borderColor:COLORS.tealLight }}
+              value={logDate} onChange={e=>setLogDate(e.target.value)} max={today()}/>
+            {logDate !== today() && <span style={{ fontSize:"0.72rem", background:COLORS.amber, color:"white", borderRadius:6, padding:"2px 8px", whiteSpace:"nowrap" }}>Past date</span>}
+          </div>
+        </div>
+      )}
       <input style={{...s.input, borderColor:COLORS.tealLight, marginBottom:10}} value={search} onChange={e=>setSearch(e.target.value)} placeholder={embedded ? "Search a food or recipe to log…" : "Search your foods & recipes…"} />
-      {flash && <div style={{background:COLORS.sagePale,color:COLORS.tealDeep,borderRadius:8,padding:"7px 11px",marginBottom:10,fontSize:"0.76rem",fontWeight:600}}>✓ Logged {flash} to today</div>}
+      {flash && <div style={{background:COLORS.sagePale,color:COLORS.tealDeep,borderRadius:8,padding:"7px 11px",marginBottom:10,fontSize:"0.76rem",fontWeight:600}}>✓ Logged {flash.label} to {flash.date === today() ? "today" : flash.date}</div>}
       {embedded && !q ? (
         <p style={{fontSize:"0.74rem",color:COLORS.textSec}}>Start typing to find a food or recipe and log it in one tap.</p>
       ) : filtered.length === 0 ? (
@@ -3268,7 +3279,6 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
     </div>
   );
 }
-
 function Pantry({ pantry = [], onAdd, onDelete }) {
   const FIELDS = [
     { f:"cal", label:"Calories", unit:"" }, { f:"pro", label:"Protein", unit:"g" }, { f:"carb", label:"Carbs", unit:"g" },
