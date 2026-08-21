@@ -3176,6 +3176,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
   const [logDate, setLogDate] = useState(today());
   const [editing, setEditing] = useState(null);
   const [editTags, setEditTags] = useState([]);
+  const [viewing, setViewing] = useState(null);
   const MEAL_TYPE_OPTIONS = ["Breakfast","Lunch","Dinner","Snack"];
   const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
   const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
@@ -3190,7 +3191,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
     return !!builtInDefault;
   };
   const items = [
-    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), excluded: isExcluded(r.name, false), nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
+    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), excluded: isExcluded(r.name, false), ingredients: r.ingredients || [], servings: r.servings || 1, nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
     ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), mealTypes: tagsFor(f.name, f.mealTypes), excluded: isExcluded(f.name, f.excludeDefault), nutrients: foodNut(f) })),
   ];
   const q = search.trim().toLowerCase();
@@ -3249,6 +3250,10 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
                     {it.nutrients.calories} cal · {it.nutrients.protein}g pro · {it.nutrients.selenium}mcg Se · {it.nutrients.iodine}mcg iod · {it.nutrients.iron}mg Fe
                   </div>
                 </div>
+                {it.isRecipe && (
+                  <button onClick={()=>setViewing(viewing===it.name ? null : it.name)}
+                    style={{...s.btnOutline,...s.btnSm, flexShrink:0, padding:"5px 9px"}}>{viewing===it.name ? "✕" : "🔍"}</button>
+                )}
                 {!embedded && (
                   <button onClick={()=>editing===it.name ? setEditing(null) : startEditTags(it)}
                     style={{...s.btnOutline,...s.btnSm, flexShrink:0, padding:"5px 9px"}}>{editing===it.name ? "Close" : "Edit"}</button>
@@ -3257,6 +3262,23 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
                   style={{...s.input, width:44, padding:"6px 4px", textAlign:"center", fontSize:"0.74rem", flexShrink:0}}/>
                 <button style={{...s.btnOutline,...s.btnSm, flexShrink:0}} onClick={()=>log(it)}>Log</button>
               </div>
+              {viewing===it.name && (
+                <div style={{marginTop:8, padding:"10px 12px", background:COLORS.amberPale, borderRadius:8}}>
+                  <div style={{fontSize:"0.7rem", fontWeight:700, color:COLORS.amber, marginBottom:6}}>🍳 Ingredients{it.servings>1 ? ` · makes ${it.servings} servings` : ""}</div>
+                  {(!it.ingredients || it.ingredients.length===0) ? (
+                    <div style={{fontSize:"0.72rem", color:COLORS.textSec}}>No ingredient details saved for this recipe.</div>
+                  ) : (
+                    <div>
+                      {it.ingredients.map((ing,ii)=>(
+                        <div key={ii} style={{fontSize:"0.72rem", color:COLORS.ink, padding:"2px 0", display:"flex", justifyContent:"space-between", gap:8}}>
+                          <span style={{overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{ing.name}</span>
+                          <span style={{color:COLORS.textSec, flexShrink:0}}>×{ing.qty}{ing.unit && ing.unit!=="serving" ? ` ${ing.unit}` : ""}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {editing===it.name && (
                 <div style={{marginTop:8, padding:"10px", background:COLORS.tealPale, borderRadius:8}}>
                   <div style={{fontSize:"0.7rem", fontWeight:600, color:COLORS.tealDeep, marginBottom:6}}>Which meals is this for?</div>
