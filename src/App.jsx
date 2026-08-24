@@ -739,6 +739,8 @@ const FOOD_DB = [
  name:"Pasta (1 cup cooked)",cal:220, pro:8, carb:43, fat:1, fib:2, se:37, io:0, zn:0.7, ir:1.8, mg:25, vd:0 },
  { keys:["whole wheat pasta","wholemeal pasta","whole grain pasta"], name:"Whole Wheat Pasta", cal:174, pro:7, carb:37, fat:1, fib:6, se:36, io:0, zn:1.1, ir:1.5, mg:42, vd:0 },
   { keys:["olive spread","olive tapenade","tapenade","black olive spread"], name:"Olive Spread/Tapenade (1 tbsp)", cal:45, pro:0, carb:1, fat:4.5, fib:0.5, se:0, io:0, zn:0, ir:0.3, mg:2, vd:0, sod:180, asug:0, mealTypes:["Snack"] },
+    { keys:["red chili pepper","red chili","red chilli","red chile"], name:"Red Chili Pepper (1 pepper)", cal:6, pro:0.3, carb:1.3, fat:0.1, fib:0.2, se:0, io:0, zn:0.1, ir:0.2, mg:3, vd:0, sod:1, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["green chili pepper","green chili","green chilli","green chile"], name:"Green Chili Pepper (1 pepper)", cal:6, pro:0.3, carb:1.4, fat:0, fib:0.2, se:0, io:0, zn:0.1, ir:0.2, mg:4, vd:0, sod:1, asug:0, mealTypes:["Lunch","Dinner"] },
   { keys:["toast with olive spread","olive spread toast","tapenade toast","toast olive tapenade"], name:"Toast w/ Olive Spread (1 slice)", cal:115, pro:3, carb:14, fat:5.5, fib:1, se:5, io:2, zn:0.3, ir:1.1, mg:10, vd:0, sod:330, asug:0, mealTypes:["Breakfast","Snack"] },
   { keys:["chickpea pasta","lentil pasta","protein pasta"], name:"Chickpea Pasta", cal:190, pro:14, carb:32, fat:3, fib:8, se:6, io:0, zn:2.0, ir:3.5, mg:50, vd:0 },
   { keys:["lasagna","lasagne"], name:"Lasagna (1 piece)", cal:480, pro:26, carb:42, fat:22, fib:3, se:22, io:28, zn:3.0, ir:3.5, mg:38, vd:25 },
