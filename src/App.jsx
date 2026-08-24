@@ -54,8 +54,9 @@ const SYMPTOMS_LIST = [
   {key:"hair loss",emoji:"💇",label:"Hair Loss"},{key:"dry skin",emoji:"🌵",label:"Dry Skin"},
   {key:"constipation",emoji:"🐌",label:"Constip."},{key:"bloated",emoji:"🫃",label:"Bloated"},{key:"palpitations",emoji:"💓",label:"Palpit."},
   {key:"insomnia",emoji:"🌙",label:"Insomnia"},{key:"neck pressure",emoji:"🦢",label:"Neck"},
+   {key:"sick",emoji:"🤒",label:"Sick"},{key:"cold",emoji:"🤧",label:"Cold"},
   {key:"good day",emoji:"✨",label:"Good Day!"}
-];
+;
 
 const EMPTY_STATE = () => ({ goals: {...DEFAULT_GOALS}, presets: { meds:[...DEFAULT_PRESETS.meds], vits:[...DEFAULT_PRESETS.vits] }, logs: [], weightLog: [], wellnessLog: [], labLog: [], recipes: [], pantry: DEFAULT_PANTRY.map(p=>({...p})), foodMealTags: {}, exerciseLog: [], excludedFoods: {} });
 
