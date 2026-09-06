@@ -709,6 +709,8 @@ const FOOD_DB = [
   { keys:["broccoli"], name:"Broccoli (1 cup)", cal:55, pro:4, carb:11, fat:1, fib:5, se:1.6, io:8, zn:0.4, ir:0.7, mg:33, vd:0 },
  { keys:["cauliflower"], name:"Cauliflower (1 cup)", cal:27, pro:2, carb:5, fat:0, fib:3, se:0.6, io:0, zn:0.3, ir:0.4, mg:16, vd:0 },
  { keys:["smoked chuck roast","chuck roast","smoked chuck","beef chuck","smoked beef chuck"], name:"Smoked Chuck Roast (6oz)", cal:440, pro:46, carb:1, fat:28, fib:0, se:26, io:8, zn:7.5, ir:3.2, mg:34, vd:8, sod:650, asug:0 },
+    { keys:["lamb burger","homemade lamb burger","grilled lamb burger"], name:"Lamb Burger, homemade (patty, peppers & onion, no bun)", cal:390, pro:33, carb:7, fat:26, fib:1.5, se:26, io:0, zn:5.8, ir:2.5, mg:37, vd:0, sod:400, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["bison burger","homemade bison burger","grilled bison burger"], name:"Bison Burger, homemade (patty, peppers & onion, no bun)", cal:260, pro:32, carb:7, fat:10, fib:1.5, se:32, io:0, zn:7.8, ir:3.9, mg:42, vd:0, sod:400, asug:0, mealTypes:["Lunch","Dinner"] },
   { keys:["steamed veggies","steamed vegetables","veggie side","steamed veggie side","mixed steamed veggies"], name:"Steamed Veggie Side", cal:90, pro:4, carb:10, fat:5, fib:5, se:6, io:2, zn:0.7, ir:1.2, mg:30, vd:6, sod:30, asug:0 },
   { keys:["sweet potato","yam"], name:"Sweet Potato", cal:103, pro:2, carb:24, fat:0, fib:4, se:0.2, io:0, zn:0.3, ir:0.7, mg:27, vd:0 },
  { keys:["potato","baked potato"], name:"Potato (medium)", cal:161, pro:4, carb:37, fat:0, fib:4, se:0.4, io:0, zn:0.4, ir:1.9, mg:48, vd:0 },
