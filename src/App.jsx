@@ -3523,6 +3523,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
     const [logServings, setLogServings] = useState({});
   const [flash, setFlash] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [logOnceQty, setLogOnceQty] = useState("1");
 
   const matches = search.trim().length >= 2
     ? searchPool.filter(it => it.name.toLowerCase().includes(search.toLowerCase()) || it.keys.some(k => k.includes(search.toLowerCase()))).slice(0, 6)
@@ -3601,6 +3602,22 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
     onSave({ id: editingId || Date.now(), name: name.trim(), prep: prep.trim(), mealTypes, servings: sv, ingredients, total, per });
     setName(""); setPrep(""); setServings(1); setMealTypes(["Breakfast"]); setIngredients([]); setSearch(""); setMissed([]);
     setFlash(editingId ? "updated" : "saved"); setEditingId(null); setTimeout(() => setFlash(null), 2500);
+  };
+
+  const logOnce = () => {
+    if (!ingredients.length) { alert("Add at least one ingredient first."); return; }
+    const n = Math.max(0.5, parseServings(logOnceQty) || 1);
+    const m = (v) => Math.round((v || 0) * n * 10) / 10;
+    const nutrients = {
+      calories: Math.round((per.cal || 0) * n), protein: m(per.pro), carbs: m(per.carb), fat: m(per.fat),
+      fiber: m(per.fib), water: 0, selenium: m(per.se), iodine: m(per.io), zinc: m(per.zn),
+      iron: m(per.ir), magnesium: m(per.mg), vitd: m(per.vd),
+    };
+    const label = name.trim() || "Mix";
+    onLog({ id: Date.now(), date: today(), type: "meal", mealType: (mealTypes && mealTypes[0]) || "Breakfast", time: nowTime(),
+      name: n === 1 ? label : `${label} (×${n})`, nutrients, notes: prep.trim() ? `One-time mix: ${prep.trim()}` : "One-time mix, not saved" });
+    setName(""); setPrep(""); setServings(1); setMealTypes(["Breakfast"]); setIngredients([]); setSearch(""); setMissed([]); setLogOnceQty("1");
+    setFlash("logged-once"); setEditingId(null); setTimeout(() => setFlash(null), 2500);
   };
 
   const logRecipe = (r) => {
@@ -3719,12 +3736,28 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
           </div>
         )}
 
-        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center" }}>
+        <div style={{ display:"flex", gap:10, marginTop:12, alignItems:"center", flexWrap:"wrap" }}>
                     <button style={{...s.btnPrimary, opacity: canSave?1:0.5}} onClick={save} disabled={!canSave}>{editingId ? "Update recipe" : "Save recipe"}</button>
           {editingId && <button style={{...s.btnOutline}} onClick={cancelEdit}>Cancel edit</button>}
           {flash === "saved" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe saved</span>}
           {flash === "updated" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Recipe updated</span>}
         </div>
+
+        {ingredients.length > 0 && !editingId && (
+          <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${COLORS.divider}` }}>
+            <div style={{ fontSize:"0.7rem", color:COLORS.textSec, marginBottom:6 }}>
+              Mixing it up this time? Log this combo just once — it won't be saved to your recipes.
+            </div>
+            <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+              <span style={{ fontSize:"0.74rem", color:COLORS.textSec }}>Servings to log</span>
+              <input type="text" inputMode="decimal" value={logOnceQty} onChange={e=>setLogOnceQty(e.target.value)}
+                onBlur={e=>setLogOnceQty(parseServings(e.target.value))}
+                style={{...s.input, width:64, textAlign:"center", padding:"5px 6px"}}/>
+              <button style={s.btnOutline} onClick={logOnce}>Log once</button>
+              {flash === "logged-once" && <span style={{ fontSize:"0.76rem", color:COLORS.sage, fontWeight:600 }}>✓ Logged</span>}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Saved recipes */}
