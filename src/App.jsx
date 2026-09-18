@@ -55,6 +55,7 @@ const SYMPTOMS_LIST = [
   {key:"constipation",emoji:"🐌",label:"Constip."},{key:"bloated",emoji:"🫃",label:"Bloated"},{key:"palpitations",emoji:"💓",label:"Palpit."},
   {key:"insomnia",emoji:"🌙",label:"Insomnia"},{key:"neck pressure",emoji:"🦢",label:"Neck"},
    {key:"sick",emoji:"🤒",label:"Sick"},{key:"cold",emoji:"🤧",label:"Cold"},
+   {key:"travel day",emoji:"✈️",label:"Travel Day"},
     {key:"good day",emoji:"✨",label:"Good Day!"}
 ];
 
