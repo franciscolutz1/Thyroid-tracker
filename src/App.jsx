@@ -3231,7 +3231,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
   const [viewing, setViewing] = useState(null);
   const MEAL_TYPE_OPTIONS = ["Breakfast","Lunch","Dinner","Snack"];
   const mealGuess = () => { const h = new Date().getHours(); return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : h < 21 ? "Dinner" : "Snack"; };
-  const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0 });
+  const foodNut = (f) => ({ calories: f.cal||0, protein: f.pro||0, carbs: f.carb||0, fat: f.fat||0, fiber: f.fib||0, water:0, selenium: f.se||0, iodine: f.io||0, zinc: f.zn||0, iron: f.ir||0, magnesium: f.mg||0, vitd: f.vd||0, sodium: f.sod||0, addedSugar: f.asug||0 });
   const tagsFor = (name, builtIn) => {
     const key = name.toLowerCase();
     if (foodMealTags[key]) return foodMealTags[key];
@@ -3243,7 +3243,7 @@ function FoodLibrary({ recipes = [], onLog, embedded = false, foodMealTags = {},
     return !!builtInDefault;
   };
   const items = [
-    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), excluded: isExcluded(r.name, false), ingredients: r.ingredients || [], servings: r.servings || 1, nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd }) })),
+    ...recipes.map(r => ({ name: r.name, isRecipe:true, keys:[r.name.toLowerCase()], mealTypes: tagsFor(r.name, r.mealTypes), excluded: isExcluded(r.name, false), ingredients: r.ingredients || [], servings: r.servings || 1, nutrients: foodNut({ cal:(r.per||{}).cal, pro:(r.per||{}).pro, carb:(r.per||{}).carb, fat:(r.per||{}).fat, fib:(r.per||{}).fib, se:(r.per||{}).se, io:(r.per||{}).io, zn:(r.per||{}).zn, ir:(r.per||{}).ir, mg:(r.per||{}).mg, vd:(r.per||{}).vd, sod:(r.per||{}).sod, asug:(r.per||{}).asug }) })),
     ...FOOD_DB.map(f => ({ name: f.name, isRecipe:false, keys:(f.keys||[]), mealTypes: tagsFor(f.name, f.mealTypes), excluded: isExcluded(f.name, f.excludeDefault), nutrients: foodNut(f) })),
   ];
   const q = search.trim().toLowerCase();
@@ -3497,7 +3497,7 @@ function Pantry({ pantry = [], onAdd, onDelete }) {
 }
 
 function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
-  const ALL_FIELDS = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd"];
+  const ALL_FIELDS = ["cal","pro","carb","fat","fib","se","io","zn","ir","mg","vd","sod","asug"];
   const SUMMARY = [
     { f:"cal", label:"cal", unit:"" }, { f:"pro", label:"protein", unit:"g" }, { f:"carb", label:"carbs", unit:"g" },
     { f:"fat", label:"fat", unit:"g" }, { f:"fib", label:"fiber", unit:"g" }, { f:"se", label:"Se", unit:"mcg" },
@@ -3614,7 +3614,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
     const nutrients = {
       calories: Math.round((per.cal || 0) * n), protein: m(per.pro), carbs: m(per.carb), fat: m(per.fat),
       fiber: m(per.fib), water: 0, selenium: m(per.se), iodine: m(per.io), zinc: m(per.zn),
-      iron: m(per.ir), magnesium: m(per.mg), vitd: m(per.vd),
+      iron: m(per.ir), magnesium: m(per.mg), vitd: m(per.vd), sodium: m(per.sod), addedSugar: m(per.asug),
     };
     const label = name.trim() || "Mix";
     onLog({ id: Date.now(), date: today(), type: "meal", mealType: (mealTypes && mealTypes[0]) || "Breakfast", time: nowTime(),
@@ -3629,7 +3629,7 @@ function Recipes({ recipes = [], pantry = [], onSave, onDelete, onLog }) {
     const nutrients = {
       calories: Math.round((r.per.cal || 0) * n), protein: m(r.per.pro), carbs: m(r.per.carb), fat: m(r.per.fat),
       fiber: m(r.per.fib), water: 0, selenium: m(r.per.se), iodine: m(r.per.io), zinc: m(r.per.zn),
-      iron: m(r.per.ir), magnesium: m(r.per.mg), vitd: m(r.per.vd),
+      iron: m(r.per.ir), magnesium: m(r.per.mg), vitd: m(r.per.vd), sodium: m(r.per.sod), addedSugar: m(r.per.asug),
     };
     onLog({ id: Date.now(), date: today(), type: "meal", mealType: (r.mealTypes && r.mealTypes[0]) || r.mealType || "Dinner", time: nowTime(),
       name: n === 1 ? r.name : `${r.name} (×${n})`, nutrients, notes: r.prep ? `Recipe: ${r.prep}` : "Logged from recipe" });
