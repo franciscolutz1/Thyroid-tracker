@@ -602,6 +602,8 @@ const FOOD_DB = [
  { keys:["yogurt","yoghurt"], name:"Yogurt (1 cup)", cal:150, pro:8, carb:17, fat:4, fib:0, se:8, io:75, zn:1.0, ir:0.1, mg:19, vd:0 },
  { keys:["chocolate milk"], name:"Chocolate Milk (1 cup)", cal:210, pro:8, carb:26, fat:8, fib:1, se:8, io:56, zn:1.0, ir:0.6, mg:33, vd:120 },
  { keys:["milk","whole milk"], name:"Milk (1 cup)", cal:150, pro:8, carb:12, fat:8, fib:0, se:8, io:56, zn:0.9, ir:0.1, mg:24, vd:120 },
+ { keys:["chocolate ice cream","choc ice cream"], name:"Chocolate Ice Cream (1/2 cup)", cal:143, pro:2.5, carb:19, fat:7.3, fib:0.8, se:1.5, io:10, zn:0.5, ir:0.6, mg:15, vd:10, sod:50, asug:14, mealTypes:["Snack","Dinner"] },
+ { keys:["dulce de leche ice cream","dulce de leche icecream"], name:"Dulce de Leche Ice Cream (1/2 cup)", cal:150, pro:2.5, carb:21, fat:7, fib:0, se:1.5, io:12, zn:0.4, ir:0.2, mg:12, vd:10, sod:55, asug:18, mealTypes:["Snack","Dinner"] },
  { keys:["cheese","cheddar"], name:"Cheddar (1oz)", cal:110, pro:7, carb:0, fat:9, fib:0, se:4, io:8, zn:0.9, ir:0.2, mg:8, vd:6 },
  { keys:["cottage cheese"], name:"Cottage Cheese", cal:100, pro:13, carb:4, fat:2, fib:0, se:10, io:26, zn:0.4, ir:0.2, mg:8, vd:0 },
  { keys:["mozzarella"], name:"Mozzarella (1oz)", cal:85, pro:6, carb:1, fat:6, fib:0, se:5, io:10, zn:0.8, ir:0.1, mg:7, vd:2 },
