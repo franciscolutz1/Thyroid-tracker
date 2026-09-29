@@ -824,6 +824,12 @@ const FOOD_DB = [
  { keys:["hummus"], name:"Hummus (¼ cup)", cal:100, pro:5, carb:12, fat:4, fib:4, se:2, io:0, zn:1.0, ir:1.5, mg:20, vd:0 },
   { keys:["salmon sashimi","sake sashimi"], name:"Salmon Sashimi (1 piece)", cal:41, pro:5, carb:0, fat:2.3, fib:0, se:7, io:2.5, zn:0.1, ir:0.07, mg:5.7, vd:113, sod:12, asug:0, mealTypes:["Lunch","Dinner"] },
   { keys:["tuna sashimi","maguro sashimi","maguro"], name:"Tuna Sashimi (1 piece)", cal:26, pro:5.6, carb:0, fat:0.2, fib:0, se:18, io:3.6, zn:0.12, ir:0.2, mg:10, vd:16, sod:8, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["miso soup"], name:"Miso Soup (1 cup)", cal:40, pro:3, carb:4, fat:1, fib:1, se:2, io:20, zn:0.3, ir:0.5, mg:15, vd:0, sod:900, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["salmon nigiri","sake nigiri"], name:"Salmon Nigiri (1 piece)", cal:55, pro:4, carb:7, fat:1.5, fib:0, se:5, io:2, zn:0.1, ir:0.2, mg:6, vd:60, sod:60, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["tuna nigiri","maguro nigiri"], name:"Tuna Nigiri (1 piece)", cal:45, pro:5, carb:7, fat:0.3, fib:0, se:14, io:2, zn:0.15, ir:0.2, mg:8, vd:10, sod:60, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["lobster roll","lobster sushi roll"], name:"Lobster Roll (sushi, 8 pieces)", cal:400, pro:14, carb:55, fat:14, fib:2, se:15, io:20, zn:1, ir:1, mg:25, vd:0, sod:750, asug:3, mealTypes:["Lunch","Dinner"] },
+  { keys:["california roll"], name:"California Roll (8 pieces)", cal:350, pro:9, carb:55, fat:9, fib:3, se:15, io:15, zn:0.8, ir:1, mg:25, vd:0, sod:600, asug:4, mealTypes:["Lunch","Dinner"] },
+  { keys:["shrimp roll","ebi roll","shrimp sushi roll"], name:"Shrimp Roll (sushi, 8 pieces)", cal:380, pro:15, carb:58, fat:8, fib:2.5, se:25, io:15, zn:1, ir:1, mg:28, vd:0, sod:650, asug:2, mealTypes:["Lunch","Dinner"] },
   { keys:["distinguished gentleman","distinguished gentlemen","distinguished gentleman roll","seito distinguished gentleman"], name:"Distinguished Gentleman Roll (Seito Sushi)", cal:680, pro:23, carb:49, fat:43, fib:3, se:35, io:30, zn:4.5, ir:2.5, mg:35, vd:0, sod:1150, asug:3, mealTypes:["Lunch","Dinner"] },
   { keys:["edamame with salt","salted edamame"], name:"Edamame with Salt (½ cup)", cal:90, pro:8, carb:7, fat:4, fib:4, se:1, io:0, zn:1.0, ir:1.8, mg:48, vd:0, sod:300, asug:0, mealTypes:["Lunch","Dinner"] },
   { keys:["belgian chocolate","belgian dark chocolate","belgian milk chocolate"], name:"Belgian Chocolate (1oz)", cal:165, pro:2, carb:15, fat:11, fib:2, se:2, io:8, zn:0.8, ir:1.2, mg:45, vd:0 },
@@ -1266,6 +1272,14 @@ function LogMed({ presets, onSave, onUpdatePresets }) {
     setFlash(name); setTimeout(()=>setFlash(null), 1200);
   };
 
+  const quickAddAll = () => {
+    const all = [...presets.meds.map(p=>({...p,type:"med"})), ...presets.vits.map(p=>({...p,type:"vit"}))];
+    all.forEach((p,i) => {
+      onSave({ id:Date.now()+i, date:logDate, type:p.type, time:nowTime(), name:p.name, dose:p.dose, notes:"" });
+    });
+    setFlash(`__all__:${all.length}`); setTimeout(()=>setFlash(null), 2000);
+  };
+
   const save = () => {
     if (!form.name.trim()) { alert("Please enter a name."); return; }
     onSave({ id:Date.now(), date:logDate, type:form.type, time:form.time||nowTime(), name:form.name.trim(), dose:form.dose, notes:form.notes });
@@ -1284,6 +1298,12 @@ function LogMed({ presets, onSave, onUpdatePresets }) {
       </div>
     </div>
       <div style={s.card}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12, flexWrap:"wrap", gap:8 }}>
+          <div style={{ fontSize:"0.76rem", color:COLORS.textSec }}>Take your whole stack at once?</div>
+          <button onClick={quickAddAll} style={{...s.btnPrimary, ...s.btnSm}}>
+            {flash && flash.startsWith("__all__") ? `✓ Logged ${flash.split(":")[1]}` : "Log All Meds & Vitamins"}
+          </button>
+        </div>
         <div style={{ fontSize:"0.74rem", fontWeight:700, color:COLORS.textSec, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:8 }}>Quick Add — Thyroid Meds</div>
         <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
           {presets.meds.map((p,i)=>(
