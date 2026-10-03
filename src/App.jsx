@@ -716,6 +716,7 @@ const FOOD_DB = [
   { keys:["brasstown beef burger","the chapman burger","chapman beef burger","brasstown burger"], name:"Brasstown Beef Burger, no side (The Chapman)", cal:850, pro:51, carb:48, fat:47, fib:4, se:35, io:12, zn:9, ir:5, mg:40, vd:0, sod:1050, asug:6, mealTypes:["Lunch","Dinner"] },
   { keys:["white sugar","sugar","granulated sugar","cane sugar","table sugar"], name:"White Sugar (1 tsp)", cal:16, pro:0, carb:4, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0, sod:0, asug:4, mealTypes:["Breakfast","Snack"] },
   { keys:["brown sugar","light brown sugar","dark brown sugar"], name:"Brown Sugar (1 tsp)", cal:17, pro:0, carb:4, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0, sod:1, asug:4, mealTypes:["Breakfast","Snack"] },
+  { keys:["sugus","sugus candy","sugus caramelo"], name:"Sugus (1 piece)", cal:20, pro:0, carb:4.3, fat:0.3, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0, sod:0, asug:3.4, mealTypes:["Snack"] },
   { keys:["grapefruit"], name:"Grapefruit (½)", cal:52, pro:1, carb:13, fat:0, fib:2, se:0.1, io:0, zn:0.1, ir:0.1, mg:11, vd:0 },
  { keys:["papaya"], name:"Papaya (1 cup)", cal:55, pro:1, carb:14, fat:0, fib:3, se:0.6, io:0, zn:0.1, ir:0.1, mg:30, vd:0 },
  { keys:["cantaloupe","honeydew","melon"], name:"Melon (1 cup)", cal:56, pro:1, carb:14, fat:0, fib:1, se:0.5, io:0, zn:0.2, ir:0.3, mg:18, vd:0 },
