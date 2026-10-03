@@ -707,6 +707,10 @@ const FOOD_DB = [
     { keys:["chapman avocado tuna bowl","the chapman tuna bowl","avocado tuna poke bowl","chapman tuna poke","chapman avocado tuna"], name:"Avocado Tuna Poke Bowl (The Chapman)", cal:620, pro:36, carb:53, fat:34, fib:13, se:100, io:15, zn:2, ir:2.5, mg:110, vd:2, sod:600, asug:5, mealTypes:["Lunch","Dinner"] },
   { keys:["steak fries","thick cut fries","steak fry"], name:"Steak Fries (side)", cal:400, pro:5, carb:50, fat:18, fib:5, se:1, io:0, zn:0.6, ir:1.2, mg:40, vd:0, sod:400, asug:0, mealTypes:["Lunch","Dinner"] },
   { keys:["truffle fries","truffle fry","parmesan truffle fries"], name:"Truffle Fries (side)", cal:460, pro:7, carb:52, fat:24, fib:4, se:3, io:5, zn:1, ir:1.3, mg:35, vd:0, sod:600, asug:0, mealTypes:["Lunch","Dinner","Snack"] },
+  { keys:["ravenous pig garden salad","ravenous pig salad","magical dining salad"], name:"Garden Salad (Ravenous Pig, Magical Dining)", cal:220, pro:5, carb:14, fat:17, fib:4, se:2, io:2, zn:0.8, ir:1.5, mg:40, vd:0, sod:350, asug:3, mealTypes:["Lunch","Dinner"] },
+  { keys:["ravenous pig steak","steak with truffle fries","steak truffle fries","magical dining steak"], name:"Steak w/ Truffle Fries (Ravenous Pig, Magical Dining)", cal:1100, pro:60, carb:55, fat:70, fib:4, se:50, io:10, zn:11, ir:5.5, mg:80, vd:10, sod:1400, asug:0, mealTypes:["Lunch","Dinner"] },
+  { keys:["ravenous pig cheese plate","magical dining cheese plate"], name:"Cheese Plate (Ravenous Pig, Magical Dining)", cal:520, pro:22, carb:30, fat:35, fib:2, se:12, io:25, zn:3, ir:1.5, mg:40, vd:15, sod:900, asug:10, mealTypes:["Dinner","Snack"] },
+  { keys:["gin and tonic","gin & tonic","gin tonic","g&t"], name:"Gin & Tonic (1 drink)", cal:170, pro:0, carb:16, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0, sod:15, asug:16, mealTypes:["Dinner","Snack"] },
    { keys:["teriyaki poke bowl","teriyaki poke","poke bowl","teriyaki tuna poke","teriyaki salmon poke"], name:"Teriyaki Poke Bowl (generic)", cal:560, pro:35, carb:68, fat:14, fib:7, se:60, io:25, zn:2, ir:2.5, mg:90, vd:3, sod:1000, asug:11, mealTypes:["Lunch","Dinner"] },
   { keys:["brasstown beef burger","the chapman burger","chapman beef burger","brasstown burger"], name:"Brasstown Beef Burger, no side (The Chapman)", cal:850, pro:51, carb:48, fat:47, fib:4, se:35, io:12, zn:9, ir:5, mg:40, vd:0, sod:1050, asug:6, mealTypes:["Lunch","Dinner"] },
   { keys:["white sugar","sugar","granulated sugar","cane sugar","table sugar"], name:"White Sugar (1 tsp)", cal:16, pro:0, carb:4, fat:0, fib:0, se:0, io:0, zn:0, ir:0, mg:0, vd:0, sod:0, asug:4, mealTypes:["Breakfast","Snack"] },
@@ -886,7 +890,7 @@ const FOOD_DB = [
   { keys:["pineapple peach oat chia smoothie", "smoothie pineapple peach banana"], name:"Pineapple Peach Banana Smoothie (w/ Oats, Chia, Greek Yogurt & Milk)", cal:475, pro:18, carb:76, fat:14, fib:11, se:8, io:45, zn:2, ir:1.5, mg:100, vd:2.5 },
   { keys:["havana alfajor","alfajor"], name:"Havana Alfajor", cal:200, pro:3, carb:30, fat:7, fib:1, se:1, io:2, zn:0.3, ir:0.5, mg:10, vd:0 },
 { keys:["beef lentil","beef lentil stew"], name:"Homemade Beef Lentil Stew", cal:385, pro:38, carb:33, fat:12, fib:16, se:21, io:26, zn:6.3, ir:6.5, mg:66, vd:0, mealTypes:["Lunch","Dinner"] },
-  { keys:["salad","green salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
+  { keys:["salad","green salad","garden salad"], name:"Green Salad", cal:80, pro:3, carb:10, fat:4, fib:3, se:0.5, io:0, zn:0.3, ir:1.2, mg:22, vd:0 },
  { keys:["blood sausage","black pudding"], name:"Blood Sausage (2sl)", cal:190, pro:9, carb:5, fat:15, fib:0, se:14, io:4, zn:1.4, ir:5.0, mg:10, vd:12 },
 ];
 
