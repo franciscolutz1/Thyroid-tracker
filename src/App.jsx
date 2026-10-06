@@ -618,6 +618,7 @@ const FOOD_DB = [
  { keys:["seaweed","nori","kelp"], name:"Seaweed/Nori", cal:10, pro:1, carb:1, fat:0, fib:0.5, se:1, io:232, zn:0.1, ir:0.4, mg:7, vd:0 },
  { keys:["mussel","mussels","steamed mussels"], name:"Mussels (3oz)", cal:146, pro:20, carb:6, fat:4, fib:0, se:76, io:140, zn:2.3, ir:6.7, mg:30, vd:0 },
  { keys:["chicken breast","grilled chicken","baked chicken","chicken"], name:"Chicken Breast (4oz)",cal:185, pro:35, carb:0, fat:4, fib:0, se:27, io:8, zn:1.0, ir:1.1, mg:32, vd:4 },
+  { keys:["publix lemon pepper chicken","publix chicken lemon pepper","publix lemon pepper rotisserie chicken","lemon pepper rotisserie chicken"], name:"Publix Lemon Pepper Rotisserie Chicken (4oz)", cal:210, pro:27, carb:1, fat:11, fib:0, se:25, io:8, zn:2, ir:1.1, mg:25, vd:5, sod:450, asug:0, mealTypes:["Lunch","Dinner"] },
  { keys:["chicken thigh"], name:"Chicken Thigh (4oz)", cal:240, pro:28, carb:0, fat:14, fib:0, se:24, io:8, zn:2.2, ir:1.2, mg:24, vd:8 },
  { keys:["chicken wing","wings"], name:"Chicken Wings (4)", cal:290, pro:27, carb:0, fat:19, fib:0, se:22, io:6, zn:1.8, ir:1.0, mg:20, vd:5 },
  { keys:["chicken liver"], name:"Chicken Liver (3oz)", cal:142, pro:21, carb:1, fat:5, fib:0, se:38, io:14, zn:3.0, ir:9.9, mg:20, vd:19 },
