@@ -671,6 +671,7 @@ const FOOD_DB = [
  { keys:["blueberr"], name:"Blueberries (1 cup)", cal:84, pro:1, carb:21, fat:0.5, fib:3.6, se:0.1, io:0, zn:0.2, ir:0.4, mg:9, vd:0 },
   { keys:["golden berries","golden berry","goldenberries","goldenberry","dried golden berries","incan berries"], name:"Golden Berries, dried (1oz)", cal:95, pro:1.2, carb:21, fat:0.5, fib:2.5, se:0.3, io:0, zn:0.2, ir:1.3, mg:10, vd:0, sod:5, asug:0, mealTypes:["Breakfast","Snack"] },
   { keys:["fresh golden berries","cape gooseberries","cape gooseberry","physalis"], name:"Golden Berries, fresh (½ cup)", cal:37, pro:1.3, carb:7.8, fat:0.5, fib:3.5, se:0.1, io:0, zn:0.1, ir:0.8, mg:8, vd:0, sod:1, asug:0, mealTypes:["Breakfast","Snack"] },
+  { keys:["dried cranberries","dried cranberry","no sugar added dried cranberries","unsweetened dried cranberries","cranberries","cranberry"], name:"Dried Cranberries, no sugar added (¼ cup)", cal:120, pro:0, carb:32, fat:0, fib:4, se:0, io:0, zn:0.1, ir:0.2, mg:3, vd:0, sod:5, asug:0, mealTypes:["Breakfast","Snack"] },
  { keys:["strawberr"], name:"Strawberries (1 cup)", cal:49, pro:1, carb:12, fat:0.5, fib:3, se:0.6, io:0, zn:0.2, ir:0.6, mg:13, vd:0 },
  { keys:["raspberr"], name:"Raspberries (1 cup)", cal:64, pro:1.5, carb:15, fat:0.8, fib:8, se:0.2, io:0, zn:0.5, ir:0.8, mg:22, vd:0 },
  { keys:["blackberr"], name:"Blackberries (1 cup)", cal:62, pro:2, carb:14, fat:0.7, fib:7.6, se:0.6, io:0, zn:0.5, ir:0.8, mg:29, vd:0 },
